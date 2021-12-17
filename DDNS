@@ -1,0 +1,83 @@
+#!/bin/bash
+# chkconfig:2345 60 30
+# description: DDNS
+
+# 以上为开机自启配置
+
+# 配置工作目录
+cd /root/NameSoli-DDNS
+check=`ls|grep 'ddns.py\|conf.json'`
+if [ -z "$check" ]
+then
+    echo $"The working directory is incorrect, please check the configuration on the 13 line of $0"
+    exit -1
+fi
+
+# 设置python3路径
+pythonBin=/usr/local/python3/bin/python3.7
+
+
+case "$1" in
+start)
+findps=`ps -ef|grep ddns.py|grep -v grep|grep -v $0|grep -v 'service.*DDNS'`
+if [ -z "$findps" ]
+then
+    nohup $pythonBin ddns.py > /dev/null 2>&1 &
+    echo -e "\033[32;1mStarted successfully\033[0m"
+else
+    echo -e "\033[31;1mDDNS service is already running! \033[0m"
+    exit 1
+fi
+;;
+################################
+stop)
+findps=`ps -ef|grep ddns.py|grep -v grep|grep -v $0|grep -v 'service.*DDNS'`
+if [ -z "$findps" ]
+then
+    echo -e "\033[31;1mDDNS service is not running! \033[0m"
+    exit 1
+else
+    ps -ef|grep ddns.py|grep -v grep|grep -v $0|grep -v 'service.*DDNS'|cut -c 9-15|xargs kill -9
+fi
+echo -e "\033[32;1mStopped successfully\033[0m"
+;;
+#################################
+restart|force-reload)
+findps=`ps -ef|grep ddns.py|grep -v grep|grep -v $0|grep -v 'service.*DDNS'`
+if [ -n "$findps" ]
+then
+    ps -ef|grep ddns.py|grep -v grep|grep -v $0|grep -v 'service.*DDNS'|cut -c 9-15|xargs kill -9
+fi
+echo -e "\033[32;1mStopped successfully\033[0m"
+
+sleep 0.5
+
+nohup $pythonBin ddns.py > /dev/null 2>&1 &
+echo -e "\033[32;1mStarted successfully\033[0m"
+;;
+########################################
+status)
+outString=`ps -ef|grep ddns.py|grep -v grep|grep -v status`
+if [ -z "$outString" ]
+then
+    echo -e "\033[31;1mDDNS service is stopped\033[0m"
+    echo "Consult DDNS log for more details: `pwd`/DDNS.log" 
+else
+    echo -e "\033[32;1mDDNS service is running\033[0m"
+    echo $outString
+    echo "================="
+    echo "Update history:"
+    echo `grep -C 1 'update_domain_ip' DDNS.log`
+    echo "================="
+    echo "Latest operation:"
+    echo `tail -1 DDNS.log`
+fi
+;;
+########################################
+*)
+echo $"Usage: $0 {start|stop|status|restart|force-reload}"
+
+esac
+
+exit 0
+
