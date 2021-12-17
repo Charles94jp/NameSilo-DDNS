@@ -4,13 +4,13 @@
 </h1>
 
 <p align="center">
-<a href="https://github.com/Charles94jp/NameSoli-DDNS/tree/python"><img src="https://img.shields.io/badge/NameSilo-DDNS-brightgreen"></a>  
+<a href="https://github.com/Charles94jp/NameSilo-DDNS/tree/python"><img src="https://img.shields.io/badge/NameSilo-DDNS-brightgreen"></a>  
 <a target="_blank" href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-_red.svg"></a>  
 <a href="#----"><img src="https://img.shields.io/badge/python-v3.8-blue"></a>
 </p>
 
 
-NameSoli DDNS是一个用于NameSoli域名的DDNS服务，适用于家庭宽带，它能自动检测家庭宽带的IP变动，并自动更新域名的解析。
+NameSilo DDNS是一个用于NameSilo域名的DDNS服务，适用于家庭宽带，它能自动检测家庭宽带的IP变动，并自动更新域名的解析。
 
 本项目已通过python3重构，查看Java版本请切换分支。
 
@@ -43,7 +43,7 @@ NameSoli DDNS是一个用于NameSoli域名的DDNS服务，适用于家庭宽带�
 
 目前运营商给家庭宽带的IP都是动态的，庆幸的是虽然IP地址不固定，但分配到家庭路由器的却是一个实实在在的公网IP，所以我们只需使用**路由器NAT映射**（需要路由器支持，在管理台设置）即可在公网访问家庭的设备。我们路由器映射22端口就能远程家里的linux，映射445+3389端口就能用win10自带远程桌面远程家里的windows。如下图
 
-![网络拓扑图](https://raw.githubusercontent.com/Charles94jp/NameSoli-DDNS/java/Network-topology.png)
+![网络拓扑图](https://raw.githubusercontent.com/Charles94jp/NameSilo-DDNS/java/Network-topology.png)
 
 为解决公网IP的变动，可以购买一个域名，使用DDNS（Dynamic Domain Name Server，动态域名服务）将域名解析到宽带的IP。这样就可以在家搭建各种服务并通过访问固定的域名来访问，而无需租用昂贵的公网服务器
 
@@ -56,7 +56,7 @@ NameSoli DDNS是一个用于NameSoli域名的DDNS服务，适用于家庭宽带�
 下载即用
 
 ```
-git -b python clone https://github.com/Charles94jp/NameSoli-DDNS.git
+git -b python clone https://github.com/Charles94jp/NameSilo-DDNS.git
 ```
 
 更新程序：
@@ -125,7 +125,7 @@ ps -ef|grep ddns.py|grep -v grep|cut -c 9-15|xargs kill -9
 
 设置开机启动，仅示范CentOS 7，其他Linux发行版请自行编写脚本。
 
-首先编辑DDNS文件，修改第8行为NameSoli-DDNS项目路径，修改第17行为python 3可执行文件路径
+首先编辑DDNS文件，修改第8行为NameSilo-DDNS项目路径，修改第17行为python 3可执行文件路径
 
 接着将DDNS注册为服务：
 
