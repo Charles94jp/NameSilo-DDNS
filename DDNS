@@ -5,7 +5,7 @@
 # 以上为开机自启配置
 
 # 配置工作目录
-cd /root/NameSoli-DDNS
+cd /root/NameSilo-DDNS
 check=`ls|grep 'ddns.py\|conf.json'`
 if [ -z "$check" ]
 then
