@@ -9,7 +9,7 @@
 <a href="#----"><img src="https://img.shields.io/badge/python-v3.8-blue"></a>
 </p>
 
-<h3 align="center">简体中文 | <a href="/Charles94jp/NameSilo-DDNS/blob/python/readme.md">English</a></h3>
+<h4 align="center">简体中文 | <a href="https://github.com/Charles94jp/NameSilo-DDNS/blob/python/readme.md">English</a></h3>
 
 
 NameSilo DDNS是一个用于NameSilo域名的DDNS服务，适用于家庭宽带，它能自动检测家庭宽带的IP变动，并自动更新域名的解析。

@@ -9,7 +9,7 @@
 <a href="#----"><img src="https://img.shields.io/badge/python-v3.8-blue"></a>
 </p>
 
-<h3 align="center"><a href="/Charles94jp/NameSilo-DDNS/blob/python/readme.zh-CN.md">简体中文</a> | English</h3>
+<h4 align="center"><a href="https://github.com/Charles94jp/NameSilo-DDNS/blob/python/readme.zh-CN.md">简体中文</a> | English</h3>
 
 
 NameSilo DDNS is a DDNS service for NameSilo domain names for home broadband , it can automatically detect IP changes in home broadband and automatically update the resolution of the domain name.
