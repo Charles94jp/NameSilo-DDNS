@@ -1,3 +1,0 @@
-key             :yourkey
-domain          :yourdomain.com
-frequency(ms)   :600000
