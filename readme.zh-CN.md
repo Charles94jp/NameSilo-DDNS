@@ -113,9 +113,10 @@ pip install httpx
 python ddns.py
 ```
 
-linux使用：
+Linux使用：
 
 ```
+chmod +x DDNS
 ./DDNS {start|stop|status|restart|force-reload}
 ```
 

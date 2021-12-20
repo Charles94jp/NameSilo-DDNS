@@ -113,6 +113,7 @@ python ddns.py
 Linux usage:
 
 ```
+chmod +x DDNS
 ./DDNS {start|stop|status|restart|force-reload}
 ```
 
