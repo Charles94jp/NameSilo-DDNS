@@ -110,13 +110,16 @@ Direct start
 python ddns.py
 ```
 
-linux running in the background
+Linux usage:
 
 ```
-nohup python ddns.py &
-# kill
-ps -ef|grep ddns.py|grep -v grep|cut -c 9-15|xargs kill -9
+./DDNS {start|stop|status|restart|force-reload}
 ```
+
+Example
+![](example.png)
+
+Windows usage: Double-click the bat or vbs file, please check the log for the running status of the program.
 
 ### Start At Boot
 

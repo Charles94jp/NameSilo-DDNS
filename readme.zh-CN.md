@@ -113,13 +113,16 @@ pip install httpx
 python ddns.py
 ```
 
-linux置于后台：
+linux使用：
 
 ```
-nohup python ddns.py &
-# 杀死进程
-ps -ef|grep ddns.py|grep -v grep|cut -c 9-15|xargs kill -9
+./DDNS {start|stop|status|restart|force-reload}
 ```
+
+例如
+![](example.png)
+
+Windows使用：双击bat或vbs文件，程序运行状态请查看日志
 
 ### Start At Boot
 
