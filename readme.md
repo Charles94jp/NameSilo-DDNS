@@ -100,7 +100,7 @@ About mail alert: Simply put, after the program is stopped unexpectedly, use mai
 
 Q: Under what circumstances will the program stop unexpectedly?
 
-A: I will avoid bugs in the coding of the program itself, but the api used may be wrong, such as NameSilo's api or ip138's api can't connect, which can happen.
+A: I will avoid bugs in the coding of the program itself, but errors may occur in the api being used, such as NameSilo's api or ip138's api not being able to connect, which rarely happens.
 
 The last five configurations are not required. Only after all five are filled in will the email alert feature be enabled.
 
