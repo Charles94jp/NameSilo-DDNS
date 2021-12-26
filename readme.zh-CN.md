@@ -97,7 +97,11 @@ pip install httpx
 |mail_pass|登录密码或key| 
 |receivers|数组，收件人地址，可以是多个| 
 
-关于邮件提醒：简单地说就是出bug后用mail_user给receivers发送一个提醒邮件。避免IP变动后无法用域名访问。
+关于邮件提醒：简单地说就是程序意外停止后用mail_user给receivers发送一个提醒邮件，避免IP变动后未更新DNS，导致无法用域名访问。
+
+Q：什么情况下程序会意外停止？
+
+A：我会避免程序本身的编码出bug，但是使用的api可能会出错，比如NameSilo的api或ip138的api无法连接，这是可能发生的。
 
 所有邮件参数都是可选的，如少填一个，程序错误时都不会发送邮件提醒。 以qq邮箱为例，如果想用qq邮箱发送邮件，需要进邮箱开启SMTP服务，并获得一个用于登录的key，在帮助里找到服务对应的服务器即可。收件人地址不限于qq邮箱平台，收件人也可以是发件人
 
@@ -109,13 +113,13 @@ pip install httpx
 ### Start
 
 
-直接启动：
+**直接启动：**
 
 ```
 python ddns.py
 ```
 
-Linux高级使用：
+**Linux高级使用：**
 
 首先编辑DDNS文件，修改第8行为NameSilo-DDNS项目路径，修改第17行为python 3可执行文件路径即可使用
 
@@ -135,7 +139,7 @@ chmod +x DDNS
 ln -s /root/NameSilo-DDNS/DDNS /usr/bin/DDNS
 ```
 
-Windows使用：双击bat或vbs文件，程序运行状态请查看日志
+**Windows使用：** 双击bat或vbs文件，程序运行状态请查看日志
 
 ### Start At Boot
 

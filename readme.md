@@ -96,6 +96,12 @@ The conf.json file needs to be configured before starting.
 |mail_pass|passwd or key| 
 |receivers|An array to hold the recipient's address.| 
 
+About mail alert: Simply put, after the program is stopped unexpectedly, use mail_user to send a reminder email to receivers to avoid failing to update DNS after IP changes, resulting in inaccessibility with the domain name.
+
+Q: Under what circumstances will the program stop unexpectedly?
+
+A: I will avoid bugs in the coding of the program itself, but the api used may be wrong, such as NameSilo's api or ip138's api can't connect, which can happen.
+
 The last five configurations are not required. Only after all five are filled in will the email alert feature be enabled.
 
 ### Note
@@ -106,13 +112,13 @@ This program can only update the DNS record of a domain name, it cannot be added
 ### Start
 
 
-Direct start
+**Direct start**
 
 ```
 python ddns.py
 ```
 
-Advanced use of Linux:
+**Advanced use of Linux:**
 
 First edit the DDNS file, change the 8th line to the path of NameSilo-DDNS project, change the 17th line to the path of python 3 executable file
 
@@ -132,7 +138,7 @@ If you want to use `DDNS` command anywhere, you can create a soft link in the `/
 ln -s /root/NameSilo-DDNS/DDNS /usr/bin/DDNS
 ```
 
-Windows usage: Double-click the bat or vbs file, please check the log for the running status of the program.
+**Windows usage:** Double-click the bat or vbs file, please check the log for the running status of the program.
 
 ### Start At Boot
 
