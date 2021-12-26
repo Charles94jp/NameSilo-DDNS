@@ -1,5 +1,5 @@
 <h1 align="center">
-  <a href="#----">
+  <a href="#">
   <img src="logo.svg" width="300px">
   </a>
   <br>
@@ -112,15 +112,24 @@ Direct start
 python ddns.py
 ```
 
-Linux usage:
+Advanced use of Linux:
+
+First edit the DDNS file, change the 8th line to the path of NameSilo-DDNS project, change the 17th line to the path of python 3 executable file
 
 ```
 chmod +x DDNS
+# usage
 ./DDNS {start|stop|status|restart|force-reload}
 ```
 
 Example
 ![](example.png)
+
+If you want to use `DDNS` command anywhere, you can create a soft link in the `/usr/bin` directory, and note that the `ln` command should use an absolute path, such as :
+
+```
+ln -s /root/NameSilo-DDNS/DDNS /usr/bin/DDNS
+```
 
 Windows usage: Double-click the bat or vbs file, please check the log for the running status of the program.
 
@@ -128,26 +137,19 @@ Windows usage: Double-click the bat or vbs file, please check the log for the ru
 
 <b>Linux</b>
 
-Set up start at boot, only CentOS 7 is demonstrated, please write your own script for other Linux distributions.
+To start at boot, only RedHat series such as CentOS 7 8 and Rocky Linux 8 are demonstrated, please write your own script for other Linux distributions.
 
-First edit the DDNS file, change the 8th line to the path of NameSilo-DDNS project, change the 17th line to the path of python 3 executable file
+Register DDNS as a service managed by systemctl.
 
-Next, register DDNS as a service.
+First of all, follow the steps in [start](#start) to configure the DDNS file.
 
-```
-chmod +x DDNS
-cp DDNS /etc/init.d/DDNS
-chkconfig --add /etc/init.d/DDNS
-# check
-chkconfig --list
-```
-
-After registering DDNS as a service, you have finished setting the start at boot and you can use DDNS through `service`.
+Then configure the DDNS.service file, modify the path of DDNS file in it, and finally:
 
 ```
-service DDNS {start|stop|status|restart|force-reload}
+cp  ./DDNS.service  /usr/lib/systemd/system/DDNS.service
+systemctl daemon-reload
+systemctl enable DDNS
 ```
-
 
 <b>Windows</b>
 

@@ -1,5 +1,5 @@
 <h1 align="center">
-  <a href="#----">
+  <a href="#">
   <img src="logo.svg" width="300px">
   </a>
   <br>
@@ -115,15 +115,24 @@ pip install httpx
 python ddns.py
 ```
 
-Linux使用：
+Linux高级使用：
+
+首先编辑DDNS文件，修改第8行为NameSilo-DDNS项目路径，修改第17行为python 3可执行文件路径即可使用
 
 ```
 chmod +x DDNS
+# usage
 ./DDNS {start|stop|status|restart|force-reload}
 ```
 
 例如
 ![](example.png)
+
+如果想在任何地方使用`DDNS`命令，可以在`/usr/bin`目录下建立软链接，注意`ln`命令要使用绝对路径，如
+
+```
+ln -s /root/NameSilo-DDNS/DDNS /usr/bin/DDNS
+```
 
 Windows使用：双击bat或vbs文件，程序运行状态请查看日志
 
@@ -131,26 +140,19 @@ Windows使用：双击bat或vbs文件，程序运行状态请查看日志
 
 <b>Linux</b>
 
-设置开机启动，仅示范CentOS 7，其他Linux发行版请自行编写脚本。
+设置开机启动，仅示范RedHat系列，如CentOS 7 8和Rocky Linux 8，其他Linux发行版请自行编写脚本。
 
-首先编辑DDNS文件，修改第8行为NameSilo-DDNS项目路径，修改第17行为python 3可执行文件路径
+将DDNS注册为systemctl管理的服务
 
-接着将DDNS注册为服务：
+首先要按照[start](#start)中的步骤配置DDNS文件
 
-```
-chmod +x DDNS
-cp DDNS /etc/init.d/DDNS
-chkconfig --add /etc/init.d/DDNS
-# 查看是否注册成功
-chkconfig --list
-```
-
-注册DDNS为服务后，即完成了开机自动启动设置，且可以通过`service`使用DDNS：
+接着配置DDNS.service文件，修改其中DDNS文件的路径，最后
 
 ```
-service DDNS {start|stop|status|restart|force-reload}
+cp  ./DDNS.service  /usr/lib/systemd/system/DDNS.service
+systemctl daemon-reload
+systemctl enable DDNS
 ```
-
 
 <b>Windows</b>
 
