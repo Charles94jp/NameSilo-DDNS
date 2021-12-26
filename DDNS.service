@@ -1,0 +1,12 @@
+[Unit]
+Description=NameSilo DDNS
+After=network-online.target
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/bash /root/NameSilo-DDNS/DDNS start
+ExecStop=/usr/bin/bash /root/NameSilo-DDNS/DDNS stop
+ExecReload=/usr/bin/bash /root/NameSilo-DDNS/DDNS restart
+
+[Install]
+WantedBy=multi-user.target
