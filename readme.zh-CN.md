@@ -84,7 +84,7 @@ pip install httpx
 
 ### Configuration
 
-启动前需要配置conf.json文件
+启动前需要配置conf.json文件，只有前两配置个是必要的，其余的可以不配置。
 
 |字段|介绍|
 |--|--|
