@@ -8,7 +8,7 @@
 <p align="center">
 <a href="https://github.com/Charles94jp/NameSilo-DDNS/tree/python"><img src="https://img.shields.io/badge/NameSilo-DDNS-brightgreen"></a>  
 <a target="_blank" href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-_red.svg"></a>  
-<a href="#----"><img src="https://img.shields.io/badge/python-v3.8-blue"></a>
+<a href="#python3"><img src="https://img.shields.io/badge/python-v3.8-blue"></a>
 </p>
 
 <h4 align="center"><a href="https://github.com/Charles94jp/NameSilo-DDNS/blob/python/readme.zh-CN.md">简体中文</a> | English</h3>
@@ -123,9 +123,10 @@ chmod +x DDNS
 ```
 
 Example
+
 ![](example.png)
 
-If you want to use `DDNS` command anywhere, you can create a soft link in the `/usr/bin` directory, and note that the `ln` command should use an absolute path, such as :
+If you want to use `DDNS` command anywhere, you can create a soft link in the `/usr/bin` directory, and note that the `ln` command should use the absolute path, such as :
 
 ```
 ln -s /root/NameSilo-DDNS/DDNS /usr/bin/DDNS
@@ -143,7 +144,7 @@ Register DDNS as a service managed by systemctl.
 
 First of all, follow the steps in [start](#start) to configure the DDNS file.
 
-Then configure the DDNS.service file, modify the path of DDNS file in it, and finally:
+Then configure the DDNS.service file, modify the path of DDNS file in it, and finally run:
 
 ```
 cp  ./DDNS.service  /usr/lib/systemd/system/DDNS.service

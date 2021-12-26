@@ -8,7 +8,7 @@
 <p align="center">
 <a href="https://github.com/Charles94jp/NameSilo-DDNS/tree/python"><img src="https://img.shields.io/badge/NameSilo-DDNS-brightgreen"></a>  
 <a target="_blank" href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-_red.svg"></a>  
-<a href="#----"><img src="https://img.shields.io/badge/python-v3.8-blue"></a>
+<a href="#python3"><img src="https://img.shields.io/badge/python-v3.8-blue"></a>
 </p>
 
 <h4 align="center">简体中文 | <a href="https://github.com/Charles94jp/NameSilo-DDNS#----">English</a></h3>
@@ -126,6 +126,7 @@ chmod +x DDNS
 ```
 
 例如
+
 ![](example.png)
 
 如果想在任何地方使用`DDNS`命令，可以在`/usr/bin`目录下建立软链接，注意`ln`命令要使用绝对路径，如
