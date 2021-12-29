@@ -41,6 +41,7 @@ It would be the best encouragement for me to get your  ⭐ STAR.
     - [Configuration](#configuration)
     - [Note](#note)
     - [Start](#start)
+    - [Log](#log)
     - [Start At Boot](#start-at-boot)
 
 ## Background
@@ -139,6 +140,30 @@ ln -s /root/NameSilo-DDNS/DDNS /usr/bin/DDNS
 ```
 
 **Windows usage:** Double-click the bat or vbs file, please check the log for the running status of the program.
+
+### Log
+
+<b>Linux</b>
+
+View log files
+
+```
+ls -lh DDNS*.log*
+```
+
+Among them, `DDNS.log` is the latest log file, and the rest are `gzip` compressed archive files. When DDNS service starts, if `DDNS.log` exceeds 2M, it will trigger automatic archiving. It can store all the logs since DDNS was used.
+
+Unpacking the archived file：
+
+```
+gunzip -N DDNS-xxx.log.gz
+```
+
+Gunzip it and read it.
+
+<b>Windows</b>
+
+When DDNS service starts, if `DDNS.log` exceeds 2M, the old `DDNS.log` file will be renamed to `DDNS-xxx.log.back` and will not be compressed.
 
 ### Start At Boot
 

@@ -41,6 +41,7 @@ NameSilo DDNS是一个用于NameSilo域名的DDNS服务，适用于家庭宽带�
     - [Configuration](#configuration)
     - [Note](#note)
     - [Start](#start)
+    - [Log](#log)
     - [Start At Boot](#start-at-boot)
 
 ## Background
@@ -140,6 +141,30 @@ ln -s /root/NameSilo-DDNS/DDNS /usr/bin/DDNS
 ```
 
 **Windows使用：** 双击bat或vbs文件，程序运行状态请查看日志
+
+### Log
+
+<b>Linux</b>
+
+查看日志文件
+
+```
+ls -lh DDNS*.log*
+```
+
+其中`DDNS.log`是当前最新的日志文件，其余的为`gzip`压缩过的归档文件。当DDNS服务启动时，若`DDNS.log`超过2M便会触发自动归档。可以存储使用DDNS以来所有的日志。
+
+解压归档文件：
+
+```
+gunzip -N DDNS-xxx.log.gz
+```
+
+解压后即可阅读
+
+<b>Windows</b>
+
+当DDNS服务启动时，若`DDNS.log`超过2M便会将旧的`DDNS.log`文件重命名为`DDNS-xxx.log.back`，不会压缩
 
 ### Start At Boot
 
