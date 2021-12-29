@@ -75,7 +75,7 @@ class DDNS:
         if debug:
             fh = logging.StreamHandler()
             self.logger.addHandler(fh)
-        self.logger.info('starting...')
+        self.logger.info('\n\nstarting...')
 
     def get_current_ip(self):
         """
