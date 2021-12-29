@@ -4,6 +4,7 @@ import os
 import time
 import smtplib
 from email.mime.text import MIMEText
+from platform import system as pl_system
 
 import httpx
 
@@ -55,12 +56,18 @@ class DDNS:
             self.receivers = args['receivers']
 
         if os.path.isfile('DDNS.log'):
-            if os.path.isfile('DDNS.log.back'):
-                os.remove('DDNS.log.back')
-            os.rename('DDNS.log', 'DDNS.log.back')
+            # size of DDNS.log > 2M
+            if os.path.getsize('DDNS.log') > 2 * 1024 * 1024:
+                if pl_system().find('Linux') > -1:
+                    date = time.strftime("%Y%m%d", time.localtime())
+                    os.system('gzip -N DDNS.log && mv DDNS.log.gz DDNS.log-' + date + '.gz')
+                else:
+                    if os.path.isfile('DDNS.log.back'):
+                        os.remove('DDNS.log.back')
+                    os.rename('DDNS.log', 'DDNS.log.back')
         self.logger = logging.getLogger('DDNS')  # 传logger名称返回新logger，否则返回root，会重复输出到屏幕
         self.logger.setLevel(logging.INFO)
-        fh = logging.FileHandler(filename='DDNS.log', encoding='utf-8', mode='w')
+        fh = logging.FileHandler(filename='DDNS.log', encoding='utf-8', mode='a')
         formatter = logging.Formatter("%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s")
         fh.setLevel(logging.INFO)
         fh.setFormatter(formatter)
