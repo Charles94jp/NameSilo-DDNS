@@ -58,13 +58,11 @@ class DDNS:
         if os.path.isfile('DDNS.log'):
             # size of DDNS.log > 2M
             if os.path.getsize('DDNS.log') > 2 * 1024 * 1024:
+                date = time.strftime("%Y%m%d", time.localtime())
                 if pl_system().find('Linux') > -1:
-                    date = time.strftime("%Y%m%d", time.localtime())
-                    os.system('gzip -N DDNS.log && mv DDNS.log.gz DDNS.log-' + date + '.gz')
+                    os.system('gzip -N DDNS.log && mv DDNS.log.gz DDNS-' + date + '.log.gz')
                 else:
-                    if os.path.isfile('DDNS.log.back'):
-                        os.remove('DDNS.log.back')
-                    os.rename('DDNS.log', 'DDNS.log.back')
+                    os.rename('DDNS.log', 'DDNS-' + date + '.log.back')
         self.logger = logging.getLogger('DDNS')  # 传logger名称返回新logger，否则返回root，会重复输出到屏幕
         self.logger.setLevel(logging.INFO)
         fh = logging.FileHandler(filename='DDNS.log', encoding='utf-8', mode='a')
