@@ -24,15 +24,17 @@ NameSilo DDNS是一个用于NameSilo的动态域名解析服务，适用于家�
 
 右上角点个 ⭐ Star 不迷路
 
-## Features
+# Features
 
 - 配置简单，可设置检测IP和刷新域名解析的频率
+
+- 日志记录和归档
 
 - 具有邮件提醒功能，服务长时间运行过程中的掉线提醒
 
 - 支持多平台Linux,Windows...
 
-## Table of Contents
+# Table of Contents
 
 - [Background](#background)
 - [Install](#install)
@@ -45,7 +47,7 @@ NameSilo DDNS是一个用于NameSilo的动态域名解析服务，适用于家�
     - [Start At Boot](#start-at-boot)
 - [Links](#links)
 
-## Background
+# Background
 
 目前运营商给家庭宽带的IP都是动态的，庆幸的是虽然IP地址不固定，但分配到家庭路由器的却是一个实实在在的公网IP，所以我们只需使用**路由器NAT映射**（需要路由器支持，在管理台设置）即可在公网访问家庭的设备。我们路由器映射22端口就能远程家里的linux，映射445+3389端口就能用win10自带远程桌面远程家里的windows。如下图
 
@@ -57,7 +59,7 @@ NameSilo DDNS是一个用于NameSilo的动态域名解析服务，适用于家�
 
 
 
-## Install
+# Install
 
 下载即用
 
@@ -73,7 +75,7 @@ git pull origin python
 mv conf.json.back conf.json
 ```
 
-### Dependencies
+## Dependencies
 
 
 需要使用python3来运行，python需要安装httpx模块：
@@ -82,9 +84,9 @@ mv conf.json.back conf.json
 pip install httpx
 ```
 
-## Usage
+# Usage
 
-### Configuration
+## Configuration
 
 启动前需要配置conf.json文件，只有前两配置个是必要的，其余的可以不配置。
 
@@ -107,12 +109,12 @@ A：我会避免程序本身的编码出bug，但是使用的api可能会出错�
 
 所有邮件参数都是可选的，如少填一个，程序错误时都不会发送邮件提醒。 以qq邮箱为例，如果想用qq邮箱发送邮件，需要进邮箱开启SMTP服务，并获得一个用于登录的key，在帮助里找到服务对应的服务器即可。收件人地址不限于qq邮箱平台，收件人也可以是发件人
 
-### Note
+## Note
 
 
 本程序只能更新域名的DNS记录，无法增加，请确保你的域名存在此DNS记录，且需要是一个子域名。
 
-### Start
+## Start
 
 
 **直接启动：**
@@ -143,7 +145,7 @@ ln -s /root/NameSilo-DDNS/DDNS /usr/bin/DDNS
 
 **Windows使用：** 双击bat或vbs文件，程序运行状态请查看日志
 
-### Log
+## Log
 
 <b>Linux</b>
 
@@ -167,7 +169,7 @@ gunzip -N DDNS-xxx.log.gz
 
 当DDNS服务启动时，若`DDNS.log`超过2M便会将旧的`DDNS.log`文件重命名为`DDNS-xxx.log.back`，不会压缩
 
-### Start At Boot
+## Start At Boot
 
 <b>Linux</b>
 
@@ -189,10 +191,10 @@ systemctl enable DDNS
 
 将vbs文件[加入策略组](https://blog.csdn.net/yunmuq/article/details/110199091)
 
-## Links
+# Links
 
 相关链接：
 
-- NameSilo API Document: [Domain API Reference - NameSilo](https://www.namesilo.com/api-reference)
+- NameSilo API Document: [Domain API Reference - NameSilo](https://www.namesilo.com/api-reference#dns/dns-list-records)
 
 - 当前IP查询: [ip138.com](https://www.ip138.com/)

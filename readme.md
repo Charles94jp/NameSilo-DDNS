@@ -24,15 +24,17 @@ This program obtains the public IP address of home broadband by visiting http://
 
 It would be the best encouragement for me to get your  ⭐ STAR.
 
-## Features
+# Features
 
 - Simple configuration, you can set the frequency of detecting IP changes and refreshing DNS.
+
+- Logging and archiving.
 
 - With email alert function, you will be alerted when there is an abnormality in the process of the service running for a long time.
 
 - Support multi-platform (Linux, Windows...)
 
-## Table of Contents
+# Table of Contents
 
 - [Background](#background)
 - [Install](#install)
@@ -45,7 +47,7 @@ It would be the best encouragement for me to get your  ⭐ STAR.
     - [Start At Boot](#start-at-boot)
 - [Links](#links)
 
-## Background
+# Background
 
 At present, telecom operators assign to home broadband IP are dynamic, although the IP address is not fixed, but the good thing is that the home router can get a real public IP, so we just need to use **router NAT mapping** (need router support, set up in the management console) to access the home device in the public network. After the router mapping port 22 we can remotely connect to our home linux machine, and after mapping port 445+3389 we can use the remote desktop of Win10.
 
@@ -56,7 +58,7 @@ To solve the problem of changing public IP, you can purchase a domain name and u
 To achieve this, you need a computer that is always running to run this DDNS program.
 
 
-## Install
+# Install
 
 Download and use
 
@@ -72,7 +74,7 @@ git pull origin python
 mv conf.json.back conf.json
 ```
 
-### Dependencies
+## Dependencies
 
 
 A Python3 environment is required. The httpx module also needs to be installed.
@@ -81,9 +83,9 @@ A Python3 environment is required. The httpx module also needs to be installed.
 pip install httpx
 ```
 
-## Usage
+# Usage
 
-### Configuration
+## Configuration
 
 The conf.json file needs to be configured before starting. Only the first two configurations are necessary, the rest can be set without.
 
@@ -106,12 +108,12 @@ A: I will avoid bugs in the coding of the program itself, but errors may occur i
 
 The last five configurations are not required. Only after all five are filled in will the email alert feature be enabled.
 
-### Note
+## Note
 
 
 This program can only update the DNS record of a domain name, it cannot be added, please make sure this DNS record exists for your domain name and it needs to be a sub-domain.
 
-### Start
+## Start
 
 
 **Quick start**
@@ -142,7 +144,7 @@ ln -s /root/NameSilo-DDNS/DDNS /usr/bin/DDNS
 
 **Windows usage:** Double-click the bat or vbs file, please check the log for the running status of the program.
 
-### Log
+## Log
 
 <b>Linux</b>
 
@@ -166,7 +168,7 @@ Gunzip it and read it.
 
 When DDNS service starts, if `DDNS.log` exceeds 2M, the old `DDNS.log` file will be renamed to `DDNS-xxx.log.back` and will not be compressed.
 
-### Start At Boot
+## Start At Boot
 
 <b>Linux</b>
 
@@ -188,8 +190,8 @@ systemctl enable DDNS
 
 Add the vbs file to the Windows policy group.
 
-## Links
+# Links
 
-- NameSilo API Document: [Domain API Reference - NameSilo](https://www.namesilo.com/api-reference)
+- NameSilo API Document: [Domain API Reference - NameSilo](https://www.namesilo.com/api-reference#dns/dns-list-records)
 
 - Current IP query: [ip138.com](https://www.ip138.com/)
