@@ -14,7 +14,7 @@
 <h4 align="center"><a href="https://github.com/Charles94jp/NameSilo-DDNS/blob/python/readme.zh-CN.md">简体中文</a> | English</h3>
 
 
-NameSilo DDNS is a DDNS service for NameSilo domain names for home broadband , it can automatically detect IP changes in home broadband and automatically update the resolution of the domain name.
+NameSilo DDNS is a Dynamic Domain Name System service for NameSilo for home broadband, it can automatically detect IP changes in home broadband and automatically update the resolution of the domain name.
 
 This project has been refactored via Python3, to view the Java version please switch branches.
 

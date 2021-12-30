@@ -14,7 +14,7 @@
 <h4 align="center">简体中文 | <a href="https://github.com/Charles94jp/NameSilo-DDNS#----">English</a></h3>
 
 
-NameSilo DDNS是一个用于NameSilo域名的DDNS服务，适用于家庭宽带，它能自动检测家庭宽带的IP变动，并自动更新域名的解析。
+NameSilo DDNS是一个用于NameSilo的动态域名解析服务，适用于家庭宽带，它能自动检测家庭宽带的IP变动，并自动更新域名的解析。
 
 本项目已通过python3重构，查看Java版本请切换分支。
 
