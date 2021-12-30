@@ -20,7 +20,7 @@ NameSilo DDNS是一个用于NameSilo的动态域名解析服务，适用于家�
 
 本程序仅适用于NameSilo上购买的域名
 
-本程序通过访问 http://202020.ip138.com/ 获取家庭宽带的公网IP地址，通过 https://www.namesilo.com/api/ 来查询和更新DNS状态。
+本程序通过访问 http://2021.ip138.com/ 获取家庭宽带的公网IP地址，通过 https://www.namesilo.com/api/ 来查询和更新DNS状态。
 
 右上角点个 ⭐ Star 不迷路
 
