@@ -43,6 +43,7 @@ NameSilo DDNS是一个用于NameSilo的动态域名解析服务，适用于家�
     - [Start](#start)
     - [Log](#log)
     - [Start At Boot](#start-at-boot)
+- [Links](#links)
 
 ## Background
 
@@ -187,3 +188,11 @@ systemctl enable DDNS
 <b>Windows</b>
 
 将vbs文件[加入策略组](https://blog.csdn.net/yunmuq/article/details/110199091)
+
+## Links
+
+相关链接：
+
+- NameSilo API Document: [Domain API Reference - NameSilo](https://www.namesilo.com/api-reference)
+
+- 当前IP查询: [ip138.com](https://www.ip138.com/)

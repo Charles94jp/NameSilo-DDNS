@@ -43,6 +43,7 @@ It would be the best encouragement for me to get your  ⭐ STAR.
     - [Start](#start)
     - [Log](#log)
     - [Start At Boot](#start-at-boot)
+- [Links](#links)
 
 ## Background
 
@@ -113,7 +114,7 @@ This program can only update the DNS record of a domain name, it cannot be added
 ### Start
 
 
-**Direct start**
+**Quick start**
 
 ```
 python ddns.py
@@ -186,3 +187,9 @@ systemctl enable DDNS
 <b>Windows</b>
 
 Add the vbs file to the Windows policy group.
+
+## Links
+
+- NameSilo API Document: [Domain API Reference - NameSilo](https://www.namesilo.com/api-reference)
+
+- Current IP query: [ip138.com](https://www.ip138.com/)
