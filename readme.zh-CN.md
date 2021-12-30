@@ -9,6 +9,8 @@
 <a href="https://github.com/Charles94jp/NameSilo-DDNS/tree/python"><img src="https://img.shields.io/badge/NameSilo-DDNS-brightgreen"></a>  
 <a target="_blank" href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-_red.svg"></a>  
 <a href="#python3"><img src="https://img.shields.io/badge/python-v3.8-blue"></a>
+<a href="#features"><img src="https://img.shields.io/badge/multi-platform-orange"></a>
+<a href="#features"><img src="https://img.shields.io/badge/log-rotation-orange"></a>
 </p>
 
 <h4 align="center">简体中文 | <a href="https://github.com/Charles94jp/NameSilo-DDNS#----">English</a></h3>
@@ -28,7 +30,7 @@ NameSilo DDNS是一个用于NameSilo的动态域名解析服务，适用于家�
 
 - 配置简单，可设置检测IP和刷新域名解析的频率
 
-- 日志记录和归档
+- 日志记录和滚动
 
 - 具有邮件提醒功能，服务长时间运行过程中的掉线提醒
 

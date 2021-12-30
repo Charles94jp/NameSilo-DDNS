@@ -9,6 +9,8 @@
 <a href="https://github.com/Charles94jp/NameSilo-DDNS/tree/python"><img src="https://img.shields.io/badge/NameSilo-DDNS-brightgreen"></a>  
 <a target="_blank" href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-_red.svg"></a>  
 <a href="#python3"><img src="https://img.shields.io/badge/python-v3.8-blue"></a>
+<a href="#features"><img src="https://img.shields.io/badge/multi-platform-orange"></a>
+<a href="#features"><img src="https://img.shields.io/badge/log-rotation-orange"></a>
 </p>
 
 <h4 align="center"><a href="https://github.com/Charles94jp/NameSilo-DDNS/blob/python/readme.zh-CN.md">简体中文</a> | English</h3>
@@ -28,7 +30,7 @@ It would be the best encouragement for me to get your  ⭐ STAR.
 
 - Simple configuration, you can set the frequency of detecting IP changes and refreshing DNS.
 
-- Logging and archiving.
+- Log rotation.
 
 - With email alert function, you will be alerted when there is an abnormality in the process of the service running for a long time.
 
