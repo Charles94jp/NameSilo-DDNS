@@ -57,6 +57,7 @@ class DDNS:
 
         if os.path.isfile('DDNS.log'):
             # size of DDNS.log > 2M
+            # logging.handles.TimedRotatingFileHandler, RotatingFileHandler代替FileHandler，即自带的日志滚动，但是命名不可控
             if os.path.getsize('DDNS.log') > 2 * 1024 * 1024:
                 date = time.strftime("%Y%m%d", time.localtime())
                 if pl_system().find('Linux') > -1:
