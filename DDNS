@@ -67,7 +67,7 @@ else
     echo $outString
     echo "================="
     echo "Update history:"
-    grep -C 1 'update_domain_ip' DDNS.log
+    grep -B 2 'update_domain_ip' DDNS.log
     echo "================="
     echo "Latest operation:"
     echo `tail -1 DDNS.log`
