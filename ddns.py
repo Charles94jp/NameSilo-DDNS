@@ -78,7 +78,7 @@ class DDNS:
 
     @staticmethod
     def archive_log():
-        date = time.strftime("%Y%m%d", time.localtime())
+        date = time.strftime("%Y%m%d-%H%M%S", time.localtime())
         if pl_system().find('Linux') > -1:
             os.system('gzip -N DDNS.log && mv DDNS.log.gz DDNS-' + date + '.log.gz')
         else:
