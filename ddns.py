@@ -219,14 +219,14 @@ if __name__ == '__main__':
     """
     不要开代理、梯子，会http连接错误
     """
-    if sys.argv[1] == 'archiveLog':
+    if len(sys.argv) > 1 and sys.argv[1] == 'archiveLog':
         DDNS.archive_log()
         exit(0)
     ddns = None
     try:
         with open('conf.json', 'r') as fp:
             ddns = DDNS(json.load(fp))
-        if sys.argv[1] == 'testEmail':
+        if len(sys.argv) > 1 and sys.argv[1] == 'testEmail':
             ddns.test_email()
         else:
             ddns.start()
