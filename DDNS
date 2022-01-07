@@ -74,8 +74,16 @@ else
 fi
 ;;
 ########################################
+testEmail)
+$pythonBin ddns.py testEmail
+;;
+########################################
+archiveLog)
+$pythonBin ddns.py archiveLog
+;;
+########################################
 *)
-echo $"Usage: $0 {start|stop|status|restart|force-reload}"
+echo $"Usage: $0 {start|stop|status|restart|force-reload|testEmail|archiveLog}"
 
 esac
 
