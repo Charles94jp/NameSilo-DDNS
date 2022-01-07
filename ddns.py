@@ -146,6 +146,8 @@ class DDNS:
             self.lastUpdateDomainIpError = True
 
     def send_email(self, title, html_msg):
+        if not self.emailAlert:
+            return -1
         # 邮件消息，plain是纯文本，html可以自定义样式
         message = MIMEText(html_msg, 'html', 'utf-8')
         # 邮件主题
@@ -192,6 +194,9 @@ class DDNS:
             exit(-1)
 
     def test_email(self):
+        if not self.emailAlert:
+            print('Email configuration is not filled')
+            return -1
         self.send_email('DDNS test', '这是<a target="_blank" href="https://github.com/Charles94jp/NameSilo-DDNS">DDNS服务'
                                      '</a>的测试邮件，收到此邮件代表你的邮件配置无误')
 
