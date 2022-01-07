@@ -63,11 +63,7 @@ class DDNS:
             # size of DDNS.log > 2M
             # logging.handles.TimedRotatingFileHandler, RotatingFileHandler代替FileHandler，即自带的日志滚动，但是命名不可控
             if os.path.getsize('DDNS.log') > 2 * 1024 * 1024:
-                date = time.strftime("%Y%m%d", time.localtime())
-                if pl_system().find('Linux') > -1:
-                    os.system('gzip -N DDNS.log && mv DDNS.log.gz DDNS-' + date + '.log.gz')
-                else:
-                    os.rename('DDNS.log', 'DDNS-' + date + '.log.back')
+                DDNS.archive_log()
         self.logger = logging.getLogger('DDNS')  # 传logger名称返回新logger，否则返回root，会重复输出到屏幕
         self.logger.setLevel(logging.INFO)
         fh = logging.FileHandler(filename='DDNS.log', encoding='utf-8', mode='a')
@@ -79,6 +75,14 @@ class DDNS:
             fh = logging.StreamHandler()
             self.logger.addHandler(fh)
         self.logger.info('\n\nstarting...')
+
+    @staticmethod
+    def archive_log():
+        date = time.strftime("%Y%m%d", time.localtime())
+        if pl_system().find('Linux') > -1:
+            os.system('gzip -N DDNS.log && mv DDNS.log.gz DDNS-' + date + '.log.gz')
+        else:
+            os.rename('DDNS.log', 'DDNS-' + date + '.log.back')
 
     def get_current_ip(self):
         """
@@ -210,6 +214,9 @@ if __name__ == '__main__':
     """
     不要开代理、梯子，会http连接错误
     """
+    if sys.argv[1] == 'archiveLog':
+        DDNS.archive_log()
+        exit(0)
     ddns = None
     try:
         with open('conf.json', 'r') as fp:
