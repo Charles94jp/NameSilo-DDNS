@@ -79,7 +79,9 @@ $pythonBin ddns.py testEmail
 ;;
 ########################################
 archiveLog)
+./DDNS stop
 $pythonBin ddns.py archiveLog
+./DDNS start
 ;;
 ########################################
 *)
