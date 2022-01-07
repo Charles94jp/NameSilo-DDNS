@@ -111,6 +111,14 @@ A：我会避免程序本身的编码出bug，但是使用的api可能会出错�
 
 所有邮件参数都是可选的，如少填一个，程序错误时都不会发送邮件提醒。 以qq邮箱为例，如果想用qq邮箱发送邮件，需要进邮箱开启SMTP服务，并获得一个用于登录的key，在帮助里找到服务对应的服务器即可。收件人地址不限于qq邮箱平台，收件人也可以是发件人
 
+测试邮件设置是否正确，会发送一封邮件到你的邮箱：
+
+```
+DDNS testEmail
+# or
+python ddns.py testEmail
+```
+
 ## Note
 
 
@@ -167,9 +175,21 @@ gunzip -N DDNS-xxx.log.gz
 
 解压后即可阅读
 
+手动归档日志，用于在`DDNS status`打印信息过多时
+
+```
+DDNS archiveLog
+```
+
 <b>Windows</b>
 
 当DDNS服务启动时，若`DDNS.log`超过2M便会将旧的`DDNS.log`文件重命名为`DDNS-xxx.log.back`，不会压缩
+
+手动归档日志:
+
+```
+python ddns.py archiveLog
+```
 
 ## Start At Boot
 

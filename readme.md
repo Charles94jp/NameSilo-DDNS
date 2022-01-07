@@ -110,6 +110,14 @@ A: I will avoid bugs in the coding of the program itself, but errors may occur i
 
 The last five configurations are not required. Only after all five are filled in will the email alert feature be enabled.
 
+Test if your email settings are correct, an email will be sent to your email address if your configuration works.
+
+```
+DDNS testEmail
+# or
+python ddns.py testEmail
+```
+
 ## Note
 
 
@@ -166,9 +174,21 @@ gunzip -N DDNS-xxx.log.gz
 
 Gunzip it and read it.
 
+Manually archived logs for when `DDNS status` prints too many messages.
+
+```
+DDNS archiveLog
+```
+
 <b>Windows</b>
 
 When DDNS service starts, if `DDNS.log` exceeds 2M, the old `DDNS.log` file will be renamed to `DDNS-xxx.log.back` and will not be compressed.
+
+Manually archived logs.
+
+```
+python ddns.py archiveLog
+```
 
 ## Start At Boot
 
