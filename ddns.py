@@ -194,7 +194,7 @@ class DDNS:
 
         # 登录并发送邮件
         try:
-            smtpObj = smtplib.SMTP()
+            smtpObj = smtplib.SMTP_SSL()
             # 连接到服务器
             smtpObj.connect(self.mail_host, 25)
             # 登录到服务器
