@@ -194,9 +194,9 @@ class DDNS:
 
         # 登录并发送邮件
         try:
-            smtpObj = smtplib.SMTP_SSL()
+            smtpObj = smtplib.SMTP_SSL(self.mail_host, int(self.mail_port))
             # 连接到服务器
-            smtpObj.connect(self.mail_host, 25)
+            #smtpObj.connect()
             # 登录到服务器
             smtpObj.login(self.mail_user, self.mail_pass)
             # 发送
@@ -260,7 +260,7 @@ if __name__ == '__main__':
     ddns = None
     try:
         with open('conf.json', 'r') as fp:
-            ddns = DDNS(json.load(fp))
+            ddns = DDNS(json.load(fp),debug=True)
         if len(sys.argv) > 1 and sys.argv[1] == 'testEmail':
             ddns.test_email()
         else:
