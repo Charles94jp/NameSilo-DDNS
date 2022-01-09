@@ -108,20 +108,29 @@ class DDNS:
         update self.domainIp
         :return: None
         """
-        r = httpx.get(self.apiRoot + '/dnsListRecords?version=1&type=xml&key=' + self.key + '&domain=' + self.domain,
-                      timeout=10)
-        if r.status_code == 200:
-            r = r.text.split('<resource_record>')
-            for record in r:
-                if record.find(self.host + '.' + self.domain) != -1:
-                    r = record
-                    break
-            r = r.split('</record_id>')
-            self.rrid = r[0].split('<record_id>')[-1]
-            self.domainIp = r[1].split('<value>')[1].split('</value>')[0]
-            self.logger.info("get_domain_ip: \tcurrent domain name resolution ip: " + self.domainIp)
-        else:
-            self.logger.error("get_domain_ip: \tapi error")
+        try:
+            r = httpx.get(
+                self.apiRoot + '/dnsListRecords?version=1&type=xml&key=' + self.key + '&domain=' + self.domain,
+                timeout=10)
+            if r.status_code == 200:
+                r = r.text.split('<resource_record>')
+                for record in r:
+                    if record.find(self.host + '.' + self.domain) != -1:
+                        r = record
+                        break
+                r = r.split('</record_id>')
+                self.rrid = r[0].split('<record_id>')[-1]
+                self.domainIp = r[1].split('<value>')[1].split('</value>')[0]
+                self.logger.info("get_domain_ip: \tcurrent domain name resolution ip: " + self.domainIp)
+            else:
+                self.logger.error("get_domain_ip: \tError, process stopped. "
+                                  "It could be due to the configuration file error, or the NameSilo server error.")
+                exit(-1)
+        except httpx.ConnectError as e:
+            self.logger.exception(e)
+            self.logger.error("get_domain_ip: \tError, process stopped. "
+                              "It could be due to the configuration file error, or the NameSilo server error.")
+            exit(-1)
 
     def update_domain_ip(self, new_ip):
         """
@@ -129,21 +138,47 @@ class DDNS:
         更新域名解析，更新self.domainIp
         :return: None
         """
-        r = httpx.get(
-            self.apiRoot + '/dnsUpdateRecord?version=1&type=xml&rrttl=7207&key=' + self.key + '&domain=' + self.domain
-            + '&rrid=' + self.rrid + '&rrhost=' + self.host + '&rrvalue=' + new_ip,
-            timeout=10)
-        r = r.text
-        r = r.split('<code>')[1]
-        r = r.split('</code>')[0]
-        if r == '300':
-            self.domainIp = new_ip
-            self.logger.info("update_domain_ip: \tupdate completed: " + self.domainIp)
-            self.lastUpdateDomainIpError = False
-        else:
+        try:
+            r = httpx.get(
+                self.apiRoot + '/dnsUpdateRecord?version=1&type=xml&rrttl=7207&key=' + self.key + '&domain=' + self.domain
+                + '&rrid=' + self.rrid + '&rrhost=' + self.host + '&rrvalue=' + new_ip,
+                timeout=10)
+            r = r.text
+            r = r.split('<code>')[1]
+            r = r.split('</code>')[0]
+            if r == '300':
+                self.domainIp = new_ip
+                self.logger.info("update_domain_ip: \tupdate completed: " + self.domainIp)
+                self.lastUpdateDomainIpError = False
+            else:
+                self.logger.error("update_domain_ip: \tupdate failed")
+                if not self.lastUpdateDomainIpError:
+                    self.send_new_ip(new_ip)
+                self.check_error()
+                self.lastUpdateDomainIpError = True
+        except BaseException as e:
+            self.logger.exception(e)
             self.logger.error("update_domain_ip: \tupdate failed")
+            if not self.lastUpdateDomainIpError:
+                self.send_new_ip(new_ip)
             self.check_error()
             self.lastUpdateDomainIpError = True
+
+    def send_new_ip(self, new_ip):
+        """
+        when update_domain_ip error
+        """
+        self.send_email('DDNS服务异常提醒',
+                        '<p class="MsoNormal"><span style="font-family:宋体;color:black">您好！</span></p>'
+                        '<p class="MsoNormal" style="text-indent:21.0pt"><span style="font-family:宋体;color:black">'
+                        '您的IP已发生变更，当前IP是：' + new_ip +
+                        '，但由于网络错误，DDNS无法推送您的新IP到NameSilo。DDNS服务不会立即停止，'
+                        '它将再尝试几次推送。</span></p><p class="MsoNormal" style="text-indent:21.0pt">'
+                        '<span style="font-family:宋体;color:black">您可以登录服务器通过DDNS.log文件查看异常细明，'
+                        '<b>请尽快排查原因并重启DDNS服务</b>，避免IP变动导致您的服务器无法通过域名访问。</span></p>'
+                        '<p class="MsoNormal" style="text-indent:21.0pt"><span style="font-family:宋体;color:black">'
+                        '有任何问题请在<a target="_blank" href="https://github.com/Charles94jp/NameSilo-DDNS">'
+                        'DDNS项目的GitHub Issues</a>中反馈，谢谢您的支持</span></p>')
 
     def send_email(self, title, html_msg):
         if not self.emailAlert:
@@ -185,7 +220,7 @@ class DDNS:
                                 '<p class="MsoNormal" style="text-indent:21.0pt"><span style="font-family:宋体;'
                                 'color:black">您的DDNS服务因异常已停止，这并非是服务本身导致的，可能是ip138.com或NameSilo的api'
                                 '繁忙所致。</span></p><p class="MsoNormal" style="text-indent:21.0pt"><span '
-                                'style="font-family:宋体;color:black">您可以DDNS.log文件查看异常细明，<b>请尽快排查原因'
+                                'style="font-family:宋体;color:black">您可以登录服务器通过DDNS.log文件查看异常细明，<b>请尽快排查原因'
                                 '并重启DDNS服务</b>，避免IP变动导致您的服务器无法通过域名访问。</span></p><p class="MsoNormal"'
                                 ' style="text-indent:21.0pt"><span style="font-family:宋体;color:black">有任何问题请在'
                                 '<a target="_blank" href="https://github.com/Charles94jp/NameSilo-DDNS">DDNS项目的'
@@ -232,3 +267,4 @@ if __name__ == '__main__':
             ddns.start()
     except BaseException as e:
         ddns.logger.exception(e)
+        exit(-1)
