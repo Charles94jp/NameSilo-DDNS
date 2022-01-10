@@ -26,7 +26,7 @@ class DDNS:
 
     ## 运行中调用
     apiRoot = "https://www.namesilo.com/api"
-    getIp = "http://2021.ip138.com/"
+    getIp = "2021.ip138.com"
     domainIp = ''
     currentIp = ''
     logger = None
@@ -90,7 +90,13 @@ class DDNS:
         update self.currentIp
         :return: None
         """
-        r = httpx.get(self.getIp, headers=self.httpHeaders, timeout=10)
+        r = None
+        try:
+            r = httpx.get('http://' + self.getIp, headers=self.httpHeaders, timeout=10)
+        except Exception as e:
+            self.logger.exception(e)
+            r = httpx.get('https://' + self.getIp, headers=self.httpHeaders, timeout=10)
+
         if r.status_code == 200:
             r = r.text
             r = r.split('您的IP地址是：')[1]
@@ -196,7 +202,6 @@ class DDNS:
         try:
             smtpObj = smtplib.SMTP_SSL(self.mail_host, int(self.mail_port))
             # 连接到服务器
-            #smtpObj.connect()
             # 登录到服务器
             smtpObj.login(self.mail_user, self.mail_pass)
             # 发送
