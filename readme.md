@@ -89,7 +89,7 @@ pip install httpx
 
 ## Configuration
 
-The conf.json file needs to be configured before starting. **Only the first two configurations are necessary**, the rest can be set without.
+The conf.json file needs to be configured before starting, refer to conf.json.example. **Only the first two configurations are necessary**, the rest can be set without.
 
 |Fields|Introduction|
 |--|--|
