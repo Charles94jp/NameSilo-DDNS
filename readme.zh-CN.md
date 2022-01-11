@@ -72,9 +72,7 @@ git -b python clone https://github.com/Charles94jp/NameSilo-DDNS.git
 更新程序：
 
 ```
-mv conf.json conf.json.back
 git pull origin python
-mv conf.json.back conf.json
 ```
 
 ## Dependencies
