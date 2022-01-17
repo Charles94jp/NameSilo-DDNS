@@ -1,0 +1,1 @@
+createobject("wscript.shell").run "win_runDDNS.bat"

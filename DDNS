@@ -1,0 +1,102 @@
+#!/bin/bash
+# chkconfig:2345 60 30
+# description: DDNS
+
+# 以上为开机自启配置 
+
+# 配置java环境变量，使用service运行脚本时无法使用profile中配置的环境变量，你可能要重新复制过来
+export JAVA_HOME=/usr/local/jdk8u291
+export CLASSPATH=.:$JAVA_HOME/lib:$JAVA_HOME/jre/lib
+export PATH=$JAVA_HOME/bin:$PATH
+
+# 配置工作目录
+cd /root/NameSoli-DDNS
+check=`ls|grep 'DDNSjar.jar\|_config.txt'`
+if [ -z "$check" ]
+then
+    echo $"The working directory is incorrect, please check the configuration on the 13 line of $0"
+    exit -1
+fi
+
+
+case "$1" in
+start)
+# 修改配置文件格式，避免拼接错误
+vi _conf.txt -c 'set fileformat=unix' -c 'wq'
+
+# 解析出配置文件参数
+list="key domain frequency"
+param=""
+for idx in ${list};
+do
+str=`grep ${idx} _conf.txt`
+# 将冒号右边的截取出来
+str=${str#*:}
+param="$param $str"
+done
+
+# 运行
+nohup java -jar DDNSjar.jar ${param}>log_DDNS.log 2>&1 &
+echo started successfully
+;;
+################################
+stop)
+findps=`ps -ef|grep DDNS|grep -v grep|grep -v $0|grep -v 'service.*DDNS'`
+if [ -z "$findps" ]
+then
+    echo "DDNS is not running!"
+    exit 1
+else
+    ps -ef|grep DDNS|grep -v grep|grep -v $0|grep -v 'service.*DDNS'|cut -c 9-15|xargs kill -9
+fi
+echo stopped successfully
+;;
+#################################
+restart)
+findps=`ps -ef|grep DDNS|grep -v grep|grep -v $0|grep -v 'service.*DDNS'`
+if [ -n "$findps" ]
+then
+    ps -ef|grep DDNS|grep -v grep|grep -v $0|grep -v 'service.*DDNS'|cut -c 9-15|xargs kill -9
+fi
+echo stopped successfully
+
+sleep 0.5
+
+# 解析出配置文件参数
+list="key domain frequency"
+param=""
+for idx in ${list};
+do
+str=`grep ${idx} _conf.txt`
+# 将冒号右边的截取出来
+str=${str#*:}
+param="$param $str"
+done
+
+# 运行
+nohup java -jar DDNSjar.jar ${param}>log_DDNS.log 2>&1 &
+echo started successfully
+;;
+########################################
+status)
+outString=`ps -ef|grep DDNS|grep -v grep|grep -v status`
+if [ -z "$outString" ]
+then
+    echo "DDNS is stopped!"
+    echo "Consult DDNS log for more details: `pwd`/log_DDNS.log" 
+else
+    echo "Program is running!"
+    echo $outString
+    echo "================="
+    echo "Latest operation:"
+    echo `tail -1 log_DDNS.log`
+fi
+;;
+########################################
+*)
+echo $"Usage: $0 {start|stop|status|restart|force-reload}"
+
+esac
+
+exit 0
+
