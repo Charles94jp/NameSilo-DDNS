@@ -1,4 +1,5 @@
-DDNS*log*
+_conf.txt
+*DDNS*log*
 .idea
 *.back
 conf.json
