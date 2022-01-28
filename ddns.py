@@ -230,6 +230,7 @@ class DDNS:
                                 ' style="text-indent:21.0pt"><span style="font-family:宋体;color:black">有任何问题请在'
                                 '<a target="_blank" href="https://github.com/Charles94jp/NameSilo-DDNS">DDNS项目的'
                                 'GitHub Issues</a>中反馈，谢谢您的支持</span></p>')
+            self.errorCount = 0
             self.logger.error("start: \t连续错误12次，程序退出")
             exit(-1)
 
