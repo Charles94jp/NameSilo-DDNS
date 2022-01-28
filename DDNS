@@ -89,7 +89,7 @@ else
     findps print
     echo "================="
     echo "Update history:"
-    grep -B 2 'update_domain_ip' DDNS.log
+    grep -B 2 'update_domain_ip:.*update completed' DDNS.log
     echo "================="
     echo "Latest operation:"
     echo `tail -1 DDNS.log`
