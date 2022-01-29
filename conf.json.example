@@ -6,5 +6,6 @@
     "mail_port": "",
     "mail_user": "",
     "mail_pass": "",
-    "receivers": [""]
+    "receivers": [""],
+    "email_after_reboot": false
 }

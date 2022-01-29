@@ -91,14 +91,15 @@ The conf.json file needs to be configured before starting, refer to conf.json.ex
 
 |Fields|Introduction|
 |--|--|
-|domain|The domain name to be updated must be a subdomain. For example, if you purchase a domain name that is bb.cc, you must build a resolution on NameSilo for a subdomain such as aa.bb.cc.| 
-|key|<a target="_blank" href="https://www.namesilo.com/account/api-manager">The key generated from NameSilo</a>, after generation you need to remember and keep this key.| 
-|frequency|How often do you detect changes in your ip, and only update your DNS when a change in ip occurs, in seconds.| 
-|mail_host| For example, you can use Google Mail's POP/IMAP | 
-|mail_port| | 
-|mail_user|The login user name, which is also the email sender.| 
-|mail_pass|passwd or key| 
-|receivers|An array to hold the recipient's address.| 
+|domain|The domain name to be updated must be a subdomain. For example, if you purchase a domain name that is bb.cc, you must build a resolution on NameSilo for a subdomain such as aa.bb.cc.|
+|key|<a target="_blank" href="https://www.namesilo.com/account/api-manager">The key generated from NameSilo</a>, after generation you need to remember and keep this key.|
+|frequency|How often do you detect changes in your ip, and only update your DNS when a change in ip occurs, in seconds.|
+|mail_host| For example, you can use Google Mail's POP/IMAP |
+|mail_port| |
+|mail_user|The login user name, which is also the email sender.|
+|mail_pass|passwd or key|
+|receivers|An array to hold the recipient's address.|
+|email_after_reboot|For Linux, The default is false, provided that the email configuration needs to be set. After setting to true, if the interval between `uptime` and current time is less than 5 minutes, DDNS will send the current IP of the server to you by email.<br> It is applicable to the case of unexpected power failure at home, when the power is turned on, the router will redial and usually get a new IP, if your server supports power on automatically, then DDNS will send you an email to tell you that your server has been started successfully after it is starts with Linux.|
 
 About mail alert: Simply put, after the program is stopped unexpectedly, use mail_user to send a reminder email to receivers to avoid failing to update DNS after IP changes, resulting in inaccessibility with the domain name.
 

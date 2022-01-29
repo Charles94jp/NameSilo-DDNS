@@ -4,6 +4,7 @@ import os
 import sys
 import time
 import smtplib
+from datetime import datetime
 from email.mime.text import MIMEText
 from platform import system as pl_system
 
@@ -23,6 +24,7 @@ class DDNS:
     mail_user = ''
     mail_pass = ''
     receivers = []
+    email_after_reboot = False
 
     ## 运行中调用
     apiRoot = "https://www.namesilo.com/api"
@@ -58,6 +60,8 @@ class DDNS:
             self.mail_user = args['mail_user']
             self.mail_pass = args['mail_pass']
             self.receivers = args['receivers']
+
+        self.email_after_reboot = args['email_after_reboot']
 
         if os.path.isfile('DDNS.log'):
             # size of DDNS.log > 2M
@@ -174,11 +178,11 @@ class DDNS:
         """
         when update_domain_ip error
         """
-        self.send_email('DDNS服务异常提醒',
+        self.send_email('DDNS服务异常提醒 - DNS更新失败',
                         '<p class="MsoNormal"><span style="font-family:宋体;color:black">您好！</span></p>'
                         '<p class="MsoNormal" style="text-indent:21.0pt"><span style="font-family:宋体;color:black">'
-                        '您的IP已发生变更，当前IP是：' + new_ip +
-                        '，但由于网络错误，DDNS无法推送您的新IP到NameSilo。DDNS服务不会立即停止，'
+                        '您的IP已发生变更，当前IP是：<a href="' + new_ip + '">' + new_ip +
+                        '</a>，但由于网络错误，DDNS无法推送您的新IP到NameSilo。DDNS服务不会立即停止，'
                         '它将再尝试几次推送。</span></p><p class="MsoNormal" style="text-indent:21.0pt">'
                         '<span style="font-family:宋体;color:black">您可以登录服务器通过DDNS.log文件查看异常细明，'
                         '<b>请尽快排查原因并重启DDNS服务</b>，避免IP变动导致您的服务器无法通过域名访问。</span></p>'
@@ -235,14 +239,42 @@ class DDNS:
             exit(-1)
 
     def test_email(self):
+        """
+        调试邮件配置是否正确
+        """
         if not self.emailAlert:
             print('Email configuration is not filled')
             return -1
-        self.send_email('DDNS test', '这是<a target="_blank" href="https://github.com/Charles94jp/NameSilo-DDNS">DDNS服务'
-                                     '</a>的测试邮件，收到此邮件代表你的邮件配置无误')
+        self.send_email('DDNS Service Test',
+                        '这是<a target="_blank" href="https://github.com/Charles94jp/NameSilo-DDNS">DDNS服务'
+                        '</a>的测试邮件，收到此邮件代表你的邮件配置无误')
+
+    def is_sys_reboot(self):
+        """
+        适用于家里意外断电后，来电后，路由器重新拨号，导致IP变化的情况
+        如果服务器支持来电自启，那么可以邮件提醒这次的IP变化
+        """
+        if self.email_after_reboot and pl_system().find('Linux') > -1:
+            uptime = os.popen('uptime -s').read().strip()
+            uptime = datetime.strptime(uptime, '%Y-%m-%d %H:%M:%S')
+            # 系统开机到现在的时间差
+            if (uptime - datetime.now()).total_seconds() < 5 * 60:
+                self.get_current_ip()
+                self.send_email('DDNS Service Restarted',
+                                '<p class="MsoNormal"><span style="font-family:宋体;color:black">您好！</span></p>'
+                                '<p class="MsoNormal"style="text-indent:21.0pt">'
+                                '<span style="font-family:宋体;color:black">您的DDNS服务检测到您的服务器发生了重启。'
+                                '您的IP已发生变更，当前IP是：<a href="' + self.currentIp + '">' + self.currentIp +
+                                '</a></span></p><p class="MsoNormal"style="text-indent:21.0pt">'
+                                '<span style="font-family:宋体;color:black">因为您设置了<a target="_blank" '
+                                'href="https://github.com/Charles94jp/NameSilo-DDNS#configuration">'
+                                'email_after_reboot</a>选项，所以收到了此邮件。</span></p>'
+                                '<p class="MsoNormal"style="text-indent:21.0pt">'
+                                '<span style="font-family:宋体;color:black">此邮件意在提醒您：您的服务器已正常启动。</span></p>')
 
     def start(self):
         self.get_domain_ip()
+        self.is_sys_reboot()
         while True:
             try:
                 self.get_current_ip()
