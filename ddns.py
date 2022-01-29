@@ -271,6 +271,7 @@ class DDNS:
                                 'email_after_reboot</a>选项，所以收到了此邮件。</span></p>'
                                 '<p class="MsoNormal"style="text-indent:21.0pt">'
                                 '<span style="font-family:宋体;color:black">此邮件意在提醒您：您的服务器已正常启动。</span></p>')
+                self.logger.info("is_sys_reboot: system has been rebooted. DDNS successfully sent email alerts.")
 
     def start(self):
         self.get_domain_ip()
