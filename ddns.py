@@ -258,7 +258,7 @@ class DDNS:
             uptime = os.popen('uptime -s').read().strip()
             uptime = datetime.strptime(uptime, '%Y-%m-%d %H:%M:%S')
             # 系统开机到现在的时间差
-            if (uptime - datetime.now()).total_seconds() < 5 * 60:
+            if (datetime.now() - uptime).total_seconds() < 5 * 60:
                 self.get_current_ip()
                 self.send_email('DDNS Service Restarted',
                                 '<p class="MsoNormal"><span style="font-family:宋体;color:black">您好！</span></p>'
