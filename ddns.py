@@ -254,24 +254,52 @@ class DDNS:
         适用于家里意外断电后，来电后，路由器重新拨号，导致IP变化的情况
         如果服务器支持来电自启，那么可以邮件提醒这次的IP变化
         """
-        if self.email_after_reboot and pl_system().find('Linux') > -1:
+        if self.emailAlert and self.email_after_reboot and pl_system().find('Linux') > -1:
             uptime = os.popen('uptime -s').read().strip()
             uptime = datetime.strptime(uptime, '%Y-%m-%d %H:%M:%S')
-            # 系统开机到现在的时间差
-            if (datetime.now() - uptime).total_seconds() < 5 * 60:
-                self.get_current_ip()
-                self.send_email('DDNS Service Restarted',
-                                '<p class="MsoNormal"><span style="font-family:宋体;color:black">您好！</span></p>'
-                                '<p class="MsoNormal"style="text-indent:21.0pt">'
-                                '<span style="font-family:宋体;color:black">您的DDNS服务检测到您的服务器发生了重启。'
-                                '您的IP已发生变更，当前IP是：<a href="' + self.currentIp + '">' + self.currentIp +
-                                '</a></span></p><p class="MsoNormal"style="text-indent:21.0pt">'
-                                '<span style="font-family:宋体;color:black">因为您设置了<a target="_blank" '
-                                'href="https://github.com/Charles94jp/NameSilo-DDNS#configuration">'
-                                'email_after_reboot</a>选项，所以收到了此邮件。</span></p>'
-                                '<p class="MsoNormal"style="text-indent:21.0pt">'
-                                '<span style="font-family:宋体;color:black">此邮件意在提醒您：您的服务器已正常启动。</span></p>')
-                self.logger.info("is_sys_reboot: system has been rebooted. DDNS successfully sent email alerts.")
+            # 判断DDNS是随系统启动，还是被手动启动。系统开机到现在的时间差
+            if (datetime.now() - uptime).total_seconds() < 4 * 60:
+
+                # 判断是重启，还是关机许久后开机
+                last_reboot = os.popen('last --system reboot --time-format iso').read().strip()
+                last_reboot = last_reboot.split('+')[0].split(' ')[-1]
+                last_reboot = datetime.strptime(last_reboot, '%Y-%m-%dT%H:%M:%S')
+
+                last_shutdown = os.popen('last --system shutdown --time-format iso').read().strip()
+                last_shutdown = last_shutdown.split('+')[0].split(' ')[-1]
+                last_shutdown = datetime.strptime(last_shutdown, '%Y-%m-%dT%H:%M:%S')
+
+                power_outage_duration = last_reboot - last_shutdown
+                if power_outage_duration.total_seconds() > 4 * 60:
+
+                    self.get_current_ip()
+                    if self.currentIp != self.domainIp:
+                        self.send_email('DDNS Service Restarted',
+                                        '<p class="MsoNormal"><span style="font-family:宋体;color:black">您好！</span></p>'
+                                        '<p class="MsoNormal"style="text-indent:21.0pt">'
+                                        '<span style="font-family:宋体;color:black">您的DDNS服务检测到您的服务器意外停止后重新启动。'
+                                        '您的IP已发生变更，当前IP是：<a href="' + self.currentIp + '">' + self.currentIp +
+                                        '</a></span></p><p class="MsoNormal"style="text-indent:21.0pt">'
+                                        '<span style="font-family:宋体;color:black">因为您设置了<a target="_blank" '
+                                        'href="https://github.com/Charles94jp/NameSilo-DDNS#configuration">'
+                                        'email_after_reboot</a>选项，所以收到了此邮件。</span></p>'
+                                        '<p class="MsoNormal"style="text-indent:21.0pt">'
+                                        '<span style="font-family:宋体;color:black">此邮件意在提醒您：您的服务器已正常启动。'
+                                        '如果您在手动开关机服务器，请忽略此邮件</span></p>')
+                    else:
+                        self.send_email('DDNS Service Restarted',
+                                        '<p class="MsoNormal"><span style="font-family:宋体;color:black">您好！</span></p>'
+                                        '<p class="MsoNormal"style="text-indent:21.0pt">'
+                                        '<span style="font-family:宋体;color:black">您的DDNS服务检测到您的服务器意外停止后重新启动。'
+                                        '您的IP未发生变更，您可以通过域名：<a>' + self.host + '.' + self.domain +
+                                        '</a>正常访问</span></p><p class="MsoNormal"style="text-indent:21.0pt">'
+                                        '<span style="font-family:宋体;color:black">因为您设置了<a target="_blank" '
+                                        'href="https://github.com/Charles94jp/NameSilo-DDNS#configuration">'
+                                        'email_after_reboot</a>选项，所以收到了此邮件。</span></p>'
+                                        '<p class="MsoNormal"style="text-indent:21.0pt">'
+                                        '<span style="font-family:宋体;color:black">此邮件意在提醒您：您的服务器已正常启动。'
+                                        '如果您在手动开关机服务器，请忽略此邮件</span></p>')
+                    self.logger.info("is_sys_reboot: system has been rebooted. DDNS successfully sent email alerts.")
 
     def start(self):
         self.get_domain_ip()
