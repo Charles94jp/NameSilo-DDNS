@@ -99,7 +99,7 @@ The conf.json file needs to be configured before starting, refer to conf.json.ex
 |mail_user|The login user name, which is also the email sender.|
 |mail_pass|passwd or key|
 |receivers|An array to hold the recipient's address.|
-|email_after_reboot|For Linux, The default is false, provided that the email configuration needs to be set. After setting to true, if the interval between `uptime` and current time is less than 5 minutes, DDNS will send the current IP of the server to you by email.<br> It is applicable to the case of unexpected power failure at home, when the power is turned on, the router will redial and usually get a new IP, if your server supports power on automatically, then DDNS will send you an email to tell you that your server has been started successfully after it is starts with Linux.|
+|email_after_reboot|Prerequisites: Linux; Set email configuration; Set to start with Linux. Default false. When set to true, if the system `uptime` is more than 4 minutes from the last shutdown time, and the DDNS start time is less than 4 minutes from the system `uptime`, you will receive an email alert to get your current IP.<br> It is applicable to the case of unexpected power failure at home, when the power is turned on, the router will redial and usually get a new IP, if your server supports power on automatically, then DDNS will send you an email to tell you that your server has been started successfully after it is starts with Linux.|
 
 About mail alert: Simply put, after the program is stopped unexpectedly, use mail_user to send a reminder email to receivers to avoid failing to update DNS after IP changes, resulting in inaccessibility with the domain name.
 
