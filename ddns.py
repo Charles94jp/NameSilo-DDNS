@@ -61,7 +61,8 @@ class DDNS:
             self.mail_pass = args['mail_pass']
             self.receivers = args['receivers']
 
-        self.email_after_reboot = args['email_after_reboot']
+        if args.get('email_after_reboot'):
+            self.email_after_reboot = args['email_after_reboot']
 
         if os.path.isfile('DDNS.log'):
             # size of DDNS.log > 2M
