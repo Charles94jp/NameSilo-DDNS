@@ -167,7 +167,7 @@ class DDNS:
                     self.send_new_ip(new_ip)
                 self.check_error()
                 self.lastUpdateDomainIpError = True
-        except BaseException as e:
+        except Exception as e:
             self.logger.exception(e)
             self.logger.error("update_domain_ip: \tupdate failed")
             if not self.lastUpdateDomainIpError:
@@ -311,7 +311,7 @@ class DDNS:
                 if self.currentIp != self.domainIp:
                     self.update_domain_ip(self.currentIp)
                 self.lastStartError = False
-            except BaseException as e:
+            except Exception as e:
                 ddns.logger.exception(e)
                 self.check_error()
                 self.lastStartError = True
