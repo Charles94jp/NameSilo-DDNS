@@ -155,6 +155,7 @@ class DDNS:
                 + '&rrid=' + self.rrid + '&rrhost=' + self.host + '&rrvalue=' + new_ip,
                 timeout=10)
             r = r.text
+            r1 = r
             r = r.split('<code>')[1]
             r = r.split('</code>')[0]
             if r == '300':
@@ -162,14 +163,14 @@ class DDNS:
                 self.logger.info("update_domain_ip: \tupdate completed: " + self.domainIp)
                 self.lastUpdateDomainIpError = False
             else:
-                self.logger.error("update_domain_ip: \tupdate failed")
+                self.logger.error("update_domain_ip: \tupdate failed. Namesilo response:\n" + r1)
                 if not self.lastUpdateDomainIpError:
                     self.send_new_ip(new_ip)
                 self.check_error()
                 self.lastUpdateDomainIpError = True
         except Exception as e:
             self.logger.exception(e)
-            self.logger.error("update_domain_ip: \tupdate failed")
+            self.logger.error("update_domain_ip: \tupdate error")
             if not self.lastUpdateDomainIpError:
                 self.send_new_ip(new_ip)
             self.check_error()
