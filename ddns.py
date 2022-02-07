@@ -330,7 +330,7 @@ if __name__ == '__main__':
         exit(0)
     ddns = None
     try:
-        with open('conf.json', 'r') as fp:
+        with open('conf/conf.json', 'r') as fp:
             ddns = DDNS(json.load(fp))
         if len(sys.argv) > 1 and sys.argv[1] == 'testEmail':
             ddns.test_email()
