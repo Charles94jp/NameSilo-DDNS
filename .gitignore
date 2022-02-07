@@ -3,3 +3,4 @@ _conf.txt
 .idea
 *.back
 conf.json
+log/

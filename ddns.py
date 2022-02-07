@@ -64,14 +64,16 @@ class DDNS:
         if args.get('email_after_reboot'):
             self.email_after_reboot = args['email_after_reboot']
 
-        if os.path.isfile('DDNS.log'):
+        if not os.path.isdir('log'):
+            os.mkdir('log')
+        if os.path.isfile('log/DDNS.log'):
             # size of DDNS.log > 2M
             # logging.handles.TimedRotatingFileHandler, RotatingFileHandler代替FileHandler，即自带的日志滚动，但是命名不可控
-            if os.path.getsize('DDNS.log') > 2 * 1024 * 1024:
+            if os.path.getsize('log/DDNS.log') > 2 * 1024 * 1024:
                 DDNS.archive_log()
         self.logger = logging.getLogger('DDNS')  # 传logger名称返回新logger，否则返回root，会重复输出到屏幕
         self.logger.setLevel(logging.INFO)
-        fh = logging.FileHandler(filename='DDNS.log', encoding='utf-8', mode='a')
+        fh = logging.FileHandler(filename='log/DDNS.log', encoding='utf-8', mode='a')
         formatter = logging.Formatter("%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s")
         fh.setLevel(logging.INFO)
         fh.setFormatter(formatter)
@@ -85,9 +87,9 @@ class DDNS:
     def archive_log():
         date = time.strftime("%Y%m%d-%H%M%S", time.localtime())
         if pl_system().find('Linux') > -1:
-            os.system('gzip -N DDNS.log && mv DDNS.log.gz DDNS-' + date + '.log.gz')
+            os.system('gzip -N log/DDNS.log && mv log/DDNS.log.gz log/DDNS-' + date + '.log.gz')
         else:
-            os.rename('DDNS.log', 'DDNS-' + date + '.log.back')
+            os.rename('log/DDNS.log', 'log/DDNS-' + date + '.log.back')
 
     def get_current_ip(self):
         """
@@ -186,7 +188,7 @@ class DDNS:
                         '您的IP已发生变更，当前IP是：<a href="' + new_ip + '">' + new_ip +
                         '</a>，但由于网络错误，DDNS无法推送您的新IP到NameSilo。DDNS服务不会立即停止，'
                         '它将再尝试几次推送。</span></p><p class="MsoNormal" style="text-indent:21.0pt">'
-                        '<span style="font-family:宋体;color:black">您可以登录服务器通过DDNS.log文件查看异常细明，'
+                        '<span style="font-family:宋体;color:black">您可以登录服务器通过log/DDNS.log文件查看异常细明，'
                         '<b>请尽快排查原因并重启DDNS服务</b>，避免IP变动导致您的服务器无法通过域名访问。</span></p>'
                         '<p class="MsoNormal" style="text-indent:21.0pt"><span style="font-family:宋体;color:black">'
                         '有任何问题请在<a target="_blank" href="https://github.com/Charles94jp/NameSilo-DDNS">'
@@ -231,7 +233,7 @@ class DDNS:
                                 '<p class="MsoNormal" style="text-indent:21.0pt"><span style="font-family:宋体;'
                                 'color:black">您的DDNS服务因异常已停止，这并非是服务本身导致的，可能是ip138.com或NameSilo的api'
                                 '繁忙所致。</span></p><p class="MsoNormal" style="text-indent:21.0pt"><span '
-                                'style="font-family:宋体;color:black">您可以登录服务器通过DDNS.log文件查看异常细明，<b>请尽快排查原因'
+                                'style="font-family:宋体;color:black">您可以登录服务器通过log/DDNS.log文件查看异常细明，<b>请尽快排查原因'
                                 '并重启DDNS服务</b>，避免IP变动导致您的服务器无法通过域名访问。</span></p><p class="MsoNormal"'
                                 ' style="text-indent:21.0pt"><span style="font-family:宋体;color:black">有任何问题请在'
                                 '<a target="_blank" href="https://github.com/Charles94jp/NameSilo-DDNS">DDNS项目的'
