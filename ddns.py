@@ -7,6 +7,7 @@ import smtplib
 from datetime import datetime
 from email.mime.text import MIMEText
 from platform import system as pl_system
+from subprocess import Popen
 
 import httpx
 
@@ -25,7 +26,7 @@ class DDNS:
     mail_pass = ''
     receivers = []
     email_after_reboot = False
-    email_template = {}
+    auto_restart = False
 
     ## 运行中调用
     apiRoot = "https://www.namesilo.com/api"
@@ -40,6 +41,9 @@ class DDNS:
     lastGetCurrentIpError = False
     lastUpdateDomainIpError = False
     lastStartError = False
+
+    # 保存邮件模板
+    emailTemplate = {}
 
     def __init__(self, args, debug=False):
         """
@@ -64,6 +68,9 @@ class DDNS:
 
         if args.get('email_after_reboot'):
             self.email_after_reboot = args['email_after_reboot']
+
+        if args.get('auto_restart'):
+            self.auto_restart = args['auto_restart']
 
         if not os.path.isdir('log'):
             os.mkdir('log')
@@ -189,12 +196,12 @@ class DDNS:
             return -1
 
         # 加载模板，模板用html文件格式是方便预览
-        if not self.email_template.get(template_file):
+        if not self.emailTemplate.get(template_file):
             with open('conf/' + template_file, 'r', encoding='utf-8') as f:
-                self.email_template[template_file] = f.read()
-        html_msg = self.email_template[template_file]
+                self.emailTemplate[template_file] = f.read()
+        html_msg = self.emailTemplate[template_file]
         if var_name and value:
-            html_msg = self.email_template[template_file].replace('${' + var_name + '}', value)
+            html_msg = self.emailTemplate[template_file].replace('${' + var_name + '}', value)
 
         # 邮件消息，plain是纯文本，html可以自定义样式
         message = MIMEText(html_msg, 'html', 'utf-8')
@@ -221,15 +228,27 @@ class DDNS:
             ddns.logger.exception(e)
 
     def check_error(self):
+        """
+        检查各处的错误，连续错误一定次数后，退出or重启
+        """
         if self.lastStartError or self.lastGetCurrentIpError or self.lastUpdateDomainIpError:
             self.errorCount = self.errorCount + 1
         else:
             self.errorCount = 1
-        if self.errorCount > 12:
-            if self.emailAlert:
-                self.send_email('DDNS服务异常提醒', 'ddns_error.email-template.html')
+        if self.errorCount > 6:
+            if pl_system().find('Linux') > -1 and self.auto_restart:
+                if self.emailAlert:
+                    self.send_email('DDNS服务异常提醒', 'ddns_error_restart.email-template.html')
+                self.logger.error("check_error: \trestart - 连续错误6次，程序即将重启")
+                # 重启DDNS服务，确保python ddns.py的错误被记录，所以使用bash -c。subprocess.
+                # Popen()本身无法单独追加到文件，需要传参stdout为open()文件，但主程序需要退出，让子进程单独运行，所以不可取
+                # 这里还是会丢掉bash命令的报错，但是无所谓，影响很小
+                Popen(['bash', '-c', 'nohup ' + sys.executable + ' ddns.py 3 >> log/DDNS.log  2>&1 &'])
+            else:
+                if self.emailAlert:
+                    self.send_email('DDNS服务异常提醒', 'ddns_error_exit.email-template.html')
+                self.logger.error("check_error: \texit - 连续错误6次，程序退出")
             self.errorCount = 0
-            self.logger.error("start: \t连续错误12次，程序退出")
             exit(-1)
 
     def test_email(self):
@@ -293,9 +312,13 @@ if __name__ == '__main__':
     """
     不要开代理、梯子，会http连接错误
     """
-    if len(sys.argv) > 1 and sys.argv[1] == 'archiveLog':
-        DDNS.archive_log()
-        exit(0)
+    if len(sys.argv) > 1:
+        if sys.argv[1] == 'archiveLog':
+            DDNS.archive_log()
+            exit(0)
+        # for auto_restart, 避免log上的冲突
+        if sys.argv[1].isdigit():
+            time.sleep(int(sys.argv[1]))
     ddns = None
     try:
         with open('conf/conf.json', 'r', encoding='utf-8') as fp:
