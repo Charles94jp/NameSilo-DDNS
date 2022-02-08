@@ -110,7 +110,12 @@ class DDNS:
             r = httpx.get('http://' + self.getIp, headers=self.httpHeaders, timeout=10)
         except Exception as e:
             self.logger.exception(e)
-            r = httpx.get('https://' + self.getIp, headers=self.httpHeaders, timeout=10)
+            try:
+                r = httpx.get('https://' + self.getIp, headers=self.httpHeaders, timeout=10)
+            except Exception as e:
+                self.logger.exception(e)
+                self.check_error()
+                self.lastGetCurrentIpError = True
 
         if r.status_code == 200:
             r = r.text
@@ -225,7 +230,7 @@ class DDNS:
             smtpObj.quit()
             self.logger.info("send_email: \tsuccess")
         except smtplib.SMTPException as e:
-            ddns.logger.exception(e)
+            self.logger.exception(e)
 
     def check_error(self):
         """
@@ -302,7 +307,7 @@ class DDNS:
                     self.update_domain_ip(self.currentIp)
                 self.lastStartError = False
             except Exception as e:
-                ddns.logger.exception(e)
+                self.logger.exception(e)
                 self.check_error()
                 self.lastStartError = True
             time.sleep(self.frequency)
