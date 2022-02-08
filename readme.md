@@ -87,7 +87,7 @@ pip install httpx
 
 ## Configuration
 
-The conf.json file needs to be configured before starting, refer to conf.json.example. **Only the first two configurations are necessary**, the rest can be set without.
+The `conf/conf.json` file needs to be configured before starting, refer to conf.json.example. **Only the first two configurations are necessary**, the rest can be set without.
 
 |Fields|Introduction|
 |--|--|
@@ -100,6 +100,7 @@ The conf.json file needs to be configured before starting, refer to conf.json.ex
 |mail_pass|passwd or key|
 |receivers|An array to hold the recipient's address.|
 |email_after_reboot|Prerequisites: Linux; Set email configuration; Set to start with Linux. Default false. When set to true, if the system `uptime` is more than 4 minutes from the last shutdown time, and the DDNS start time is less than 4 minutes from the system `uptime`, you will receive an email alert to get your current IP.<br> It is applicable to the case of unexpected power failure at home, when the power is turned on, the router will redial and usually get a new IP, if your server supports power on automatically, then DDNS will send you an email to tell you that your server has been started successfully after it is starts with Linux.|
+|auto_restart|For Linux. Default disable. Self restarting after the program has been consistently exception for a period of time. Because the service is exception when launching https request to NameSilo after a long time running, the reason is not known, but restarting DDNS can solve the problem.|
 
 About mail alert: Simply put, after the program is stopped unexpectedly, use mail_user to send a reminder email to receivers to avoid failing to update DNS after IP changes, resulting in inaccessibility with the domain name.
 
@@ -155,12 +156,14 @@ ln -s /root/NameSilo-DDNS/DDNS /usr/bin/DDNS
 
 ## Log
 
+The logs are in the log folder.
+
 <b>Linux</b>
 
 View log files
 
 ```
-ls -lh DDNS*.log*
+ls -lh log/DDNS*.log*
 ```
 
 Among them, `DDNS.log` is the latest log file, and the rest are `gzip` compressed archive files. When DDNS service starts, if `DDNS.log` exceeds 2M, it will trigger automatic archiving. It can store all the logs since DDNS was used.
