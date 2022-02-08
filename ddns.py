@@ -25,6 +25,7 @@ class DDNS:
     mail_pass = ''
     receivers = []
     email_after_reboot = False
+    email_template = {}
 
     ## 运行中调用
     apiRoot = "https://www.namesilo.com/api"
@@ -153,9 +154,8 @@ class DDNS:
         """
         try:
             r = httpx.get(
-                self.apiRoot + '/dnsUpdateRecord?version=1&type=xml&rrttl=7207&key=' + self.key + '&domain=' + self.domain
-                + '&rrid=' + self.rrid + '&rrhost=' + self.host + '&rrvalue=' + new_ip,
-                timeout=10)
+                self.apiRoot + '/dnsUpdateRecord?version=1&type=xml&rrttl=7207&key=' + self.key + '&domain='
+                + self.domain + '&rrid=' + self.rrid + '&rrhost=' + self.host + '&rrvalue=' + new_ip, timeout=10)
             r = r.text
             r1 = r
             r = r.split('<code>')[1]
@@ -167,36 +167,35 @@ class DDNS:
             else:
                 self.logger.error("update_domain_ip: \tupdate failed. Namesilo response:\n" + r1)
                 if not self.lastUpdateDomainIpError:
-                    self.send_new_ip(new_ip)
+                    self.send_email('DDNS服务异常提醒 - DNS更新失败', 'send_new_ip.email-template.html', 'new_ip', new_ip)
                 self.check_error()
                 self.lastUpdateDomainIpError = True
         except Exception as e:
             self.logger.exception(e)
             self.logger.error("update_domain_ip: \tupdate error")
             if not self.lastUpdateDomainIpError:
-                self.send_new_ip(new_ip)
+                self.send_email('DDNS服务异常提醒 - DNS更新失败', 'send_new_ip.email-template.html', 'new_ip', new_ip)
             self.check_error()
             self.lastUpdateDomainIpError = True
 
-    def send_new_ip(self, new_ip):
+    def send_email(self, title, template_file, var_name=None, value=None):
         """
-        when update_domain_ip error
+        :param title: 邮件标题
+        :param template_file: 模板的单纯文件名，不需要路径
+        :param var_name: 模板中的变量名，无需加上${}，只支持一个变量
+        :param value: 内存中的变量值
         """
-        self.send_email('DDNS服务异常提醒 - DNS更新失败',
-                        '<p class="MsoNormal"><span style="font-family:宋体;color:black">您好！</span></p>'
-                        '<p class="MsoNormal" style="text-indent:21.0pt"><span style="font-family:宋体;color:black">'
-                        '您的IP已发生变更，当前IP是：<a href="' + new_ip + '">' + new_ip +
-                        '</a>，但由于网络错误，DDNS无法推送您的新IP到NameSilo。DDNS服务不会立即停止，'
-                        '它将再尝试几次推送。</span></p><p class="MsoNormal" style="text-indent:21.0pt">'
-                        '<span style="font-family:宋体;color:black">您可以登录服务器通过log/DDNS.log文件查看异常细明，'
-                        '<b>请尽快排查原因并重启DDNS服务</b>，避免IP变动导致您的服务器无法通过域名访问。</span></p>'
-                        '<p class="MsoNormal" style="text-indent:21.0pt"><span style="font-family:宋体;color:black">'
-                        '有任何问题请在<a target="_blank" href="https://github.com/Charles94jp/NameSilo-DDNS">'
-                        'DDNS项目的GitHub Issues</a>中反馈，谢谢您的支持</span></p>')
-
-    def send_email(self, title, html_msg):
         if not self.emailAlert:
             return -1
+
+        # 加载模板，模板用html文件格式是方便预览
+        if not self.email_template.get(template_file):
+            with open('conf/' + template_file, 'r', encoding='utf-8') as f:
+                self.email_template[template_file] = f.read()
+        html_msg = self.email_template[template_file]
+        if var_name and value:
+            html_msg = self.email_template[template_file].replace('${' + var_name + '}', value)
+
         # 邮件消息，plain是纯文本，html可以自定义样式
         message = MIMEText(html_msg, 'html', 'utf-8')
         # 邮件主题
@@ -228,16 +227,7 @@ class DDNS:
             self.errorCount = 1
         if self.errorCount > 12:
             if self.emailAlert:
-                self.send_email('DDNS服务异常提醒',
-                                '<p class="MsoNormal"><span style="font-family:宋体;color:black">您好！</span></p>'
-                                '<p class="MsoNormal" style="text-indent:21.0pt"><span style="font-family:宋体;'
-                                'color:black">您的DDNS服务因异常已停止，这并非是服务本身导致的，可能是ip138.com或NameSilo的api'
-                                '繁忙所致。</span></p><p class="MsoNormal" style="text-indent:21.0pt"><span '
-                                'style="font-family:宋体;color:black">您可以登录服务器通过log/DDNS.log文件查看异常细明，<b>请尽快排查原因'
-                                '并重启DDNS服务</b>，避免IP变动导致您的服务器无法通过域名访问。</span></p><p class="MsoNormal"'
-                                ' style="text-indent:21.0pt"><span style="font-family:宋体;color:black">有任何问题请在'
-                                '<a target="_blank" href="https://github.com/Charles94jp/NameSilo-DDNS">DDNS项目的'
-                                'GitHub Issues</a>中反馈，谢谢您的支持</span></p>')
+                self.send_email('DDNS服务异常提醒', 'ddns_error.email-template.html')
             self.errorCount = 0
             self.logger.error("start: \t连续错误12次，程序退出")
             exit(-1)
@@ -249,9 +239,7 @@ class DDNS:
         if not self.emailAlert:
             print('Email configuration is not filled')
             return -1
-        self.send_email('DDNS Service Test',
-                        '这是<a target="_blank" href="https://github.com/Charles94jp/NameSilo-DDNS">DDNS服务'
-                        '</a>的测试邮件，收到此邮件代表你的邮件配置无误')
+        self.send_email('DDNS Service Test', 'test_email.email-template.html')
 
     def is_sys_reboot(self):
         """
@@ -278,31 +266,11 @@ class DDNS:
 
                     self.get_current_ip()
                     if self.currentIp != self.domainIp:
-                        self.send_email('DDNS Service Restarted',
-                                        '<p class="MsoNormal"><span style="font-family:宋体;color:black">您好！</span></p>'
-                                        '<p class="MsoNormal"style="text-indent:21.0pt">'
-                                        '<span style="font-family:宋体;color:black">您的DDNS服务检测到您的服务器意外停止后重新启动。'
-                                        '您的IP已发生变更，当前IP是：<a href="' + self.currentIp + '">' + self.currentIp +
-                                        '</a></span></p><p class="MsoNormal"style="text-indent:21.0pt">'
-                                        '<span style="font-family:宋体;color:black">因为您设置了<a target="_blank" '
-                                        'href="https://github.com/Charles94jp/NameSilo-DDNS#configuration">'
-                                        'email_after_reboot</a>选项，所以收到了此邮件。</span></p>'
-                                        '<p class="MsoNormal"style="text-indent:21.0pt">'
-                                        '<span style="font-family:宋体;color:black">此邮件意在提醒您：您的服务器已正常启动。'
-                                        '如果您在手动开关机服务器，请忽略此邮件</span></p>')
+                        self.send_email('DDNS Service Restarted', 'sys_reboot_ip.email-template.html', 'currentIp',
+                                        self.currentIp)
                     else:
-                        self.send_email('DDNS Service Restarted',
-                                        '<p class="MsoNormal"><span style="font-family:宋体;color:black">您好！</span></p>'
-                                        '<p class="MsoNormal"style="text-indent:21.0pt">'
-                                        '<span style="font-family:宋体;color:black">您的DDNS服务检测到您的服务器意外停止后重新启动。'
-                                        '您的IP未发生变更，您可以通过域名：<a>' + self.host + '.' + self.domain +
-                                        '</a>正常访问</span></p><p class="MsoNormal"style="text-indent:21.0pt">'
-                                        '<span style="font-family:宋体;color:black">因为您设置了<a target="_blank" '
-                                        'href="https://github.com/Charles94jp/NameSilo-DDNS#configuration">'
-                                        'email_after_reboot</a>选项，所以收到了此邮件。</span></p>'
-                                        '<p class="MsoNormal"style="text-indent:21.0pt">'
-                                        '<span style="font-family:宋体;color:black">此邮件意在提醒您：您的服务器已正常启动。'
-                                        '如果您在手动开关机服务器，请忽略此邮件</span></p>')
+                        self.send_email('DDNS Service Restarted', 'sys_reboot_domain.email-template.html', 'domain',
+                                        self.host + '.' + self.domain)
                     self.logger.info("is_sys_reboot: system has been rebooted. DDNS successfully sent email alerts.")
 
     def start(self):
@@ -330,7 +298,7 @@ if __name__ == '__main__':
         exit(0)
     ddns = None
     try:
-        with open('conf/conf.json', 'r') as fp:
+        with open('conf/conf.json', 'r', encoding='utf-8') as fp:
             ddns = DDNS(json.load(fp))
         if len(sys.argv) > 1 and sys.argv[1] == 'testEmail':
             ddns.test_email()
