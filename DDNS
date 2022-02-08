@@ -31,7 +31,11 @@ function findps()
 
 function startps()
 {
-    nohup $pythonBin ddns.py >> DDNS.log 2>&1 &
+    if [ ! -d "log" ]
+    then
+        mkdir log
+    fi
+    nohup $pythonBin ddns.py >> log/DDNS.log 2>&1 &
 }
 
 function killps()
@@ -89,10 +93,10 @@ else
     findps print
     echo "================="
     echo "Update history:"
-    grep -B 2 'update_domain_ip:.*update completed' DDNS.log
+    grep -B 2 'update_domain_ip:.*update completed' log/DDNS.log
     echo "================="
     echo "Latest operation:"
-    echo `tail -1 DDNS.log`
+    echo `tail -1 log/DDNS.log`
 fi
 ;;
 ########################################
