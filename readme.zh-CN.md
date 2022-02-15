@@ -98,7 +98,7 @@ pip install httpx
 
 ## Configuration
 
-启动前需要配置conf.json文件，参考conf.json.example，**只有前两项配置是必要的**，其余的可以不进行配置。
+启动前需要配置`conf/conf.json`文件，参考conf.json.example，**只有前两项配置是必要的**，其余的可以不进行配置。
 
 |字段|介绍|
 |--|--|
@@ -111,6 +111,7 @@ pip install httpx
 |mail_pass|登录密码或key|
 |receivers|数组，收件人地址，可以是多个|
 |email_after_reboot|前提：Linux，设置了邮件，设置了开机启动。默认false，设置为true后，如果系统开机时间距离上次关机时间大于4分钟，且DDNS启动时间距离开机时间小于4分钟，会收到邮件提醒，获得当前IP。<br>适用于家里意外断电的情况，当通电后，路由器重新拨号，一般会获得新IP，如果服务器支持来电自动开机，那么DDNS在开机自动启动后，会发送邮件告诉你：你的服务器已成功启动。|
+|auto_restart|Linux下生效，默认不启用。在程序持续异常一段时间后，自我重启。因为服务在长时间运行后，向NameSilo发起https请求时，会出现异常，目前不知道原因，但是重启DDNS能解决问题。|
 
 关于邮件提醒：简单地说就是程序意外停止后用mail_user给receivers发送一个提醒邮件，避免IP变动后未更新DNS，导致无法用域名访问。
 
@@ -166,12 +167,14 @@ ln -s /root/NameSilo-DDNS/DDNS /usr/bin/DDNS
 
 ## Log
 
+日志都在log文件夹下
+
 <b>Linux</b>
 
 查看日志文件
 
 ```
-ls -lh DDNS*.log*
+ls -lh log/DDNS*.log*
 ```
 
 其中`DDNS.log`是当前最新的日志文件，其余的为`gzip`压缩过的归档文件。当DDNS服务启动时，若`DDNS.log`超过2M便会触发自动归档。可以存储使用DDNS以来所有的日志。
