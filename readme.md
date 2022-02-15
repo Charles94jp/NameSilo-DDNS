@@ -238,6 +238,8 @@ The image in Docker Hub will only be updated with the release, not necessarily t
 docker build -t charles94jp/ddns .
 ```
 
+The default time zone is Asia/Shanghai (CST, +0800), if you don't use this time zone, you need to modify the Dockerfile.
+
 ## RUN
 
 ```shell
@@ -246,7 +248,7 @@ docker run -d --name ddns -v <local dir>:/home/NameSilo-DDNS:rw charles94jp/ddns
 
 Be sure to mount the local directory `<local dir>` to `/home/NameSilo-DDNS` in the container with the -v parameter, the container will write out the program files to `<local dir>`.
 
-Then configure `conf/conf.json` in `<local dir>`, refer to [Configuration](#configuration), using DDNS through docker need to pay extra attention to the time zone configuration, because alpine's default time zone is UTC, which will affect the time in the logs.
+Then configure `conf/conf.json` in `<local dir>`, refer to [Configuration](#configuration)
 
 Finally remember to restart the container, because at the beginning of ``docker run`` there is no configuration file, so the ddns program is not successfully run.
 

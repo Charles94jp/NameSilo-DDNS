@@ -261,7 +261,7 @@ docker run -d --name ddns -v <local dir>:/home/NameSilo-DDNS:rw charles94jp/ddns
 
 一定要用 -v 参数将本机的目录`<local dir>`挂载到容器内的`/home/NameSilo-DDNS`，容器会将程序文件写出到`<local dir>`
 
-接着在`<local dir>`中配置`conf/conf.json`，参考[Configuration](#configuration)，通过docker使用DDNS需要额外注意时区配置，因为alpine是UTC而国内习惯用CST，会影响日志中的时间
+接着在`<local dir>`中配置`conf/conf.json`，参考[Configuration](#configuration)
 
 最后记得重启一下容器，因为最开始`docker run`时没有配置文件，所以ddns程序是没有成功运行的
 
