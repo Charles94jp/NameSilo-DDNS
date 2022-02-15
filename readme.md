@@ -47,6 +47,10 @@ It would be the best encouragement for me to get your  ⭐ STAR.
     - [Start](#start)
     - [Log](#log)
     - [Start At Boot](#start-at-boot)
+- [Docker](#Docker)
+    - [Build or Pull Image](#build-or-pull-image)
+    - [RUN](#run)
+    - [Start with Linux](#start-with-linux)
 - [Links](#links)
 
 # Background
@@ -213,6 +217,49 @@ systemctl enable DDNS
 <b>Windows</b>
 
 Add the vbs file to the Windows policy group.
+
+# Docker
+
+## Build or Pull Image
+
+<b>Docker Hub</b>
+
+> Stay tuned
+
+This image is 57M in size, thanks to the fact that it is built on the smallest Linux alpine.
+
+The image in Docker Hub will only be updated with the release, not necessarily the latest, and you can also choose to build the image manually.
+
+<b>Build docker image manually</b>
+
+```shell
+docker build -t charles94jp/ddns .
+```
+
+## RUN
+
+```shell
+docker run -d --name ddns -v <local dir>:/home/NameSilo-DDNS:rw charles94jp/ddns
+```
+
+Be sure to mount the local directory `<local dir>` to `/home/NameSilo-DDNS` in the container with the -v parameter, the container will write out the program files to `<local dir>`.
+
+Then configure `conf/conf.json` in `<local dir>`, refer to [Configuration](#configuration), using DDNS through docker need to pay extra attention to the time zone configuration, because alpine's default time zone is UTC, which will affect the time in the logs.
+
+Finally remember to restart the container, because at the beginning of ``docker run`` there is no configuration file, so the ddns program is not successfully run.
+
+```shell
+docker restart ddns
+```
+
+Check the status of the ddns program with ``ddns-docker`` in ``<local dir>`.
+
+## Start with Linux
+
+```shell
+systemctl enable docker
+docker update --restart=always ddns
+```
 
 # Links
 

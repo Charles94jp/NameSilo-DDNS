@@ -239,11 +239,11 @@ systemctl enable DDNS
 
 <b>Docker Hub</b>
 
-请期待
+>  请期待
 
-本镜像基于最小的Linux alpine构建，为57M
+本镜像基于最小的Linux alpine构建，镜像大小为57M
 
-你也可以选择手动构建镜像
+Docker Hub中的镜像只会随release更新，不一定是最新的，你也可以选择手动构建镜像
 
 <b>手动构建镜像</b>
 
@@ -251,7 +251,7 @@ systemctl enable DDNS
 docker build -t charles94jp/ddns .
 ```
 
-下载`python:3.x.x-alpine`镜像和`pip install httpx`需要一定时间
+下载`python:3.x.x-alpine`镜像和`pip install httpx`需要一点时间
 
 ## RUN
 
@@ -259,17 +259,17 @@ docker build -t charles94jp/ddns .
 docker run -d --name ddns -v <local dir>:/home/NameSilo-DDNS:rw charles94jp/ddns
 ```
 
-一定要用 -v 参数将本机的目录`<local dir>`挂载到容器内的`/home/NameSilo-DDNS`，容器会将程序文件写出
+一定要用 -v 参数将本机的目录`<local dir>`挂载到容器内的`/home/NameSilo-DDNS`，容器会将程序文件写出到`<local dir>`
 
-接着在`<local dir>`中配置`conf/conf.json`，参考[Configuration](#configuration)，docker需要额外注意时区配置，因为alpine是UTC而国内习惯用CST
+接着在`<local dir>`中配置`conf/conf.json`，参考[Configuration](#configuration)，通过docker使用DDNS需要额外注意时区配置，因为alpine是UTC而国内习惯用CST，会影响日志中的时间
 
-最后记得重启一下容器，因为最开始run时没有配置文件，所以ddns程序是没有成功运行的
+最后记得重启一下容器，因为最开始`docker run`时没有配置文件，所以ddns程序是没有成功运行的
 
 ```shell
 docker restart ddns
 ```
 
-查看状态用`<local dir>`中的`DDNS status`，它是为docker定制的，只能查看状态
+查看ddns程序状态用`<local dir>`中的`ddns-docker`
 
 ## Start with Linux
 
