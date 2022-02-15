@@ -220,6 +220,8 @@ Add the vbs file to the Windows policy group.
 
 # Docker
 
+Now, NameSilo-DDNS supports docker on Linux, no need to have a python environment on your server, and no need to systemctl in terms of starting with Linux.
+
 ## Build or Pull Image
 
 <b>Docker Hub</b>
