@@ -1,0 +1,29 @@
+#!/bin/bash
+
+function findps()
+{
+    if [ "$1" = "print" ]
+    then
+        docker ps -a|head -1
+        docker ps -a|grep charles94jp/ddns.*Up
+    else
+        fps=`docker ps -a|grep charles94jp/ddns.*Up`
+    fi
+}
+
+findps;
+if [ -z "$fps" ]
+then
+    echo -e "\033[31;1mddns docker container is stopped\033[0m"
+
+else
+    echo -e "\033[32;1mddns docker container is running\033[0m"
+    echo 
+    findps print
+    echo "================="
+    echo "Update history:"
+    grep -B 2 'update_domain_ip:.*update completed' log/DDNS.log
+    echo "================="
+    echo "Latest operation:"
+    echo `tail -1 log/DDNS.log`
+fi
