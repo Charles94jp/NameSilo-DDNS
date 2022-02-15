@@ -136,7 +136,6 @@ python ddns.py testEmail
 
 ## Start
 
-
 **快速启动：**
 
 ```
@@ -224,6 +223,58 @@ systemctl enable DDNS
 <b>Windows</b>
 
 将vbs文件[加入策略组](https://blog.csdn.net/yunmuq/article/details/110199091)
+
+
+
+# Docker
+
+现在，NameSilo-DDNS支持docker启动了（Linux），不需要本机有python环境，在开机启动方面也不用systemctl了
+
+## Build or Pull Image
+
+<b>Docker Hub</b>
+
+请期待
+
+本镜像基于最小的Linux alpine构建，为57M
+
+你也可以选择手动构建镜像
+
+<b>手动构建镜像</b>
+
+```shell
+docker build -t charles94jp/ddns .
+```
+
+下载`python:3.x.x-alpine`镜像和`pip install httpx`需要一定时间
+
+## RUN
+
+```shell
+docker run -d --name ddns -v <local dir>:/home/NameSilo-DDNS:rw charles94jp/ddns
+```
+
+一定要用 -v 参数将本机的目录`<local dir>`挂载到容器内的`/home/NameSilo-DDNS`，容器会将程序文件写出
+
+接着在`<local dir>`中配置`conf/conf.json`，参考[Configuration](#configuration)，docker需要额外注意时区配置，因为alpine是UTC而国内习惯用CST
+
+最后记得重启一下容器，因为最开始run时没有配置文件，所以ddns程序是没有成功运行的
+
+```shell
+docker restart ddns
+```
+
+查看状态用`<local dir>`中的`DDNS status`，它是为docker定制的，只能查看状态
+
+## Start with Linux
+
+```shell
+systemctl enable docker
+docker update --restart=always ddns
+```
+
+
+
 
 # Links
 
