@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd $(dirname "$0")
+
 function findps()
 {
     if [ "$1" = "print" ]
