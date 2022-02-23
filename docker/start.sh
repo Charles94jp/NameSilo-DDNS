@@ -6,11 +6,14 @@ if [ -d "/home/NameSilo-DDNS" ]; then
     cp -r /home/NameSilo-DDNS.back/conf /home/NameSilo-DDNS/
     mkdir -p /home/NameSilo-DDNS/log
     cd /home/NameSilo-DDNS
-    nohup python /home/NameSilo-DDNS/ddns.py >> /home/NameSilo-DDNS/log/DDNS.log 2>&1 &
 fi
 
-while test "1" = "1"
+while true
 do
-sleep 1000
+    ddns_ps=`ps -ef|grep ddns|grep -v grep`
+    if [ -z "$ddns_ps" ]
+    then
+        nohup python /home/NameSilo-DDNS/ddns.py >> /home/NameSilo-DDNS/log/DDNS.log 2>&1 &
+    fi
+    sleep 666
 done
-/usr/bin/tail -f -s 10 /dev/null
