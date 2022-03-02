@@ -256,7 +256,7 @@ Finally remember to restart the container, because at the beginning of ``docker 
 docker restart ddns
 ```
 
-Check the status of the ddns program with ``ddns-docker`` in ``<local dir>`.
+Check the status of the ddns program with ``ddns-docker`` in `<local dir>`.
 
 ## Start with Linux
 
