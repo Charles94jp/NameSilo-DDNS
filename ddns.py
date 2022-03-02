@@ -245,10 +245,10 @@ class DDNS:
                 if self.emailAlert:
                     self.send_email('DDNS服务异常提醒', 'ddns_error_restart.email-template.html')
                 self.logger.error("check_error: \trestart - 连续错误6次，程序即将重启")
-                # 重启DDNS服务，确保python ddns.py的错误被记录，所以使用bash -c。subprocess.
+                # 重启DDNS服务，确保python ddns.py的错误被记录，所以使用sh -c。subprocess.
                 # Popen()本身无法单独追加到文件，需要传参stdout为open()文件，但主程序需要退出，让子进程单独运行，所以不可取
-                # 这里还是会丢掉bash命令的报错，但是无所谓，影响很小
-                Popen(['bash', '-c', 'nohup ' + sys.executable + ' ddns.py 3 >> log/DDNS.log  2>&1 &'])
+                # 这里还是会丢掉sh命令的报错，但是无所谓，影响很小
+                Popen(['sh', '-c', 'nohup ' + sys.executable + ' ddns.py 3 >> log/DDNS.log  2>&1 &'])
             else:
                 if self.emailAlert:
                     self.send_email('DDNS服务异常提醒', 'ddns_error_exit.email-template.html')
