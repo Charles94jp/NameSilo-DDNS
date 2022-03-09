@@ -30,7 +30,7 @@ class DDNS:
 
     ## 运行中调用
     apiRoot = "https://www.namesilo.com/api"
-    getIp = "2021.ip138.com"
+    getIp = "2022.ip138.com"
     domainIp = ''
     currentIp = ''
     logger = None
