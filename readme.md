@@ -22,7 +22,7 @@ This project has been refactored via Python3, to view the Java version please sw
 
 This program is only available for domain names purchased on NameSilo.
 
-This program obtains the public IP address of home broadband by visiting http://2021.ip138.com/, and queries and updates the DNS status by https://www.namesilo.com/api/.
+This program obtains the public IP address of home broadband by visiting http://2022.ip138.com/, and queries and updates the DNS status by https://www.namesilo.com/api/.
 
 It would be the best encouragement for me to get your  ⭐ STAR.
 
