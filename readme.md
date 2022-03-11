@@ -9,6 +9,7 @@
 <a href="https://github.com/Charles94jp/NameSilo-DDNS/tree/python"><img src="https://img.shields.io/badge/NameSilo-DDNS-brightgreen"></a>  
 <a target="_blank" href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-_red.svg"></a>  
 <a href="#python3"><img src="https://img.shields.io/badge/python-v3.8-blue"></a>
+<a href="#table-of-contents"><img src="https://img.shields.io/badge/Docker-Build-brightgreen"></a>
 <a href="#features"><img src="https://img.shields.io/badge/multi-platform-orange"></a>
 <a href="#features"><img src="https://img.shields.io/badge/log-rotation-orange"></a>
 </p>
@@ -22,7 +23,7 @@ This project has been refactored via Python3, to view the Java version please sw
 
 This program is only available for domain names purchased on NameSilo.
 
-This program obtains the public IP address of home broadband by visiting http://2022.ip138.com/, and queries and updates the DNS status by https://www.namesilo.com/api/.
+This program obtains the public IP address of home broadband by visiting http://202x.ip138.com or https://api.myip.com or https://api.ipify.org?format=json, and queries and updates the DNS status by https://www.namesilo.com/api/.
 
 It would be the best encouragement for me to get your  ⭐ STAR.
 
@@ -269,4 +270,5 @@ docker update --restart=always ddns
 
 - NameSilo API Document: [Domain API Reference - NameSilo](https://www.namesilo.com/api-reference#dns/dns-list-records)
 
-- Current IP query: [ip138.com](https://www.ip138.com/)
+- Current IP query: [ip138.com](https://www.ip138.com/) ; [myip.com](https://www.myip.com/api-docs/) ; [ipify](https://www.ipify.org/)
+

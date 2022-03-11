@@ -9,6 +9,7 @@
 <a href="https://github.com/Charles94jp/NameSilo-DDNS/tree/python"><img src="https://img.shields.io/badge/NameSilo-DDNS-brightgreen"></a>  
 <a target="_blank" href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-_red.svg"></a>  
 <a href="#python3"><img src="https://img.shields.io/badge/python-v3.8-blue"></a>
+<a href="#table-of-contents"><img src="https://img.shields.io/badge/Docker-Build-brightgreen"></a>
 <a href="#features"><img src="https://img.shields.io/badge/multi-platform-orange"></a>
 <a href="#features"><img src="https://img.shields.io/badge/log-rotation-orange"></a>
 </p>
@@ -22,7 +23,7 @@ NameSilo DDNS是一个用于NameSilo的动态域名解析服务，适用于家�
 
 本程序仅适用于NameSilo上购买的域名
 
-本程序通过访问 http://2022.ip138.com/ 获取家庭宽带的公网IP地址，通过 https://www.namesilo.com/api/ 来查询和更新DNS状态。
+本程序通过访问 http://202x.ip138.com 或https://api.myip.com 或 https://api.ipify.org?format=json获取家庭宽带的公网IP地址，通过 https://www.namesilo.com/api/ 来查询和更新DNS状态。
 
 右上角点个 ⭐ Star 不迷路
 
@@ -280,11 +281,10 @@ docker update --restart=always ddns
 
 
 
-
 # Links
 
 相关链接：
 
 - NameSilo API Document: [Domain API Reference - NameSilo](https://www.namesilo.com/api-reference#dns/dns-list-records)
 
-- 当前IP查询: [ip138.com](https://www.ip138.com/)
+- 当前IP查询: [ip138.com](https://www.ip138.com/) ; [myip.com](https://www.myip.com/api-docs/) ; [ipify](https://www.ipify.org/)
