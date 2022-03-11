@@ -238,13 +238,13 @@ systemctl enable DDNS
 
 ## Build or Pull Image
 
-<b>Docker Hub</b>
+<b>Pull from Docker Hub</b>
 
->  请期待
+>  docker pull charles94jp/ddns
 
-本镜像基于最小的Linux alpine构建，镜像大小为57M
+本镜像基于最小的Linux alpine构建，Docker Hub显示21.37M，`docker images`显示镜像大小为57M
 
-Docker Hub中的镜像只会随release更新，不一定是最新的，你也可以选择手动构建镜像
+Docker Hub中的镜像不一定是最新的，你也可以选择手动构建镜像
 
 <b>手动构建镜像</b>
 

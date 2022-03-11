@@ -225,13 +225,13 @@ Now, NameSilo-DDNS supports docker on Linux, no need to have a python environmen
 
 ## Build or Pull Image
 
-<b>Docker Hub</b>
+<b>Pull from Docker Hub</b>
 
-> Stay tuned
+> docker pull charles94jp/ddns
 
-This image is 57M in size, thanks to the fact that it is built on the smallest Linux alpine.
+This image is built based on the smallest Linux alpine image, Docker Hub shows 21.37M, `docker images` shows the image size is 57M.
 
-The image in Docker Hub will only be updated with the release, not necessarily the latest, and you can also choose to build the image manually.
+The images in Docker Hub are not necessarily the latest, you can also choose to build the images manually
 
 <b>Build docker image manually</b>
 
