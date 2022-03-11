@@ -240,7 +240,9 @@ systemctl enable DDNS
 
 <b>Pull from Docker Hub</b>
 
->  docker pull charles94jp/ddns
+```shell
+docker pull charles94jp/ddns
+```
 
 本镜像基于最小的Linux alpine构建，Docker Hub显示21.37M，`docker images`显示镜像大小为57M
 
