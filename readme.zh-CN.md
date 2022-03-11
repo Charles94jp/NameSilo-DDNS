@@ -258,6 +258,7 @@ docker build -t charles94jp/ddns .
 
 ```shell
 docker run -d --name ddns -v <local dir>:/home/NameSilo-DDNS:rw charles94jp/ddns
+# --restart=always
 ```
 
 一定要用 -v 参数将本机的目录`<local dir>`挂载到容器内的`/home/NameSilo-DDNS`，容器会将程序文件写出到`<local dir>`

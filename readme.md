@@ -245,6 +245,7 @@ The default time zone is Asia/Shanghai (CST, +0800), if you don't use this time 
 
 ```shell
 docker run -d --name ddns -v <local dir>:/home/NameSilo-DDNS:rw charles94jp/ddns
+# --restart=always
 ```
 
 Be sure to mount the local directory `<local dir>` to `/home/NameSilo-DDNS` in the container with the -v parameter, the container will write out the program files to `<local dir>`.
