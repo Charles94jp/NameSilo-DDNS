@@ -30,7 +30,11 @@ class DDNS:
 
     ## 运行中调用
     apiRoot = "https://www.namesilo.com/api"
-    getIp = "2022.ip138.com"
+    # ip138的api，由于每年更换一次域名，设为初始化时自动获取api域名
+    getIp = ""
+    # 添加了两个美国的备用api
+    getIPBack1 = "https://api.myip.com"
+    getIPBack2 = "https://api.ipify.org?format=json"
     domainIp = ''
     currentIp = ''
     logger = None
@@ -91,6 +95,17 @@ class DDNS:
             self.logger.addHandler(fh)
         self.logger.info('\n\nstarting...')
 
+        r = None
+        try:
+            r = httpx.get("https://www.ip138.com/", headers=self.httpHeaders, timeout=10)
+            api = r.text.split("<iframe src=\"//")[1]
+            api = api.split("/\"")[0]
+            self.getIp = api
+        except Exception as e:
+            self.logger.exception(e)
+            if not self.getIp:
+                self.logger.info("__init__: 未正确获取ip138的api，将使用备用api")
+
     @staticmethod
     def archive_log():
         date = time.strftime("%Y%m%d-%H%M%S", time.localtime())
@@ -105,6 +120,15 @@ class DDNS:
         update self.currentIp
         :return: None
         """
+        if not self.getIp:
+            try:
+                self.get_current_ip_bk()
+            except Exception as e:
+                self.logger.error("get_current_ip: \tapi error")
+                self.check_error()
+                self.lastGetCurrentIpError = True
+            return
+
         r = None
         try:
             r = httpx.get('http://' + self.getIp, headers=self.httpHeaders, timeout=10)
@@ -125,9 +149,26 @@ class DDNS:
             self.logger.info("get_current_ip: \tcurrent host ip: " + r)
             self.lastGetCurrentIpError = False
         else:
-            self.logger.error("get_current_ip: \tapi error")
-            self.check_error()
-            self.lastGetCurrentIpError = True
+            try:
+                self.get_current_ip_bk()
+            except Exception as e:
+                self.logger.exception(e)
+                self.logger.error("get_current_ip: \tapi error")
+                self.check_error()
+                self.lastGetCurrentIpError = True
+
+    def get_current_ip_bk(self):
+        # 备用
+        r = None
+        try:
+            r = httpx.get(self.getIPBack1, headers=self.httpHeaders, timeout=10)
+            r = r.json()
+            self.currentIp = r['ip']
+        except Exception as e:
+            self.logger.exception(e)
+            r = httpx.get(self.getIPBack2, headers=self.httpHeaders, timeout=10)
+            r = r.json()
+            self.currentIp = r['ip']
 
     def get_domain_ip(self):
         """
