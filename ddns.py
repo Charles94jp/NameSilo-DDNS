@@ -146,7 +146,7 @@ class DDNS:
             r = r.split('您的IP地址是：')[1]
             r = r.split('</title>')[0]
             self.currentIp = r
-            self.logger.info("get_current_ip: \tcurrent host ip: " + r)
+            self.logger.info("get_current_ip: \tcurrent host ip(ip138): " + r)
             self.lastGetCurrentIpError = False
         else:
             try:
@@ -164,11 +164,15 @@ class DDNS:
             r = httpx.get(self.getIPBack1, headers=self.httpHeaders, timeout=10)
             r = r.json()
             self.currentIp = r['ip']
+            self.logger.info("get_current_ip: \tcurrent host ip(myip): " + self.currentIp)
+            self.lastGetCurrentIpError = False
         except Exception as e:
             self.logger.exception(e)
             r = httpx.get(self.getIPBack2, headers=self.httpHeaders, timeout=10)
             r = r.json()
             self.currentIp = r['ip']
+            self.logger.info("get_current_ip: \tcurrent host ip(ipify): " + self.currentIp)
+            self.lastGetCurrentIpError = False
 
     def get_domain_ip(self):
         """
