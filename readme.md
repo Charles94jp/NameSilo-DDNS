@@ -1,6 +1,6 @@
 <h1 align="center">
   <a href="#">
-  <img src="logo.svg" width="300px">
+  <img src="logo.svg" width="301px">
   </a>
   <br>
 </h1>
