@@ -60,24 +60,31 @@ At present, telecom operators assign to home broadband IP are dynamic, although 
 
 ![网络拓扑图](https://raw.githubusercontent.com/Charles94jp/NameSilo-DDNS/java/Network-topology.png)
 
-To solve the problem of changing public IP, you can purchase a domain name and use DDNS (Dynamic Domain Name Server) to resolve the domain name to your broadband's IP. This will allow you to access your home devices by accessing a fixed domain name.
+To solve the problem of changing public IP, you can purchase a domain name and use DDNS (Dynamic Domain Name Server) to resolve the domain name to your broadband's IP. This will allow you to access your home devices by accessing a **fixed domain name**.
 
 To achieve this, you need a computer that is always running to run this DDNS program.
 
-
 # Install
 
-Download and use
+There are two optional modes of operation.
+
+1\. Local
+
+Download and use:
 
 ```
 git -b python clone https://github.com/Charles94jp/NameSilo-DDNS.git
 ```
 
-Update
+Update:
 
 ```
 git pull origin python
 ```
+
+2\. [Docker](#docker)
+
+
 
 ## Dependencies
 

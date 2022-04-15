@@ -23,7 +23,7 @@ NameSilo DDNS是一个用于NameSilo的动态域名解析服务，适用于家�
 
 本程序仅适用于NameSilo上购买的域名
 
-本程序通过访问 http://202x.ip138.com 或https://api.myip.com 或 https://api.ipify.org?format=json获取家庭宽带的公网IP地址，通过 https://www.namesilo.com/api/ 来查询和更新DNS状态。
+本程序通过访问 http://202x.ip138.com 或https://api.myip.com 或 https://api.ipify.org?format=json 获取家庭宽带的公网IP地址，通过 https://www.namesilo.com/api/ 来查询和更新DNS状态。
 
 右上角点个 ⭐ Star 不迷路
 
@@ -71,13 +71,17 @@ NameSilo DDNS是一个用于NameSilo的动态域名解析服务，适用于家�
 
 ![网络拓扑图](https://raw.githubusercontent.com/Charles94jp/NameSilo-DDNS/java/Network-topology.png)
 
-为解决公网IP的变动，可以购买一个域名，使用DDNS（Dynamic Domain Name Server，动态域名服务）将域名解析到宽带的IP。这样就可以在家搭建各种服务并通过访问固定的域名来访问，而无需租用昂贵的公网服务器
+为解决公网IP的变动，可以购买一个域名，使用DDNS（Dynamic Domain Name Server，动态域名服务）将域名解析到宽带的IP。这样就可以在家搭建各种服务并通过访问**固定的域名**来访问，而无需租用昂贵的公网服务器
 
 想实现这个目的，你需要一台一直运行的电脑来运行此DDNS程序
 
 
 
 # Install
+
+两种可选方式
+
+1\. 本地运行
 
 下载即用
 
@@ -90,6 +94,10 @@ git -b python clone https://github.com/Charles94jp/NameSilo-DDNS.git
 ```
 git pull origin python
 ```
+
+2\. [Docker运行](#docker)
+
+
 
 ## Dependencies
 
