@@ -99,7 +99,7 @@ class DDNS:
             self.logger.addHandler(fh)
         self.logger.info('\n\nstarting...')
 
-        self.ssl_context ^= ssl.OP_NO_TLSv1
+        self.ssl_context.options ^= ssl.OP_NO_TLSv1
 
         r = None
         try:
