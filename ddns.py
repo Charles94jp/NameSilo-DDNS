@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import ssl
 import sys
 import time
 import smtplib
@@ -49,6 +50,9 @@ class DDNS:
     # 保存邮件模板
     emailTemplate = {}
 
+    # 支持低版本的 TLS 1.0
+    ssl_context = httpx.create_ssl_context()
+
     def __init__(self, args, debug=False):
         """
         set attributes，set logger
@@ -95,9 +99,11 @@ class DDNS:
             self.logger.addHandler(fh)
         self.logger.info('\n\nstarting...')
 
+        self.ssl_context ^= ssl.OP_NO_TLSv1
+
         r = None
         try:
-            r = httpx.get("https://www.ip138.com/", headers=self.httpHeaders, timeout=10)
+            r = httpx.get("https://www.ip138.com/", headers=self.httpHeaders, timeout=10, verify=self.ssl_context)
             api = r.text.split("<iframe src=\"//")[1]
             api = api.split("/\"")[0]
             self.getIp = api
@@ -135,7 +141,7 @@ class DDNS:
         except Exception as e:
             self.logger.exception(e)
             try:
-                r = httpx.get('https://' + self.getIp, headers=self.httpHeaders, timeout=10)
+                r = httpx.get('https://' + self.getIp, headers=self.httpHeaders, timeout=10, verify=self.ssl_context)
             except Exception as e:
                 self.logger.exception(e)
                 self.check_error()
@@ -161,14 +167,14 @@ class DDNS:
         # 备用
         r = None
         try:
-            r = httpx.get(self.getIPBack1, headers=self.httpHeaders, timeout=10)
+            r = httpx.get(self.getIPBack1, headers=self.httpHeaders, timeout=10, verify=self.ssl_context)
             r = r.json()
             self.currentIp = r['ip']
             self.logger.info("get_current_ip: \tcurrent host ip(myip): " + self.currentIp)
             self.lastGetCurrentIpError = False
         except Exception as e:
             self.logger.exception(e)
-            r = httpx.get(self.getIPBack2, headers=self.httpHeaders, timeout=10)
+            r = httpx.get(self.getIPBack2, headers=self.httpHeaders, timeout=10, verify=self.ssl_context)
             r = r.json()
             self.currentIp = r['ip']
             self.logger.info("get_current_ip: \tcurrent host ip(ipify): " + self.currentIp)
@@ -182,7 +188,7 @@ class DDNS:
         try:
             r = httpx.get(
                 self.apiRoot + '/dnsListRecords?version=1&type=xml&key=' + self.key + '&domain=' + self.domain,
-                timeout=10)
+                timeout=10, verify=self.ssl_context)
             if r.status_code == 200:
                 r = r.text.split('<resource_record>')
                 for record in r:
@@ -212,7 +218,8 @@ class DDNS:
         try:
             r = httpx.get(
                 self.apiRoot + '/dnsUpdateRecord?version=1&type=xml&rrttl=7207&key=' + self.key + '&domain='
-                + self.domain + '&rrid=' + self.rrid + '&rrhost=' + self.host + '&rrvalue=' + new_ip, timeout=10)
+                + self.domain + '&rrid=' + self.rrid + '&rrhost=' + self.host + '&rrvalue=' + new_ip, timeout=10
+                , verify=self.ssl_context)
             r = r.text
             r1 = r
             r = r.split('<code>')[1]
