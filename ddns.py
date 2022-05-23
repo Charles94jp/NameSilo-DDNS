@@ -104,7 +104,6 @@ class DDNS:
             fh = logging.StreamHandler()
             self.logger.addHandler(fh)
         self.logger.info('\n\nstarting...')
-
         r = None
         try:
             r = httpx.get("https://www.ip138.com/", headers=self.httpHeaders, timeout=10, verify=self.ssl_context)
