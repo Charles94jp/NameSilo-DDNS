@@ -14,50 +14,52 @@ import httpx
 
 
 class DDNS:
-    ## 通过配置文件初始化
-    key = ''
-    # 配置中domain = host.domain，host为子域名前缀
-    domain = ''
-    host = ''
-    frequency = 600
-    emailAlert = False
-    mail_host = ''
-    mail_port = ''
-    mail_user = ''
-    mail_pass = ''
-    receivers = []
-    email_after_reboot = False
-    auto_restart = False
-
     ## 运行中调用
     apiRoot = "https://www.namesilo.com/api"
-    # ip138的api，由于每年更换一次域名，设为初始化时自动获取api域名
-    getIp = ""
     # 添加了两个美国的备用api
     getIPBack1 = "https://api.myip.com"
     getIPBack2 = "https://api.ipify.org?format=json"
-    domainIp = ''
-    currentIp = ''
-    logger = None
     httpHeaders = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
                                  'Chrome/96.0.4664.93 Safari/537.36'}
-    rrid = ''
-    errorCount = 0
-    lastGetCurrentIpError = False
-    lastUpdateDomainIpError = False
-    lastStartError = False
-
-    # 保存邮件模板
-    emailTemplate = {}
-
     # 支持低版本的 TLS 1.0
     ssl_context = httpx.create_ssl_context()
+    ssl_context.options ^= ssl.OP_NO_TLSv1
 
     def __init__(self, args, debug=False):
         """
         set attributes，set logger
         :param args: dict
         """
+        ### 声明变量
+        ## 通过配置文件初始化
+        self.key = ''
+        # 配置中domain = host.domain，host为子域名前缀
+        self.domain = ''
+        self.host = ''
+        self.frequency = 600
+        self.emailAlert = False
+        self.mail_host = ''
+        self.mail_port = ''
+        self.mail_user = ''
+        self.mail_pass = ''
+        self.receivers = []
+        self.email_after_reboot = False
+        self.auto_restart = False
+        self.domainIp = ''
+        self.currentIp = ''
+        self.logger = None
+        self.rrid = ''
+        self.errorCount = 0
+        self.lastGetCurrentIpError = False
+        self.lastUpdateDomainIpError = False
+        self.lastStartError = False
+        # ip138的api，由于每年更换一次域名，设为初始化时自动获取api域名
+        self.getIp = ""
+
+        # 保存邮件模板
+        self.emailTemplate = {}
+        ### 声明结束
+
         self.key = args['key']
         tmp = args['domain']
         tmp = tmp.split('.')
@@ -98,8 +100,6 @@ class DDNS:
             fh = logging.StreamHandler()
             self.logger.addHandler(fh)
         self.logger.info('\n\nstarting...')
-
-        self.ssl_context ^= ssl.OP_NO_TLSv1
 
         r = None
         try:
@@ -216,10 +216,9 @@ class DDNS:
         :return: None
         """
         try:
-            r = httpx.get(
-                self.apiRoot + '/dnsUpdateRecord?version=1&type=xml&rrttl=7207&key=' + self.key + '&domain='
-                + self.domain + '&rrid=' + self.rrid + '&rrhost=' + self.host + '&rrvalue=' + new_ip, timeout=10
-                , verify=self.ssl_context)
+            url = self.apiRoot + '/dnsUpdateRecord?version=1&type=xml&rrttl=7207&key=' + self.key + '&domain=' \
+                  + self.domain + '&rrid=' + self.rrid + '&rrhost=' + self.host + '&rrvalue=' + new_ip
+            r = httpx.get(url, timeout=10, verify=self.ssl_context)
             r = r.text
             r1 = r
             r = r.split('<code>')[1]
@@ -229,7 +228,7 @@ class DDNS:
                 self.logger.info("update_domain_ip: \tupdate completed: " + self.domainIp)
                 self.lastUpdateDomainIpError = False
             else:
-                self.logger.error("update_domain_ip: \tupdate failed. Namesilo response:\n" + r1)
+                self.logger.error(f"update_domain_ip: \tupdate failed. Namesilo response:\n{r1}")
                 if not self.lastUpdateDomainIpError:
                     self.send_email('DDNS服务异常提醒 - DNS更新失败', 'send_new_ip.email-template.html', 'new_ip', new_ip)
                 self.check_error()
