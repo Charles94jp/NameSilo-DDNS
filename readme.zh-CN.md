@@ -116,7 +116,7 @@ pip install httpx
 
 |字段|介绍|
 |--|--|
-|domain|要更新的域名，必须是子域名，如你购买的域名是bb.cc，你必须在NameSilo上建一个子域名的解析，如aa.bb.cc|
+|domain|要更新的域名，程序只能更新已存在的DNS记录，而不能创建一个新的DNS记录。所以你**必须先在NameSilo网页上创建一个解析**后，才能运行程序。|
 |key|<a target="_blank" href="https://guozh.net/obtain-namesilo-api-key/">从NameSilo获取</a>的api key，有key才能获取和修改你的域名状态，保管好不要泄露此key|
 |frequency|多久检测一次你的ip变动，如有变动才更新你的域名解析状态，单位s|
 |mail_host|SMT邮件服务器，如qq、163等|
@@ -147,7 +147,7 @@ python ddns.py testEmail
 ## Note
 
 
-本程序只能更新域名的DNS记录，无法增加，请确保你的域名存在此DNS记录，且需要是一个子域名。
+本程序只能更新域名的DNS记录，无法增加，请确保你的域名存在此DNS记录。
 
 ## Start
 

@@ -65,7 +65,8 @@ class DDNS:
         tmp = args['domain']
         tmp = tmp.split('.')
         self.domain = tmp[-2] + '.' + tmp[-1]
-        self.host = tmp[0]
+        tmp = tmp[0:len(tmp) - 2]
+        self.host = '.'.join(tmp)
         if args.get('frequency'):
             self.frequency = args['frequency']
 
@@ -194,8 +195,9 @@ class DDNS:
                 timeout=10, verify=self.ssl_context)
             if r.status_code == 200:
                 r = r.text.split('<resource_record>')
+                _domain = self.domain if self.host == '@' or self.host == '' else self.host + '.' + self.domain
                 for record in r:
-                    if record.find(self.host + '.' + self.domain) != -1:
+                    if record.find(f'<host>{_domain}</host>') != -1:
                         r = record
                         break
                 r = r.split('</record_id>')
@@ -219,8 +221,9 @@ class DDNS:
         :return: None
         """
         try:
+            _host = '' if self.host == '@' else self.host
             url = self.apiRoot + '/dnsUpdateRecord?version=1&type=xml&rrttl=7207&key=' + self.key + '&domain=' \
-                  + self.domain + '&rrid=' + self.rrid + '&rrhost=' + self.host + '&rrvalue=' + new_ip
+                  + self.domain + '&rrid=' + self.rrid + '&rrhost=' + _host + '&rrvalue=' + new_ip
             r = httpx.get(url, timeout=10, verify=self.ssl_context)
             r = r.text
             r1 = r

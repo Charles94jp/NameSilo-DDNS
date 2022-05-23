@@ -103,7 +103,7 @@ The `conf/conf.json` file needs to be configured before starting, refer to conf.
 
 |Fields|Introduction|
 |--|--|
-|domain|The domain name to be updated must be a subdomain. For example, if you purchase a domain name that is bb.cc, you must build a resolution on NameSilo for a subdomain such as aa.bb.cc.|
+|domain|The domain that you want to update. This program can only update an existing DNS record, not create a new one. So you must first create a resolution on the NameSilo web page before you can run the program.|
 |key|<a target="_blank" href="https://www.namesilo.com/account/api-manager">The key generated from NameSilo</a>, after generation you need to remember and keep this key.|
 |frequency|How often do you detect changes in your ip, and only update your DNS when a change in ip occurs, in seconds.|
 |mail_host| For example, you can use Google Mail's POP/IMAP |
@@ -134,7 +134,7 @@ python ddns.py testEmail
 ## Note
 
 
-This program can only update the DNS record of a domain name, it cannot be added, please make sure this DNS record exists for your domain name and it needs to be a sub-domain.
+This program can only update the DNS record of a domain name, it cannot be added, please make sure this DNS record exists for your domain name.
 
 ## Start
 
