@@ -44,6 +44,7 @@ class DDNS:
         self.mail_pass = ''
         self.receivers = []
         self.email_after_reboot = False
+        self.email_every_update = False
         self.auto_restart = False
         self.domainIp = ''
         self.currentIp = ''
@@ -78,6 +79,9 @@ class DDNS:
 
         if args.get('email_after_reboot'):
             self.email_after_reboot = args['email_after_reboot']
+
+        if args.get('email_every_update'):
+            self.email_every_update = args['email_every_update']
 
         if args.get('auto_restart'):
             self.auto_restart = args['auto_restart']
@@ -226,6 +230,9 @@ class DDNS:
             if r == '300':
                 self.domainIp = new_ip
                 self.logger.info("update_domain_ip: \tupdate completed: " + self.domainIp)
+                if self.email_every_update:
+                    self.send_email('DDNS服务通知：已成功推送新IP地址到NameSilo', 'update_success.email-template.html',
+                                    'new_ip', new_ip)
                 self.lastUpdateDomainIpError = False
             else:
                 self.logger.error(f"update_domain_ip: \tupdate failed. Namesilo response:\n{r1}")

@@ -8,5 +8,6 @@
     "mail_pass": "",
     "receivers": [""],
     "email_after_reboot": false,
-    "auto_restart": false
+    "auto_restart": false,
+    "email_every_update": false
 }
