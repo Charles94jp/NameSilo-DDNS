@@ -195,9 +195,8 @@ class DDNS:
         :return: None
         """
         try:
-            r = httpx.get(
-                self.apiRoot + '/dnsListRecords?version=1&type=xml&key=' + self.key + '&domain=' + self.domain,
-                timeout=10, verify=self.ssl_context, proxies=self.proxies)
+            url = f'{self.apiRoot}/dnsListRecords?version=1&type=xml&key={self.key}&domain={self.domain}'
+            r = httpx.get(url, timeout=10, verify=self.ssl_context, proxies=self.proxies)
             if r.status_code == 200:
                 r = r.text.split('<resource_record>')
                 _domain = self.domain if self.host == '@' or self.host == '' else self.host + '.' + self.domain
@@ -228,8 +227,8 @@ class DDNS:
         """
         try:
             _host = '' if self.host == '@' else self.host
-            url = self.apiRoot + '/dnsUpdateRecord?version=1&type=xml&rrttl=7207&key=' + self.key + '&domain=' \
-                  + self.domain + '&rrid=' + self.rrid + '&rrhost=' + _host + '&rrvalue=' + new_ip
+            url = f'{self.apiRoot}/dnsUpdateRecord?version=1&type=xml&rrttl=7207&key={self.key}&domain={self.domain}' \
+                  f'&rrid={self.rrid}&rrhost={_host}&rrvalue={new_ip}'
             r = httpx.get(url, timeout=10, verify=self.ssl_context, proxies=self.proxies)
             r = r.text
             r1 = r
