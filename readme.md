@@ -29,13 +29,13 @@ It would be the best encouragement for me to get your  ⭐ STAR.
 
 # Features
 
-- Simple configuration, you can set the frequency of detecting IP changes and refreshing DNS.
-
-- Log rotation.
+- Simple but rich configuration.
 
 - With email alert function, you will be alerted when there is an abnormality in the process of the service running for a long time.
 
-- Support multi-platform (Linux, Windows...)
+- Support Docker.
+
+- Log rotation.
 
 # Table of Contents
 
@@ -115,7 +115,7 @@ The `conf/conf.json` file needs to be configured before starting, refer to conf.
 |auto_restart|For Linux. Default disable. Self restarting after the program has been consistently exception for a period of time. Because the service is exception when launching https request to NameSilo after a long time running, the reason is not known, but restarting DDNS can solve the problem.|
 |email_every_update|Prerequisites: Linux; Set email configuration; Every time the IP is changed, an email will be sent to inform the new IP to avoid inaccessibility within ten or twenty minutes of DNS update.|
 
-About mail alert: Simply put, after the program is stopped unexpectedly, use mail_user to send a reminder email to receivers to avoid failing to update DNS after IP changes, resulting in inaccessibility with the domain name.
+About mail alert: Simply put, after the program is stopped unexpectedly, use mail_user to send a reminder email to receivers to avoid failing to update DNS after IP changes, resulting in inaccessibility with the domain name.Once you fill in the email server, username password and recipient, etc., you will receive basic email notifications, and the rest of the notifications are optional.
 
 Q: Under what circumstances will the program stop unexpectedly?
 
