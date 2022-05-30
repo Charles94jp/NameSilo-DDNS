@@ -24,6 +24,7 @@ class DDNS:
     # 支持低版本的 TLS 1.0
     ssl_context = httpx.create_ssl_context()
     ssl_context.options ^= ssl.OP_NO_TLSv1
+    proxies = {}
 
     def __init__(self, args, debug=False):
         """
@@ -104,6 +105,10 @@ class DDNS:
         if debug:
             fh = logging.StreamHandler()
             self.logger.addHandler(fh)
+            self.proxies = {
+                'http://': 'http://127.0.0.1:7890',
+                'https://': 'http://127.0.0.1:7890'
+            }
         self.logger.info('\n\nstarting...')
         r = None
         try:
@@ -192,7 +197,7 @@ class DDNS:
         try:
             r = httpx.get(
                 self.apiRoot + '/dnsListRecords?version=1&type=xml&key=' + self.key + '&domain=' + self.domain,
-                timeout=10, verify=self.ssl_context)
+                timeout=10, verify=self.ssl_context, proxies=self.proxies)
             if r.status_code == 200:
                 r = r.text.split('<resource_record>')
                 _domain = self.domain if self.host == '@' or self.host == '' else self.host + '.' + self.domain
@@ -218,13 +223,14 @@ class DDNS:
         """
         重要 api
         更新域名解析，更新self.domainIp
+        todo: fix 280 record_id missing or invalid
         :return: None
         """
         try:
             _host = '' if self.host == '@' else self.host
             url = self.apiRoot + '/dnsUpdateRecord?version=1&type=xml&rrttl=7207&key=' + self.key + '&domain=' \
                   + self.domain + '&rrid=' + self.rrid + '&rrhost=' + _host + '&rrvalue=' + new_ip
-            r = httpx.get(url, timeout=10, verify=self.ssl_context)
+            r = httpx.get(url, timeout=10, verify=self.ssl_context, proxies=self.proxies)
             r = r.text
             r1 = r
             r = r.split('<code>')[1]
@@ -337,6 +343,7 @@ class DDNS:
             if (datetime.now() - uptime).total_seconds() < 4 * 60:
 
                 # 判断是重启，还是关机许久后开机
+                # todo: docker
                 last_reboot = os.popen('last --system reboot --time-format iso').read().strip()
                 last_reboot = last_reboot.split('+')[0].split(' ')[-1]
                 last_reboot = datetime.strptime(last_reboot, '%Y-%m-%dT%H:%M:%S')
@@ -377,6 +384,7 @@ if __name__ == '__main__':
     """
     不要开代理、梯子，会http连接错误
     """
+    dev = False
     if len(sys.argv) > 1:
         if sys.argv[1] == 'archiveLog':
             DDNS.archive_log()
@@ -384,10 +392,12 @@ if __name__ == '__main__':
         # for auto_restart, 避免log上的冲突
         if sys.argv[1].isdigit():
             time.sleep(int(sys.argv[1]))
+        if sys.argv[1] == 'dev':
+            dev = True
     ddns = None
     try:
         with open('conf/conf.json', 'r', encoding='utf-8') as fp:
-            ddns = DDNS(json.load(fp))
+            ddns = DDNS(json.load(fp), debug=dev)
         if len(sys.argv) > 1 and sys.argv[1] == 'testEmail':
             ddns.test_email()
         else:
