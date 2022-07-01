@@ -103,7 +103,7 @@ The `conf/conf.json` file needs to be configured before starting, refer to conf.
 
 |Fields|Introduction|
 |--|--|
-|domain|The domain that you want to update. This program can only update an existing DNS record, not create a new one. So you must first create a resolution on the NameSilo web page before you can run the program.|
+|domain|String or list, such as `"aa.bb.cn"` or `["cc.bb.cn", "q.w.cc.cn"]`.The domain that you want to update. This program can only update an existing DNS record, not create a new one. So you must first create a resolution on the NameSilo web page before you can run the program.|
 |key|<a target="_blank" href="https://www.namesilo.com/account/api-manager">The key generated from NameSilo</a>, after generation you need to remember and keep this key.|
 |frequency|How often do you detect changes in your ip, and only update your DNS when a change in ip occurs, in seconds.|
 |mail_host| For example, you can use Google Mail's POP/IMAP |

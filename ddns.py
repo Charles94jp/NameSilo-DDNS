@@ -35,8 +35,10 @@ class DDNS:
         ## 通过配置文件初始化
         self.key = ''
         # 配置中domain = host.domain，host为子域名前缀
-        self.domain = ''
-        self.host = ''
+        # self.domain = ''
+        # self.host = ''
+        # 支持多域名
+        self.domains = []
         self.frequency = 600
         self.emailAlert = False
         self.mail_host = ''
@@ -47,10 +49,10 @@ class DDNS:
         self.email_after_reboot = False
         self.email_every_update = False
         self.auto_restart = False
-        self.domainIp = ''
+        # self.domainIp = ''
         self.currentIp = ''
         self.logger = None
-        self.rrid = ''
+        # self.rrid = ''
         self.errorCount = 0
         self.lastGetCurrentIpError = False
         self.lastUpdateDomainIpError = False
@@ -63,11 +65,22 @@ class DDNS:
         ### 声明结束
 
         self.key = args['key']
+        self.originalDomain = args['domain']
         tmp = args['domain']
-        tmp = tmp.split('.')
-        self.domain = tmp[-2] + '.' + tmp[-1]
-        tmp = tmp[0:len(tmp) - 2]
-        self.host = '.'.join(tmp)
+        if type(tmp) != list:
+            tmp = tmp.split('.')
+            domain = tmp[-2] + '.' + tmp[-1]
+            tmp = tmp[0:len(tmp) - 2]
+            host = '.'.join(tmp)
+            self.domains.append({'domain': domain, 'host': host})
+        else:
+            for tmpi in tmp:
+                tmpi = tmpi.split('.')
+                domain = tmpi[-2] + '.' + tmpi[-1]
+                tmpi = tmpi[0:len(tmpi) - 2]
+                host = '.'.join(tmpi)
+                self.domains.append({'domain': domain, 'host': host})
+
         if args.get('frequency'):
             self.frequency = args['frequency']
 
@@ -194,29 +207,31 @@ class DDNS:
         update self.domainIp
         :return: None
         """
-        try:
-            url = f'{self.apiRoot}/dnsListRecords?version=1&type=xml&key={self.key}&domain={self.domain}'
-            r = httpx.get(url, timeout=10, verify=self.ssl_context, proxies=self.proxies)
-            if r.status_code == 200:
-                r = r.text.split('<resource_record>')
-                _domain = self.domain if self.host == '@' or self.host == '' else self.host + '.' + self.domain
-                for record in r:
-                    if record.find(f'<host>{_domain}</host>') != -1:
-                        r = record
-                        break
-                r = r.split('</record_id>')
-                self.rrid = r[0].split('<record_id>')[-1]
-                self.domainIp = r[1].split('<value>')[1].split('</value>')[0]
-                self.logger.info("get_domain_ip: \tcurrent domain name resolution ip: " + self.domainIp)
-            else:
+        for domain in self.domains:
+            try:
+                url = f"{self.apiRoot}/dnsListRecords?version=1&type=xml&key={self.key}&domain={domain['domain']}"
+                r = httpx.get(url, timeout=10, verify=self.ssl_context, proxies=self.proxies)
+                if r.status_code == 200:
+                    r = r.text.split('<resource_record>')
+                    _domain = domain['domain'] if domain['host'] == '@' or \
+                                                  domain['host'] == '' else domain['host'] + '.' + domain['domain']
+                    for record in r:
+                        if record.find(f'<host>{_domain}</host>') != -1:
+                            r = record
+                            break
+                    r = r.split('</record_id>')
+                    domain['rrid'] = r[0].split('<record_id>')[-1]
+                    domain['domainIp'] = r[1].split('<value>')[1].split('</value>')[0]
+                    self.logger.info("get_domain_ip: \tcurrent domain name resolution ip: " + domain['domainIp'])
+                else:
+                    self.logger.error("get_domain_ip: \tError, process stopped. "
+                                      "It could be due to the configuration file error, or the NameSilo server error.")
+                    exit(-1)
+            except httpx.ConnectError as e:
+                self.logger.exception(e)
                 self.logger.error("get_domain_ip: \tError, process stopped. "
                                   "It could be due to the configuration file error, or the NameSilo server error.")
                 exit(-1)
-        except httpx.ConnectError as e:
-            self.logger.exception(e)
-            self.logger.error("get_domain_ip: \tError, process stopped. "
-                              "It could be due to the configuration file error, or the NameSilo server error.")
-            exit(-1)
 
     def update_domain_ip(self, new_ip):
         """
@@ -225,35 +240,51 @@ class DDNS:
         todo: fix 280 record_id missing or invalid
         :return: None
         """
-        try:
-            _host = '' if self.host == '@' else self.host
-            url = f'{self.apiRoot}/dnsUpdateRecord?version=1&type=xml&rrttl=7207&key={self.key}&domain={self.domain}' \
-                  f'&rrid={self.rrid}&rrhost={_host}&rrvalue={new_ip}'
-            r = httpx.get(url, timeout=10, verify=self.ssl_context, proxies=self.proxies)
-            r = r.text
-            r1 = r
-            r = r.split('<code>')[1]
-            r = r.split('</code>')[0]
-            if r == '300':
-                self.domainIp = new_ip
-                self.logger.info("update_domain_ip: \tupdate completed: " + self.domainIp)
-                if self.email_every_update:
-                    self.send_email('DDNS服务通知：已成功推送新IP地址到NameSilo', 'update_success.email-template.html',
-                                    'new_ip', new_ip)
-                self.lastUpdateDomainIpError = False
-            else:
-                self.logger.error(f"update_domain_ip: \tupdate failed. Namesilo response:\n{r1}")
+        success1 = 10000
+        error2 = 20000
+        error3 = 30000
+        for domain in self.domains:
+            try:
+                _host = '' if domain["host"] == '@' else domain["host"]
+                url = f'{self.apiRoot}/dnsUpdateRecord?version=1&type=xml&rrttl=7207&key={self.key}&domain={domain["domain"]}' \
+                      f'&rrid={domain["rrid"]}&rrhost={_host}&rrvalue={new_ip}'
+                r = httpx.get(url, timeout=10, verify=self.ssl_context, proxies=self.proxies)
+
+                # debug
+                # self.logger.info(url)
+                # r1 = httpx.get(f'{self.apiRoot}/dnsListRecords?version=1&type=xml&key={self.key}&domain={domain["domain"]}', timeout=10, verify=self.ssl_context, proxies=self.proxies)
+                # self.logger.info(r1.text)
+
+                r = r.text
+                r1 = r
+                r = r.split('<code>')[1]
+                r = r.split('</code>')[0]
+                if r == '300':
+                    domain['domainIp'] = new_ip
+                    self.logger.info("update_domain_ip: \tupdate completed: " + domain['domainIp'])
+                    if self.email_every_update:
+                        success1 = success1 + 1
+                    self.lastUpdateDomainIpError = False
+                else:
+                    self.logger.error(f"update_domain_ip: \tupdate failed. Namesilo response:\n{r1}")
+                    if not self.lastUpdateDomainIpError:
+                        error2 = error2 + 1
+                    self.check_error()
+                    self.lastUpdateDomainIpError = True
+            except Exception as e:
+                self.logger.exception(e)
+                self.logger.error("update_domain_ip: \tupdate error")
                 if not self.lastUpdateDomainIpError:
-                    self.send_email('DDNS服务异常提醒 - DNS更新失败', 'send_new_ip.email-template.html', 'new_ip', new_ip)
+                    error3 = error3 + 1
                 self.check_error()
                 self.lastUpdateDomainIpError = True
-        except Exception as e:
-            self.logger.exception(e)
-            self.logger.error("update_domain_ip: \tupdate error")
-            if not self.lastUpdateDomainIpError:
-                self.send_email('DDNS服务异常提醒 - DNS更新失败', 'send_new_ip.email-template.html', 'new_ip', new_ip)
-            self.check_error()
-            self.lastUpdateDomainIpError = True
+        if success1 > 10000:
+            self.send_email('DDNS服务通知：已成功推送新IP地址到NameSilo', 'update_success.email-template.html',
+                            'new_ip', new_ip)
+        if error2 > 20000:
+            self.send_email('DDNS服务异常提醒 - DNS更新失败', 'send_new_ip.email-template.html', 'new_ip', new_ip)
+        if error3 > 30000:
+            self.send_email('DDNS服务异常提醒 - DNS更新失败', 'send_new_ip.email-template.html', 'new_ip', new_ip)
 
     def send_email(self, title, template_file, var_name=None, value=None):
         """
@@ -305,7 +336,8 @@ class DDNS:
             self.errorCount = self.errorCount + 1
         else:
             self.errorCount = 1
-        if self.errorCount > 6:
+        # 引入了多个ip的支持
+        if self.errorCount > 6 * len(self.domains):
             if pl_system().find('Linux') > -1 and self.auto_restart:
                 if self.emailAlert:
                     self.send_email('DDNS服务异常提醒', 'ddns_error_restart.email-template.html')
@@ -353,14 +385,13 @@ class DDNS:
 
                 power_outage_duration = last_reboot - last_shutdown
                 if power_outage_duration.total_seconds() > 4 * 60:
-
                     self.get_current_ip()
-                    if self.currentIp != self.domainIp:
+                    if self.currentIp != self.domains[0]['domainIp']:
                         self.send_email('DDNS Service Restarted', 'sys_reboot_ip.email-template.html', 'currentIp',
                                         self.currentIp)
                     else:
                         self.send_email('DDNS Service Restarted', 'sys_reboot_domain.email-template.html', 'domain',
-                                        self.host + '.' + self.domain)
+                                        self.originalDomain.__str__())
                     self.logger.info("is_sys_reboot: system has been rebooted. DDNS successfully sent email alerts.")
 
     def start(self):
@@ -369,8 +400,11 @@ class DDNS:
         while True:
             try:
                 self.get_current_ip()
-                if self.currentIp != self.domainIp:
-                    self.update_domain_ip(self.currentIp)
+                for domain in self.domains:
+                    if self.currentIp != domain['domainIp']:
+                        self.update_domain_ip(self.currentIp)
+                        # update_domain_ip中也有for domain in self.domains:
+                        break
                 self.lastStartError = False
             except Exception as e:
                 self.logger.exception(e)
