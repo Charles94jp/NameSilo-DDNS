@@ -225,7 +225,7 @@ class DDNS:
                     r = r.split('</record_id>')
                     domain['rrid'] = r[0].split('<record_id>')[-1]
                     domain['domainIp'] = r[1].split('<value>')[1].split('</value>')[0]
-                    self.logger.info(f"get_domain_ip: \t'{domain['domain']}' resolution ip: " + domain['domainIp'])
+                    self.logger.info(f"get_domain_ip: \t'{domain['host']}.{domain['domain']}' resolution ip: " + domain['domainIp'])
                 else:
                     self.logger.error("get_domain_ip: \tError, process stopped. "
                                       "It could be due to the configuration file error, or the NameSilo server error.")
@@ -267,19 +267,19 @@ class DDNS:
                 r = r.split('</code>')[0]
                 if r == '300':
                     domain['domainIp'] = new_ip
-                    self.logger.info(f"update_domain_ip: \tupdate '{domain['domain']}' completed: " + domain['domainIp'])
+                    self.logger.info(f"update_domain_ip: \tupdate '{domain['host']}.{domain['domain']}' completed: " + domain['domainIp'])
                     if self.email_every_update:
                         success1 = success1 + 1
                     self.lastUpdateDomainIpError = False
                 else:
-                    self.logger.error(f"update_domain_ip: \tupdate '{domain['domain']}' failed. Namesilo response:\n{r1}")
+                    self.logger.error(f"update_domain_ip: \tupdate '{domain['host']}.{domain['domain']}' failed. Namesilo response:\n{r1}")
                     if not self.lastUpdateDomainIpError:
                         error2 = error2 + 1
                     self.check_error()
                     self.lastUpdateDomainIpError = True
             except Exception as e:
                 self.logger.exception(e)
-                self.logger.error(f"update_domain_ip: \tupdate '{domain['domain']}' error")
+                self.logger.error(f"update_domain_ip: \tupdate '{domain['host']}.{domain['domain']}' error")
                 if not self.lastUpdateDomainIpError:
                     error3 = error3 + 1
                 self.check_error()
