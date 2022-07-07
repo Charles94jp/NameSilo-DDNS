@@ -65,8 +65,11 @@ class DDNS:
         ### 声明结束
 
         self.key = args['key']
-        self.originalDomain = args['domain']
-        tmp = args['domain']
+        tmp = args.get('domains')
+        self.originalDomain = args.get('domains')
+        if tmp is None:
+            tmp = args.get('domain')
+            self.originalDomain = args.get('domain')
         if type(tmp) != list:
             tmp = tmp.split('.')
             domain = tmp[-2] + '.' + tmp[-1]
@@ -240,6 +243,9 @@ class DDNS:
         todo: fix 280 record_id missing or invalid
         :return: None
         """
+        # 更新rrid，修复更新时api返回280：record_id missing or invalid
+        self.get_domain_ip()
+
         success1 = 10000
         error2 = 20000
         error3 = 30000

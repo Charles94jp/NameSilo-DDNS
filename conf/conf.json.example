@@ -1,5 +1,7 @@
 {
-    "domain": "www.namesilo.com",
+    "domains": [
+        "www.namesilo.com"
+    ],
     "key": "1234",
     "frequency": 600,
     "mail_host": "",
