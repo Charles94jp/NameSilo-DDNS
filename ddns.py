@@ -243,9 +243,6 @@ class DDNS:
         todo: fix 280 record_id missing or invalid
         :return: None
         """
-        # 更新rrid，修复更新时api返回280：record_id missing or invalid
-        self.get_domain_ip()
-
         success1 = 10000
         error2 = 20000
         error3 = 30000
@@ -271,6 +268,12 @@ class DDNS:
                     if self.email_every_update:
                         success1 = success1 + 1
                     self.lastUpdateDomainIpError = False
+                elif r == '280':
+                    self.logger.info(f"update_domain_ip: record_id has expired, re-query domain name information")
+                    # 更新rrid，修复更新时api返回280：record_id missing or invalid
+                    self.get_domain_ip()
+                    self.update_domain_ip()
+                    return 1
                 else:
                     self.logger.error(f"update_domain_ip: \tupdate '{domain['host']}.{domain['domain']}' failed. Namesilo response:\n{r1}")
                     if not self.lastUpdateDomainIpError:
@@ -291,6 +294,7 @@ class DDNS:
             self.send_email('DDNS服务异常提醒 - DNS更新失败', 'send_new_ip.email-template.html', 'new_ip', new_ip)
         if error3 > 30000:
             self.send_email('DDNS服务异常提醒 - DNS更新失败', 'send_new_ip.email-template.html', 'new_ip', new_ip)
+        return 0
 
     def send_email(self, title, template_file, var_name=None, value=None):
         """
