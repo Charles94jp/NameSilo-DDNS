@@ -431,12 +431,10 @@ if __name__ == '__main__':
         # for auto_restart, 避免log上的冲突
         if sys.argv[1].isdigit():
             time.sleep(int(sys.argv[1]))
-        if sys.argv[1] == 'dev':
-            dev = True
     ddns = None
     try:
         with open('conf/conf.json', 'r', encoding='utf-8') as fp:
-            ddns = DDNS(json.load(fp), debug=dev)
+            ddns = DDNS(json.load(fp), debug=True if sys.gettrace() else False)
         if len(sys.argv) > 1 and sys.argv[1] == 'testEmail':
             ddns.test_email()
         else:
