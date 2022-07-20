@@ -272,7 +272,7 @@ class DDNS:
                     self.logger.info(f"update_domain_ip: record_id has expired, re-query domain name information")
                     # 更新rrid，修复更新时api返回280：record_id missing or invalid
                     self.get_domain_ip()
-                    self.update_domain_ip()
+                    self.update_domain_ip(new_ip)
                     return 1
                 else:
                     self.logger.error(f"update_domain_ip: \tupdate '{domain['host']}.{domain['domain']}' failed. Namesilo response:\n{r1}")
