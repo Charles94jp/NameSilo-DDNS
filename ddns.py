@@ -1,3 +1,4 @@
+import argparse
 import json
 import logging
 import os
@@ -24,6 +25,8 @@ class DDNS:
     :since: 2021-12-18
     """
 
+    version = 'NameSilo DDNS v2.2.0'
+
     _DEBUG_PROXY = 'http://127.0.0.1:8081'
 
     # 支持低版本的 TLS 1.0
@@ -35,7 +38,7 @@ class DDNS:
 
     _IS_LINUX = True if pl_system().find('Linux') > -1 else False
 
-    def __init__(self, conf: dict, debug: bool = False) -> None:
+    def __init__(self, conf: dict, restart_count: int = 0, in_docker: bool = False, debug: bool = False) -> None:
         """
 
         :param dict conf: 解析后的配置文件
@@ -150,17 +153,26 @@ def main():
     """
     不要开代理、梯子，会http连接错误
     """
-    # todo: argparse
-    if len(sys.argv) > 1:
-        if sys.argv[1] == 'archiveLog':
-            DDNS.archive_log()
-            sys.exit(0)
-        # for auto_restart, 避免log上的冲突
-        if sys.argv[1].isdigit():
-            time.sleep(int(sys.argv[1]))
+    parser = argparse.ArgumentParser(description='NameSilo DDNS: Regularly detect IP changes of home broadband and '
+                                                 'automatically update the IP address of the domain')
+    parser.add_argument('--archive', action='store_true', help='Archive logs')
+    parser.add_argument('--docker', action='store_true',
+                        help='Tell the program that it is now running in a docker container')
+    parser.add_argument('-c', help='A magic parameter', dest='count', type=int, default=0)
+    parser.add_argument('-v', action='version', version=DDNS.version)
+    parser.add_argument('--version', action='version', version=DDNS.version)
+    args = parser.parse_args()
+
+    if args.archive:
+        DDNS.archive_log()
+        sys.exit(0)
+    # for auto_restart, 避免log上的冲突
+    if args.count > 0:
+        time.sleep(5)
 
     with open('conf/conf.json', 'r', encoding='utf-8') as fp:
-        ddns = DDNS(json.load(fp), debug=True if sys.gettrace() else False)
+        ddns = DDNS(json.load(fp), restart_count=args.count, in_docker=args.docker,
+                    debug=True if sys.gettrace() else False)
     if len(sys.argv) > 1 and sys.argv[1] == 'testEmail':
         ddns.test_email()
     else:

@@ -2,8 +2,6 @@ import logging
 import smtplib
 from email.mime.text import MIMEText
 
-import httpx
-
 
 class EmailClient:
     """
