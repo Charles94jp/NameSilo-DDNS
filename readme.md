@@ -241,16 +241,19 @@ The images in Docker Hub are not necessarily the latest, you can also choose to 
 docker build -t charles94jp/ddns .
 ```
 
-The default time zone is Asia/Shanghai (CST, +0800), if you don't use this time zone, you need to modify the Dockerfile.
+
 
 ## RUN
 
 ```shell
 docker run -d --name ddns -v <local dir>:/home/NameSilo-DDNS:rw charles94jp/ddns
 # --restart=always
+# -e TZ=Asia/Shanghai
 ```
 
 Be sure to mount the local directory `<local dir>` to `/home/NameSilo-DDNS` in the container with the -v parameter, the container will write out the program files to `<local dir>`.
+
+The default time zone is Asia/Shanghai (CST, +0800). If you don't use this time zone, you can modify it with the -e option, for example `-e TZ=US/Mountain`.
 
 Then configure `conf/conf.json` in `<local dir>`, refer to [Configuration](#configuration)
 
