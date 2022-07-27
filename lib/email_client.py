@@ -42,7 +42,7 @@ class EmailClient:
 
         # 加载模板，模板用html文件格式是方便预览
         with open('conf/' + template_file_name, 'r', encoding='utf-8') as f:
-            email_template = f.read()
+            html_msg = email_template = f.read()
         if var_name is not None and value is not None:
             html_msg = email_template.replace('${' + var_name + '}', value)
 

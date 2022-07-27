@@ -38,7 +38,7 @@ class DDNS:
 
     _IS_LINUX = True if pl_system().find('Linux') > -1 else False
 
-    def __init__(self, conf: dict, restart_count: int = 0, in_docker: bool = False, debug: bool = False) -> None:
+    def __init__(self, conf: dict, restart_count: int = 0, debug: bool = False) -> None:
         """
 
         :param dict conf: 解析后的配置文件
@@ -52,19 +52,19 @@ class DDNS:
             # logging.handles.TimedRotatingFileHandler, RotatingFileHandler代替FileHandler，即自带的日志滚动，但是命名不可控
             if os.path.getsize('log/DDNS.log') > 2 * 1024 * 1024:
                 DDNS.archive_log()
-        self.logger = logging.getLogger('NameSilo_DDNS')  # 传logger名称返回新logger，否则返回root，会重复输出到屏幕
-        self.logger.setLevel(logging.INFO)
+        self._logger = logging.getLogger('NameSilo_DDNS')  # 传logger名称返回新logger，否则返回root，会重复输出到屏幕
+        self._logger.setLevel(logging.INFO)
         fh = logging.FileHandler(filename='log/DDNS.log', encoding='utf-8', mode='a')
         formatter = logging.Formatter('%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
         fh.setLevel(logging.INFO)
         fh.setFormatter(formatter)
-        self.logger.addHandler(fh)
+        self._logger.addHandler(fh)
         if debug:
             fh = logging.StreamHandler()
             fh.setLevel(logging.INFO)
             fh.setFormatter(formatter)
-            self.logger.addHandler(fh)
-        self.logger.info("""
+            self._logger.addHandler(fh)
+        self._logger.info("""
 
  ███╗   ██╗  █████╗  ███╗   ███╗ ███████╗ ███████╗ ██╗ ██╗       ██████╗      ██████╗  ██████╗  ███╗   ██╗ ███████╗
  ████╗  ██║ ██╔══██╗ ████╗ ████║ ██╔════╝ ██╔════╝ ██║ ██║      ██╔═══██╗     ██╔══██╗ ██╔══██╗ ████╗  ██║ ██╔════╝
@@ -87,51 +87,65 @@ class DDNS:
             # 默认每次循环休眠10分钟
             self._frequency = 600
         self._email_every_update = conf['email_every_update']
-        # todo: auto_restart & email_after_reboot
+        # is_sys_reboot is deprecated
+        # self._email_after_reboot = conf['email_after_reboot']
+        # self._in_docker = in_docker
+        self._restart_count = restart_count
+        # todo: auto_restart
 
     @staticmethod
     def archive_log():
         date = time.strftime('%Y%m%d-%H%M%S', time.localtime())
         os.rename('log/DDNS.log', 'log/DDNS-' + date + '.log.back')
 
+    def test_email(self):
+        """
+        调试邮件配置是否正确
+        """
+        if not self._email_client.available:
+            print('Email configuration is not filled')
+            sys.exit(-1)
+        self._logger.info('test_email')
+        self._email_client.send_email('DDNS Service Test', 'test_email.email-template.html')
+        print('The test email has been sent')
+
     def is_sys_reboot(self):
         """
         适用于家里意外断电后，来电后，路由器重新拨号，导致IP变化的情况
         如果服务器支持来电自启，那么可以邮件提醒这次的IP变化
-        todo: docker
+        deprecated:
+            1.该功能实际用处不大，监控家里停电、来电可以通过其它渠道，不需要本程序
+            2.如果来电，路由器程序拨号，IP变化，本程序有邮件提醒
+            3.docker中判断是否是长时间关机后启动，需要读取/var/log/wtmp文件，alpine没有last命令可以读取。而python utmp则不方便
         """
-        if self.emailAlert and self.email_after_reboot and pl_system().find('Linux') > -1:
+        import warnings
+        warnings.warn("this is deprecated", DeprecationWarning, 2)
+        if self._email_client.available and self._email_after_reboot and pl_system().find('Linux') > -1:
             uptime = os.popen('uptime -s').read().strip()
             uptime = datetime.strptime(uptime, '%Y-%m-%d %H:%M:%S')
             # 判断DDNS是随系统启动，还是被手动启动。系统开机到现在的时间差
             if (datetime.now() - uptime).total_seconds() < 4 * 60:
 
-                # 判断是重启，还是关机许久后开机
-                # todo: docker
-                last_reboot = os.popen('last --system reboot --time-format iso').read().strip()
+                # 判断系统这次启动是重启，还是关机许久后开机
+                # 容器通过 -v /var/log/wtmp:/home/wtmp:rw 挂载宿主机文件进行
+                cmd = f"last --system reboot --time-format iso {'-f /home/wtmp' if self._in_docker else ''}"
+                last_reboot = os.popen(cmd).read().strip()
                 last_reboot = last_reboot.split('+')[0].split(' ')[-1]
                 last_reboot = datetime.strptime(last_reboot, '%Y-%m-%dT%H:%M:%S')
 
-                last_shutdown = os.popen('last --system shutdown --time-format iso').read().strip()
+                cmd = f"last --system shutdown --time-format iso {'-f /home/wtmp' if self._in_docker else ''}"
+                last_shutdown = os.popen(cmd).read().strip()
                 last_shutdown = last_shutdown.split('+')[0].split(' ')[-1]
                 last_shutdown = datetime.strptime(last_shutdown, '%Y-%m-%dT%H:%M:%S')
 
                 power_outage_duration = last_reboot - last_shutdown
                 if power_outage_duration.total_seconds() > 4 * 60:
-                    self.get_current_ip()
-                    if self.currentIp != self.domains[0]['domainIp']:
-                        self.send_email('DDNS Service Restarted', 'sys_reboot_ip.email-template.html', 'currentIp',
-                                        self.currentIp)
-                    else:
-                        self.send_email('DDNS Service Restarted', 'sys_reboot_domain.email-template.html', 'domain',
-                                        self.originalDomain.__str__())
-                    self.logger.info('is_sys_reboot: system has been rebooted. DDNS successfully sent email alerts.')
+                    pass
 
     def start(self) -> None:
         """
         开启循环
         """
-        # self.is_sys_reboot()
         current_ip = ''
         while True:
             try:
@@ -145,7 +159,7 @@ class DDNS:
                         self._email_client.send_email('DDNS服务异常提醒 - DNS更新失败',
                                                       'send_new_ip.email-template.html', 'new_ip', current_ip)
             except Exception as e:
-                self.logger.exception(e)
+                self._logger.exception(e)
             time.sleep(self._frequency)
 
 
@@ -156,8 +170,7 @@ def main():
     parser = argparse.ArgumentParser(description='NameSilo DDNS: Regularly detect IP changes of home broadband and '
                                                  'automatically update the IP address of the domain')
     parser.add_argument('--archive', action='store_true', help='Archive logs')
-    parser.add_argument('--docker', action='store_true',
-                        help='Tell the program that it is now running in a docker container')
+    parser.add_argument('--test-email', action='store_true', help='Send a test email and exit')
     parser.add_argument('-c', help='A magic parameter', dest='count', type=int, default=0)
     parser.add_argument('-v', action='version', version=DDNS.version)
     parser.add_argument('--version', action='version', version=DDNS.version)
@@ -171,9 +184,8 @@ def main():
         time.sleep(5)
 
     with open('conf/conf.json', 'r', encoding='utf-8') as fp:
-        ddns = DDNS(json.load(fp), restart_count=args.count, in_docker=args.docker,
-                    debug=True if sys.gettrace() else False)
-    if len(sys.argv) > 1 and sys.argv[1] == 'testEmail':
+        ddns = DDNS(json.load(fp), restart_count=args.count, debug=True if sys.gettrace() else False)
+    if args.test_email:
         ddns.test_email()
     else:
         ddns.start()
