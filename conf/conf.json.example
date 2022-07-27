@@ -4,12 +4,11 @@
     ],
     "key": "1234",
     "frequency": 600,
-    "mail_host": "",
-    "mail_port": "",
+    "mail_host": "smtp.qq.com",
+    "mail_port": "465",
     "mail_user": "",
-    "mail_pass": "",
+    "mail_pass": "password or key",
     "receivers": [""],
-    "email_after_reboot": false,
     "auto_restart": false,
     "email_every_update": false
 }

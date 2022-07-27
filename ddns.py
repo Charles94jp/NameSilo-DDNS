@@ -7,6 +7,7 @@ import sys
 import time
 from datetime import datetime
 from platform import system as pl_system
+from subprocess import Popen
 
 import httpx
 
@@ -21,7 +22,8 @@ class DDNS:
 
     :author: Charles94jp
     :changelog: 20xx-xx-xx: xxx
-                2022-07-26 代码重构，拆分模块。
+                2022-07-27 代码重构，引入argparse，移除email_after_reboot，新的重启及计数机制
+                2022-07-26 代码重构，拆分出三个子模块，优化代码风格，取消缓存邮件模板，取消日志回滚时压缩，添加ASCII启动图标
     :since: 2021-12-18
     """
 
@@ -91,7 +93,7 @@ class DDNS:
         # self._email_after_reboot = conf['email_after_reboot']
         # self._in_docker = in_docker
         self._restart_count = restart_count
-        # todo: auto_restart
+        self._auto_restart = conf['auto_restart']
 
     @staticmethod
     def archive_log():
@@ -145,6 +147,7 @@ class DDNS:
     def start(self) -> None:
         """
         开启循环
+        todo: 优化邮件内容
         """
         current_ip = ''
         while True:
@@ -160,6 +163,19 @@ class DDNS:
                                                       'send_new_ip.email-template.html', 'new_ip', current_ip)
             except Exception as e:
                 self._logger.exception(e)
+                if self._auto_restart:
+                    if self._restart_count > 10:
+                        self._email_client.send_email('DDNS服务异常提醒', 'ddns_error_exit.email-template.html')
+                        self._logger.info('程序连续错误10次，自动退出')
+                        sys.exit(-1)
+                    time.sleep(self._frequency)
+                    # 重启DDNS服务，确保python ddns.py的错误被记录，所以使用sh -c。subprocess.
+                    # Popen()本身无法单独追加到文件，需要传参stdout为open()文件，但主程序需要退出，让子进程单独运行，所以不可取
+                    # 这里还是会丢掉sh命令的报错，但是无所谓，影响很小
+                    Popen(['sh', '-c',
+                           f'nohup {sys.executable} ddns.py -c {self._restart_count + 1}>> log/DDNS.log  2>&1 &'])
+                    sys.exit(-1)
+            self._restart_count = 0
             time.sleep(self._frequency)
 
 
@@ -172,8 +188,7 @@ def main():
     parser.add_argument('--archive', action='store_true', help='Archive logs')
     parser.add_argument('--test-email', action='store_true', help='Send a test email and exit')
     parser.add_argument('-c', help='A magic parameter', dest='count', type=int, default=0)
-    parser.add_argument('-v', action='version', version=DDNS.version)
-    parser.add_argument('--version', action='version', version=DDNS.version)
+    parser.add_argument('-v', '--version', action='version', version=DDNS.version)
     args = parser.parse_args()
 
     if args.archive:
