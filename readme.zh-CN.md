@@ -192,15 +192,7 @@ ln -s /root/NameSilo-DDNS/DDNS /usr/bin/DDNS
 ls -lh log/DDNS*.log*
 ```
 
-其中`DDNS.log`是当前最新的日志文件，其余的为`gzip`压缩过的归档文件。当DDNS服务启动时，若`DDNS.log`超过2M便会触发自动归档。可以存储使用DDNS以来所有的日志。
-
-解压归档文件：
-
-```
-gunzip -N DDNS-xxx.log.gz
-```
-
-解压后即可阅读
+当DDNS服务启动时，若`DDNS.log`超过2M便会触发自动归档。可以存储使用DDNS以来所有的日志。
 
 手动归档日志，用于在`DDNS status`打印信息过多时
 
