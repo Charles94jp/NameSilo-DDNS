@@ -2,8 +2,6 @@ import logging
 import smtplib
 from email.mime.text import MIMEText
 
-import socks
-
 
 class EmailClient:
     """
@@ -16,6 +14,7 @@ class EmailClient:
                 2022-07-26 代码重构，拆分出此类，由于邮件使用频率不高，取消在内存中缓存模板内容
     :since: 2022-07-26
     """
+    available = False
 
     def __init__(self, conf: dict, debug: bool = False) -> None:
         """
@@ -35,10 +34,11 @@ class EmailClient:
     def send_email(self, title, template_file_name, domain_table=None, var_name=None, value=None):
         """
 
-        :param title: 邮件标题
-        :param template_file: 模板的单纯文件名，不需要路径
-        :param var_name: 模板中的变量名，无需加上${}，只支持一个变量
-        :param value: 内存中的变量值
+        :param str title: 邮件标题
+        :param str template_file_name: 模板的单纯文件名，不需要路径
+        :param str domain_table:
+        :param str var_name: 模板中的变量名，无需加上${}，只支持一个变量
+        :param * value: 内存中的变量值
         """
         if not self.available:
             return -1
@@ -63,6 +63,7 @@ class EmailClient:
         # 登录并发送邮件
         try:
             if self._debug:
+                import socks
                 socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5, '127.0.0.1', 7890)
                 socks.wrapmodule(smtplib)
             smtp_client = smtplib.SMTP_SSL(self._mail_host, int(self._mail_port))

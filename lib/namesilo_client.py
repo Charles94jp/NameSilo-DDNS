@@ -12,6 +12,7 @@ class NameSiloClient:
 
     :author: Charles94jp
     :changelog: 20xx-xx-xx: xxx
+                2022-07-28 域名信息导出html table用于发邮件
                 2022-07-26 代码重构，拆分出此类
     :since: 2022-07-26
     """

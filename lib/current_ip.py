@@ -26,15 +26,15 @@ class CurrentIP:
         """
         self._http_client = http_client
         self._logger = logging.getLogger('NameSilo_DDNS')
-        self.ip138_url = None
+        self._ip138_url = None
         try:
             r = self._http_client.get('https://www.ip138.com/')
             api = r.text.split('<iframe src=\"//')[1]
             api = api.split('/\"')[0]
-            self.ip138_url = api
+            self._ip138_url = api
         except Exception as e:
             self._logger.exception(e)
-            if self.ip138_url is not None:
+            if self._ip138_url is not None:
                 self._logger.info('__init__: 未正确获取ip138的api，将使用备用api')
 
     def fetch(self):
@@ -44,20 +44,21 @@ class CurrentIP:
         :return: '-1' if failed
         :rtype: str
         """
-        ip = r = '-1'
-        if not self.ip138_url:
+        ip = '-1'
+        if not self._ip138_url:
             try:
-                ip = self._get_current_ip_bk()
+                ip = self._fetch_current_ip_bk()
             except Exception as e:
+                self._logger.exception(e)
                 self._logger.error('fetch: \tapi error')
             return ip
 
         try:
-            r = self._http_client.get('http://' + self.ip138_url)
+            r = self._http_client.get('http://' + self._ip138_url)
         except Exception as e:
             self._logger.exception(e)
             try:
-                r = self._http_client.get('https://' + self.ip138_url)
+                r = self._http_client.get('https://' + self._ip138_url)
             except Exception as e:
                 self._logger.exception(e)
                 return '-1'

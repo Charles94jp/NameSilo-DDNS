@@ -22,6 +22,7 @@ class DDNS:
 
     :author: Charles94jp
     :changelog: 20xx-xx-xx: xxx
+                2022-07-28 邮件内容添加域名信息表
                 2022-07-27 代码重构，引入argparse，移除email_after_reboot，新的重启及计数机制
                 2022-07-26 代码重构，拆分出三个子模块，优化代码风格，取消缓存邮件模板，取消日志回滚时压缩，添加ASCII启动图标
     :since: 2021-12-18
@@ -151,7 +152,6 @@ class DDNS:
         todo: 邮件支持中英文
         """
         self._namesilo_client.fetch_domains_info()
-        current_ip = ''
         while True:
             try:
                 current_ip = self._current_ip.fetch()
