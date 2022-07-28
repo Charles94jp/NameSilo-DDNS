@@ -9,6 +9,7 @@
     "mail_user": "",
     "mail_pass": "password or key",
     "receivers": [""],
+    "mail_lang": "zh-cn",
     "auto_restart": false,
     "email_every_update": false
 }

@@ -1,0 +1,32 @@
+<!--title:DDNS服务异常提醒 - DNS更新失败-->
+<!--called by function update_domain_ip-->
+<p>
+    <span>
+        Hello,
+    </span>
+</p>
+<p>
+    <span>
+        Your IP has changed, the current IP is: <a href="${new_ip}">${new_ip}</a>, but due to the network error, the NameSilo DDNS program is unable to push your new IP to NameSilo. the NameSilo DDNS service will not stop immediately, it will try to push it a few more times.
+    </span>
+</p>
+<p>
+    <span>
+        You can connect to the server to check the exception details through log/DDNS.log file, <b>please check the reason and restart NameSilo DDNS service as soon as possible</b> to avoid the IP change that your server cannot be accessed through the domain name.
+    </span>
+</p>
+<p>
+    <span>
+        The following is your current domain information:
+    </span>
+</p>
+<p>
+    <span>
+        Please feedback any questions in <a target="_blank" href="https://github.com/Charles94jp/NameSilo-DDNS">GitHub Issues</a> of the NameSilo DDNS project, thank you for your support.
+    </span>
+</p>
+<p>
+    <span>
+        The following is your current domain information:
+    </span>
+</p>

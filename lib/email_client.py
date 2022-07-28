@@ -1,5 +1,6 @@
 import logging
 import smtplib
+from email.utils import formataddr
 from email.mime.text import MIMEText
 
 
@@ -56,7 +57,7 @@ class EmailClient:
         # 邮件主题
         message['Subject'] = title
         # 发送方信息
-        message['From'] = self._mail_user
+        message['From'] = formataddr(('DDNS Service', self._mail_user))
         # 接受方信息
         message['To'] = ','.join(self._receivers)
 

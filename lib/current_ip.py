@@ -35,7 +35,8 @@ class CurrentIP:
         except Exception as e:
             self._logger.exception(e)
             if self._ip138_url is not None:
-                self._logger.info('__init__: 未正确获取ip138的api，将使用备用api')
+                self._logger.info('__init__: The api for ip138 is not correctly obtained, '
+                                  'the alternate api will be used')
 
     def fetch(self):
         """

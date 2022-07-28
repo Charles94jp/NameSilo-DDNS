@@ -22,7 +22,7 @@ class DDNS:
 
     :author: Charles94jp
     :changelog: 20xx-xx-xx: xxx
-                2022-07-28 邮件内容添加域名信息表
+                2022-07-28 邮件内容添加域名信息表，邮件支持英文
                 2022-07-27 代码重构，引入argparse，移除email_after_reboot，新的重启及计数机制
                 2022-07-26 代码重构，拆分出三个子模块，优化代码风格，取消缓存邮件模板，取消日志回滚时压缩，添加ASCII启动图标
     :since: 2021-12-18
@@ -95,6 +95,10 @@ class DDNS:
         # self._in_docker = in_docker
         self._restart_count = restart_count
         self._auto_restart = conf['auto_restart']
+        self._is_mail_lang_zh_cn = True
+        lang = conf['mail_lang'].lower()
+        if lang == 'en' or lang == 'en-us':
+            self._is_mail_lang_zh_cn = False
 
     @staticmethod
     def archive_log():
@@ -109,8 +113,10 @@ class DDNS:
             print('Email configuration is not filled')
             sys.exit(-1)
         self._logger.info('test_email')
-        self._email_client.send_email('DDNS服务通知 - 测试邮件', 'test_email.email-template.html',
-                                      self._namesilo_client.to_html_table())
+        self._email_client.send_email(
+            'DDNS服务通知 - 这是一封测试邮件' if self._is_mail_lang_zh_cn else 'DDNS Service Notification - This is a test email',
+            f'email_test.email-template{"" if self._is_mail_lang_zh_cn else "-en"}.html',
+            self._namesilo_client.to_html_table())
         print('The test email has been sent')
 
     def is_sys_reboot(self):
@@ -149,7 +155,6 @@ class DDNS:
     def start(self) -> None:
         """
         开启循环
-        todo: 邮件支持中英文
         """
         self._namesilo_client.fetch_domains_info()
         while True:
@@ -159,20 +164,27 @@ class DDNS:
                 if not self._namesilo_client.ip_equal(current_ip):
                     r = self._namesilo_client.update_domain_ip(current_ip)
                     if r == 0 and self._email_every_update:
-                        self._email_client.send_email('DDNS服务通知 - 已成功推送新IP地址到NameSilo',
-                                                      'update_successful.email-template.html',
-                                                      self._namesilo_client.to_html_table(), 'new_ip', current_ip)
+                        self._email_client.send_email(
+                            'DDNS服务通知 - 已成功推送新IP地址到NameSilo' if self._is_mail_lang_zh_cn else
+                            'DDNS Service Notification - New IP address has been successfully pushed to NameSilo',
+                            f'update_successful.email-template{"" if self._is_mail_lang_zh_cn else "-en"}.html',
+                            self._namesilo_client.to_html_table(), 'new_ip', current_ip)
                     if r != 0:
-                        self._email_client.send_email('DDNS服务异常提醒 - DNS更新失败',
-                                                      'update_failed.email-template.html',
-                                                      self._namesilo_client.to_html_table(), 'new_ip', current_ip)
+                        self._email_client.send_email(
+                            'DDNS服务异常提醒 - DNS更新失败' if self._is_mail_lang_zh_cn else
+                            'DDNS Service Exception Alert - DNS update failure',
+                            f'update_failed.email-template{"" if self._is_mail_lang_zh_cn else "-en"}.html',
+                            self._namesilo_client.to_html_table(), 'new_ip', current_ip)
             except Exception as e:
                 self._logger.exception(e)
                 if self._auto_restart:
                     if self._restart_count > 10:
-                        self._email_client.send_email('DDNS服务异常提醒 - 程序已停止', 'ddns_error_exit.email-template.html',
-                                                      self._namesilo_client.to_html_table())
-                        self._logger.info('程序连续错误10次，自动退出')
+                        self._email_client.send_email(
+                            'DDNS服务异常提醒 - 程序已停止' if self._is_mail_lang_zh_cn else
+                            'DDNS service exception alert - service has stopped',
+                            f'ddns_error_exit.email-template{"" if self._is_mail_lang_zh_cn else "-en"}.html',
+                            self._namesilo_client.to_html_table())
+                        self._logger.info('The program has made 10 consecutive errors and exited automatically')
                         sys.exit(-1)
                     time.sleep(self._frequency)
                     # 重启DDNS服务，确保python ddns.py的错误被记录，所以使用sh -c。subprocess.
