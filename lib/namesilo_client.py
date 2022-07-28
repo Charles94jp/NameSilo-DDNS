@@ -43,7 +43,6 @@ class NameSiloClient:
             self.domains.append({'domain': domain, 'host': host})
             if not is_list:
                 break
-        self.fetch_domains_info()
 
     def fetch_domains_info(self) -> None:
         """
@@ -56,7 +55,7 @@ class NameSiloClient:
                 if r.status_code == 200:
                     r = r.text.split('<resource_record>')
                     _domain = domain['domain'] if domain['host'] == '@' or \
-                                                  domain['host'] == '' else domain['host'] + '.' + domain['domain']
+                                                  domain['host'] == '' else f"{domain['host']}.{domain['domain']}"
                     for record in r:
                         if record.find(f'<host>{_domain}</host>') != -1:
                             r = record
@@ -65,14 +64,15 @@ class NameSiloClient:
                     domain['record_id'] = r[0].split('<record_id>')[-1]
                     domain['domain_ip'] = r[1].split('<value>')[1].split('</value>')[0]
                     self._logger.info(
-                        f"get_domain_ip: \t'{domain['host']}.{domain['domain']}' resolution ip: " + domain['domain_ip'])
+                        f"get_domain_ip: \t'{domain['host']}{'.' if domain['host'] else ''}{domain['domain']}' "
+                        f"resolution ip: {domain['domain_ip']}")
                 else:
-                    self._logger.error('get_domain_ip: \tError, process stopped. '
+                    self._logger.error('fetch_domains_info: \tError, process stopped. '
                                        'It could be due to the configuration file error, or the NameSilo server error.')
                     exit(-1)
             except httpx.ConnectError as e:
                 self._logger.exception(e)
-                self._logger.error('get_domain_ip: \tError, process stopped. '
+                self._logger.error('fetch_domains_info: \tError, process stopped. '
                                    'It could be due to the configuration file error, or the NameSilo server error.')
 
     def update_domain_ip(self, new_ip: str):
@@ -180,7 +180,7 @@ class NameSiloClient:
             tr = tr_template.replace('${background}', ';background-color:rgb(248,248,248)' if count % 2 == 0 else '')
             td1 = td_template.replace('${content}', domain['host'])
             td2 = td_template.replace('${content}', domain['domain'])
-            td3 = td_template.replace('${content}', domain['domain_ip'])
+            td3 = td_template.replace('${content}', domain.get('domain_ip', ''))
             tr = tr.replace('${tds}', td1 + td2 + td3)
             trs = trs + tr
             count = count + 1

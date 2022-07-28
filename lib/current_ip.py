@@ -49,7 +49,7 @@ class CurrentIP:
             try:
                 ip = self._get_current_ip_bk()
             except Exception as e:
-                self._logger.error('get_current_ip: \tapi error')
+                self._logger.error('fetch: \tapi error')
             return ip
 
         try:
@@ -66,13 +66,13 @@ class CurrentIP:
             r = r.text
             r = r.split('您的IP地址是：')[1]
             ip = r.split('</title>')[0]
-            self._logger.info(f'get_current_ip: \tcurrent host ip(ip138): {ip}')
+            self._logger.info(f'fetch: \tcurrent host ip(ip138): {ip}')
         else:
             try:
                 ip = self._get_current_ip_bk()
             except Exception as e:
                 self._logger.exception(e)
-                self._logger.error('get_current_ip: \tapi error')
+                self._logger.error('fetch: \tapi error')
         return ip
 
     def _fetch_current_ip_bk(self):
@@ -87,12 +87,12 @@ class CurrentIP:
             r = self._http_client.get(self._MYIP_API)
             r = r.json()
             ip = r['ip']
-            self._logger.info(f'get_current_ip: \tcurrent host ip(myip): {ip}')
+            self._logger.info(f'_fetch_current_ip_bk: \tcurrent host ip(myip): {ip}')
             return ip
         except Exception as e:
             self._logger.exception(e)
             r = self._http_client.get(self._IPIFY_API)
             r = r.json()
             ip = r['ip']
-            self._logger.info(f'get_current_ip: \tcurrent host ip(ipify): {ip}')
+            self._logger.info(f'_fetch_current_ip_bk: \tcurrent host ip(ipify): {ip}')
             return ip

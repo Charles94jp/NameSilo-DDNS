@@ -148,12 +148,14 @@ class DDNS:
     def start(self) -> None:
         """
         开启循环
-        todo: 优化邮件内容
+        todo: 邮件支持中英文
         """
+        self._namesilo_client.fetch_domains_info()
         current_ip = ''
         while True:
             try:
                 current_ip = self._current_ip.fetch()
+                # 值得注意的是，当程序在运行一段时间后，而用户手动去NameSilo修改了域名的解析值，由于程序只对比内存中的值，所以不会触发更新
                 if not self._namesilo_client.ip_equal(current_ip):
                     r = self._namesilo_client.update_domain_ip(current_ip)
                     if r == 0 and self._email_every_update:
