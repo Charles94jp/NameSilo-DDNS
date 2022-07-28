@@ -125,6 +125,7 @@ pip install httpx
 |mail_user|登录用户名，也是发件人|
 |mail_pass|登录密码或key|
 |receivers|数组，收件人地址，可以是多个|
+|mail_lang|邮件的语言。默认zh-cn，可选en-us|
 |~~email_after_reboot~~|从v2.2.0版本起弃用。适用于家里意外断电的情况，当通电后，路由器重新拨号，一般会获得新IP，如果服务器支持来电自动开机，那么DDNS在开机自动启动后，会发送邮件告诉你：你的服务器已成功启动。|
 |auto_restart|Linux下生效，默认不启用。在程序持续异常一段时间后，自我重启。因为服务在长时间运行后，向NameSilo发起https请求时，会出现异常，目前不知道原因，但是重启DDNS能解决问题。|
 |email_every_update|每次IP更新都发送邮件告知新IP，避免在DNS更新的十几二十分钟内无法访问。默认关闭，打开的前提是设置了邮件。|

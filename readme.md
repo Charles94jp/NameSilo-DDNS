@@ -106,11 +106,12 @@ The `conf/conf.json` file needs to be configured before starting, refer to conf.
 |domain or domains|String or list, such as `"aa.bb.cn"` or `["cc.bb.cn", "q.w.cc.cn"]`.The domain that you want to update. This program can only update an existing DNS record, not create a new one. So you must first create a resolution on the NameSilo web page before you can run the program.|
 |key|<a target="_blank" href="https://www.namesilo.com/account/api-manager">The key generated from NameSilo</a>, after generation you need to remember and keep this key.|
 |frequency|How often do you detect changes in your ip, and only update your DNS when a change in ip occurs, in seconds.|
-|mail_host| For example, you can use [Google Mail's POP/IMAP](https://support.google.com/mail/answer/7126229) |
-|mail_port| Must be SMTP SSL port |
+|mail_host| For example, you can use [Google Mail's POP/IMAP](https://support.google.com/mail/answer/7126229). |
+|mail_port| Must be SMTP SSL port. |
 |mail_user|The login user name, which is also the email sender.|
-|mail_pass|Password or key, for gmail, refer [here](https://support.google.com/accounts/answer/185833)|
+|mail_pass|Password or key, for gmail, refer [here](https://support.google.com/accounts/answer/185833).|
 |receivers|An array to hold the recipient's address.|
+|mail_lang|The language of the email. Default zh-cn, optional en-us.|
 |~~email_after_reboot~~|Deprecated since v2.2.0. When the power is lost unexpectedly, an email notification will be sent when the power is reapplied. If the server can start automatically after power on.|
 |auto_restart|For Linux. Default disable. Self restarting after the program has been consistently exception for a period of time. Because the service is exception when launching https request to NameSilo after a long time running, the reason is not known, but restarting DDNS can solve the problem.|
 |email_every_update|Prerequisites: Linux; Set email configuration; Every time the IP is changed, an email will be sent to inform the new IP to avoid inaccessibility within ten or twenty minutes of DNS update.|
