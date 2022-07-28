@@ -2,6 +2,8 @@ import logging
 import smtplib
 from email.mime.text import MIMEText
 
+import socks
+
 
 class EmailClient:
     """
@@ -15,12 +17,13 @@ class EmailClient:
     :since: 2022-07-26
     """
 
-    def __init__(self, conf: dict) -> None:
+    def __init__(self, conf: dict, debug: bool = False) -> None:
         """
 
         :param dict conf: 解析后的配置文件
         """
         self._logger = logging.getLogger('NameSilo_DDNS')
+        self._debug = debug
         if conf['mail_host'] and conf['mail_port'] and conf['mail_user'] and conf['mail_pass'] and conf['receivers']:
             self.available = True
             self._mail_host = conf['mail_host']
@@ -57,15 +60,18 @@ class EmailClient:
 
         # 登录并发送邮件
         try:
+            if self._debug:
+                socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5, '127.0.0.1', 7890)
+                socks.wrapmodule(smtplib)
             smtp_client = smtplib.SMTP_SSL(self._mail_host, int(self._mail_port))
             # 连接到服务器
             # 登录到服务器
-            smtp_client.login(self._mail_user, self._mail_pwd)
+            r = smtp_client.login(self._mail_user, self._mail_pwd)
             # 发送
-            smtp_client.sendmail(
+            r = smtp_client.sendmail(
                 self._mail_user, self._receivers, message.as_string())
             # 退出
-            smtp_client.quit()
+            r = smtp_client.quit()
             self._logger.info('send_email: \tsuccess')
         except smtplib.SMTPException as e:
             self._logger.exception(e)

@@ -83,7 +83,7 @@ class DDNS:
 
         self._current_ip = CurrentIP(self._base_http_client)
         self._namesilo_client = NameSiloClient(self._base_http_client, conf)
-        self._email_client = EmailClient(conf)
+        self._email_client = EmailClient(conf, debug=debug)
         self._frequency = conf.get('frequency')
         if self._frequency is None:
             # 默认每次循环休眠10分钟
