@@ -32,7 +32,7 @@ class EmailClient:
             self._mail_pwd = conf['mail_pass']
             self._receivers = conf['receivers']
 
-    def send_email(self, title, template_file_name, var_name=None, value=None):
+    def send_email(self, title, template_file_name, domain_table=None, var_name=None, value=None):
         """
 
         :param title: 邮件标题
@@ -48,6 +48,8 @@ class EmailClient:
             html_msg = email_template = f.read()
         if var_name is not None and value is not None:
             html_msg = email_template.replace('${' + var_name + '}', value)
+
+        html_msg = html_msg + domain_table
 
         # 邮件消息，plain是纯文本，html可以自定义样式
         message = MIMEText(html_msg, 'html', 'utf-8')

@@ -108,7 +108,8 @@ class DDNS:
             print('Email configuration is not filled')
             sys.exit(-1)
         self._logger.info('test_email')
-        self._email_client.send_email('DDNS Service Test', 'test_email.email-template.html')
+        self._email_client.send_email('DDNS服务通知 - 测试邮件', 'test_email.email-template.html',
+                                      self._namesilo_client.to_html_table())
         print('The test email has been sent')
 
     def is_sys_reboot(self):
@@ -156,16 +157,19 @@ class DDNS:
                 if not self._namesilo_client.ip_equal(current_ip):
                     r = self._namesilo_client.update_domain_ip(current_ip)
                     if r == 0 and self._email_every_update:
-                        self._email_client.send_email('DDNS服务通知：已成功推送新IP地址到NameSilo',
-                                                      'update_success.email-template.html', 'new_ip', current_ip)
+                        self._email_client.send_email('DDNS服务通知 - 已成功推送新IP地址到NameSilo',
+                                                      'update_successful.email-template.html',
+                                                      self._namesilo_client.to_html_table(), 'new_ip', current_ip)
                     if r != 0:
                         self._email_client.send_email('DDNS服务异常提醒 - DNS更新失败',
-                                                      'send_new_ip.email-template.html', 'new_ip', current_ip)
+                                                      'update_failed.email-template.html',
+                                                      self._namesilo_client.to_html_table(), 'new_ip', current_ip)
             except Exception as e:
                 self._logger.exception(e)
                 if self._auto_restart:
                     if self._restart_count > 10:
-                        self._email_client.send_email('DDNS服务异常提醒', 'ddns_error_exit.email-template.html')
+                        self._email_client.send_email('DDNS服务异常提醒 - 程序已停止', 'ddns_error_exit.email-template.html',
+                                                      self._namesilo_client.to_html_table())
                         self._logger.info('程序连续错误10次，自动退出')
                         sys.exit(-1)
                     time.sleep(self._frequency)

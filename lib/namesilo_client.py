@@ -134,3 +134,55 @@ class NameSiloClient:
         for domain in self.domains:
             result = result & (ip == domain['domain_ip'])
         return result
+
+    def to_html_table(self) -> str:
+        """
+        将域名信息导出为html表格，方便邮件发送
+
+        :rtype: str
+        :return: html code
+        """
+
+        # 因为google不支持<style>标签，只能全部样式都内联。qq邮箱是支持的
+        table_template = """
+<figure style="max-width: 900px;overflow-x: auto;margin: 1.2em 0px;padding: 0px;">
+    <table style="font-size:12px;border-spacing: 0px;width: 100%;overflow: auto;break-inside: auto;text-align: left;margin: 0.8em 0;padding: 0;word-break: initial;">
+        <thead style="background-color:rgb(248,248,248)">
+        <tr style="border:1px solid rgb(223,226,229);margin:0px;padding:0px">
+            <th style="width:33.3%;border-width:1px 1px 0px;border-top-style:solid;border-right-style:solid;border-left-style:solid;border-top-color:rgb(223,226,229);border-right-color:rgb(223,226,229);border-left-color:rgb(223,226,229);border-bottom-style:initial;border-bottom-color:initial;margin:0px;padding:6px 13px;text-align:left">
+                HOSTNAME
+            </th>
+            <th style="width:33.3%;text-align:left;border-width:1px 1px 0px;border-top-style:solid;border-right-style:solid;border-left-style:solid;border-top-color:rgb(223,226,229);border-right-color:rgb(223,226,229);border-left-color:rgb(223,226,229);border-bottom-style:initial;border-bottom-color:initial;margin:0px;padding:6px 13px">
+                DOMAIN
+            </th>
+            <th style="text-align:left;border-width:1px 1px 0px;border-top-style:solid;border-right-style:solid;border-left-style:solid;border-top-color:rgb(223,226,229);border-right-color:rgb(223,226,229);border-left-color:rgb(223,226,229);border-bottom-style:initial;border-bottom-color:initial;margin:0px;padding:6px 13px">
+                ADDRESS/VALUE
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        ${trs}
+        </tbody>
+    </table>
+</figure>
+        """
+
+        tr_template = """
+        <tr style="border:1px solid rgb(223,226,229);margin:0px;padding:0px${background}">
+        ${tds}
+        </tr>"""
+
+        td_template = '<td style="border:1px solid rgb(223,226,229);padding:6px 13px">${content}</td>'
+
+        count = 1
+        trs = ''
+        for domain in self.domains:
+            tr = tr_template.replace('${background}', ';background-color:rgb(248,248,248)' if count % 2 == 0 else '')
+            td1 = td_template.replace('${content}', domain['host'])
+            td2 = td_template.replace('${content}', domain['domain'])
+            td3 = td_template.replace('${content}', domain['domain_ip'])
+            tr = tr.replace('${tds}', td1 + td2 + td3)
+            trs = trs + tr
+            count = count + 1
+        table = table_template.replace('${trs}', trs)
+        return table
