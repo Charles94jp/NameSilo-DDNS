@@ -31,12 +31,16 @@ class EmailClient:
             self._mail_user = conf['mail_user']
             self._mail_pwd = conf['mail_pass']
             self._receivers = conf['receivers']
+            self._zh_cn = True
+            lang = conf['mail_lang'].lower()
+            if lang == 'en' or lang == 'en-us':
+                self._zh_cn = False
 
-    def send_email(self, title, template_file_name, domain_table=None, var_name=None, value=None):
+    def send_email(self, template_file_name, domain_table=None, var_name=None, value=None):
         """
+        从邮件模板中读取邮件标题和内容，替换变量，拼接domain table后发送
 
-        :param str title: 邮件标题
-        :param str template_file_name: 模板的单纯文件名，不需要路径
+        :param str template_file_name: 模板的单纯文件名，不需要路径，不要.email-template.html后缀
         :param str domain_table:
         :param str var_name: 模板中的变量名，无需加上${}，只支持一个变量
         :param * value: 内存中的变量值
@@ -45,10 +49,14 @@ class EmailClient:
             return -1
 
         # 加载模板，模板用html文件格式是方便预览
-        with open('conf/' + template_file_name, 'r', encoding='utf-8') as f:
-            html_msg = email_template = f.read()
+        with open(f'conf/{template_file_name}.email-template{"" if self._zh_cn else "-en"}.html',
+                  'r', encoding='utf-8') as f:
+            template = f.read()
+        template = template.split('<!--email title-->')
+        title = template[0]
+        html_msg = template[1]
         if var_name is not None and value is not None:
-            html_msg = email_template.replace('${' + var_name + '}', value)
+            html_msg = html_msg.replace('${' + var_name + '}', value)
 
         html_msg = html_msg + domain_table
 

@@ -65,7 +65,7 @@ class NameSiloClient:
                     domain['record_id'] = r[0].split('<record_id>')[-1]
                     domain['domain_ip'] = r[1].split('<value>')[1].split('</value>')[0]
                     self._logger.info(
-                        f"get_domain_ip: \t'{domain['host']}{'.' if domain['host'] else ''}{domain['domain']}' "
+                        f"fetch_domains_info: \t'{domain['host']}{'.' if domain['host'] else ''}{domain['domain']}' "
                         f"resolution ip: {domain['domain_ip']}")
                 else:
                     self._logger.error('fetch_domains_info: \tError, process stopped. '
@@ -90,6 +90,7 @@ class NameSiloClient:
             if domain['domain_ip'] == new_ip:
                 continue
             try:
+                full_domain = f"{domain['host']}{'.' if domain['host'] else ''}{domain['domain']}"
                 _host = '' if domain["host"] == '@' else domain["host"]
                 url = f"/api/dnsUpdateRecord?version=1&type=xml&rrttl=7207&key={self._api_key}" \
                       f"&domain={domain['domain']}&rrid={domain['record_id']}&rrhost={_host}&rrvalue={new_ip}"
@@ -99,7 +100,7 @@ class NameSiloClient:
                 r = r.split('</code>')[0]
                 if r == '300':
                     domain['domain_ip'] = new_ip
-                    self._logger.info(f"update_domain_ip: \tupdate '{domain['host']}.{domain['domain']}' "
+                    self._logger.info(f"update_domain_ip: \tupdate '{full_domain}' "
                                       f"completed: {domain['domain_ip']}")
                     success1 = success1 + 1
                 elif r == '280':
@@ -110,12 +111,12 @@ class NameSiloClient:
                     return result
                 else:
                     error2 = error2 + 1
-                    self._logger.error(f"update_domain_ip: \tupdate '{domain['host']}.{domain['domain']}' failed. "
+                    self._logger.error(f"update_domain_ip: \tupdate '{full_domain}' failed. "
                                        f"Namesilo response:\n{r1}")
             except Exception as e:
                 error3 = error3 + 1
                 self._logger.exception(e)
-                self._logger.error(f"update_domain_ip: \tupdate '{domain['host']}.{domain['domain']}' error")
+                self._logger.error(f"update_domain_ip: \tupdate '{full_domain}' error")
         if success1 > 10000:
             return 0
         if error2 > 20000:
