@@ -25,23 +25,24 @@ This program is only available for domain names purchased on NameSilo.
 
 This program obtains the public IP address of home broadband by visiting http://202x.ip138.com or https://api.myip.com or https://api.ipify.org?format=json, and queries and updates the DNS status by https://www.namesilo.com/api/.
 
-It would be the best encouragement for me to get your  ⭐ STAR.
+👉  ⭐  [Star](#)
+
+
 
 # Features
 
 - Simple but rich configuration.
-
 - With email alert function, you will be alerted when there is an abnormality in the process of the service running for a long time.
-
 - Support Docker.
-
 - Log rotation.
+- Support multiple domain name updates at the same time.
+
+
 
 # Table of Contents
 
 - [Background](#background)
 - [Install](#install)
-    - [Dependencies](#dependencies)
 - [Usage](#usage)
     - [Configuration](#configuration)
     - [Note](#note)
@@ -54,6 +55,8 @@ It would be the best encouragement for me to get your  ⭐ STAR.
     - [Start with Linux](#start-with-linux)
 - [Links](#links)
 
+
+
 # Background
 
 At present, telecom operators assign to home broadband IP are dynamic, although the IP address is not fixed, but the good thing is that the home router can get a real public IP, so we just need to use **set Modem to Bridge Mode + use router for Broadband Authentication + router setup NAT Mapping/DMZ Host** to access the home device in the public network. After the router mapping port 22 we can remotely connect to our home linux machine, and after mapping port 445+3389 we can use the remote desktop of Win10.
@@ -63,6 +66,8 @@ At present, telecom operators assign to home broadband IP are dynamic, although 
 To solve the problem of changing public IP, you can purchase a domain name and use DDNS (Dynamic Domain Name Server) to resolve the domain name to your broadband's IP. This will allow you to access your home devices by accessing a **fixed domain name**.
 
 To achieve this, you need a computer that is always running to run this DDNS program.
+
+
 
 # Install
 
@@ -76,6 +81,12 @@ Download and use:
 git -b python clone https://github.com/Charles94jp/NameSilo-DDNS.git
 ```
 
+The python 3 environment is required. The httpx module also needs to be installed.
+
+```
+pip install httpx
+```
+
 Update:
 
 ```
@@ -86,20 +97,15 @@ git pull origin python
 
 
 
-## Dependencies
-
-
-A Python3 environment is required. The httpx module also needs to be installed.
-
-```
-pip install httpx
-```
-
 # Usage
 
 ## Configuration
 
+
+
 The `conf/conf.json` file needs to be configured before starting, refer to conf.json.example. **Only the first two configurations are necessary**, the rest can be set without.
+
+
 
 |Fields|Introduction|
 |--|--|
@@ -110,32 +116,39 @@ The `conf/conf.json` file needs to be configured before starting, refer to conf.
 |mail_port| Must be SMTP SSL port. |
 |mail_user|The login user name, which is also the email sender.|
 |mail_pass|Password or key, for gmail, refer [here](https://support.google.com/accounts/answer/185833).|
-|receivers|An array to hold the recipient's address.|
+|receivers|Array to store the addresses of recipients. Receiver and sender can be the same address.|
 |mail_lang|The language of the email. Default zh-cn, optional en-us.|
 |~~email_after_reboot~~|Deprecated since v2.2.0. When the power is lost unexpectedly, an email notification will be sent when the power is reapplied. If the server can start automatically after power on.|
-|auto_restart|For Linux. Default disable. Self restarting after the program has been consistently exception for a period of time. Because the service is exception when launching https request to NameSilo after a long time running, the reason is not known, but restarting DDNS can solve the problem.|
+|auto_restart|Effective under Linux, disabled by default. When enabled, the program will automatically restart when it encounters exceptions. Since v2.1.0, the robustness of the program has been improved and this option is no longer important.|
 |email_every_update|Prerequisites: Linux; Set email configuration; Every time the IP is changed, an email will be sent to inform the new IP to avoid inaccessibility within ten or twenty minutes of DNS update.|
 
-About mail alert: Simply put, after the program is stopped unexpectedly, use mail_user to send a reminder email to receivers to avoid failing to update DNS after IP changes, resulting in inaccessibility with the domain name.Once you fill in the email server, username password and recipient, etc., you will receive basic email notifications, and the rest of the notifications are optional.
 
-Q: Under what circumstances will the program stop unexpectedly?
 
-A: I will avoid bugs in the coding of the program itself, but errors may occur in the api being used, such as NameSilo's api or ip138's api not being able to connect, which rarely happens.
+Q：What is the use of email function?
 
-The last five configurations are not required. Only after all five are filled in will the email alert feature be enabled.
+A：The following emails will be received: successful push ip to NameSilo; failed to push ip; program stopped due to unexpected circumstances; program restarted automatically
+
+Q：How to enable the email function?
+
+A：From mail_host to mail_pass, all 4 configurations are filled in correctly, and it will be enabled automatically
+
+
 
 Test if your email settings are correct, an email will be sent to your email address if your configuration works.
 
 ```
 DDNS testEmail
 # or
-python ddns.py testEmail
+python ddns.py --test-email
 ```
+
+
 
 ## Note
 
-
 This program can only update the DNS record of a domain name, it cannot be added, please make sure this DNS record exists for your domain name.
+
+
 
 ## Start
 
@@ -145,6 +158,8 @@ This program can only update the DNS record of a domain name, it cannot be added
 ```
 python ddns.py
 ```
+
+
 
 **Advanced use of Linux:**
 
@@ -166,7 +181,11 @@ If you want to use `DDNS` command anywhere, you can create a soft link in the `/
 ln -s /root/NameSilo-DDNS/DDNS /usr/bin/DDNS
 ```
 
+
+
 **Windows usage:** Double-click the bat or vbs file, please check the log for the running status of the program.
+
+
 
 ## Log
 
@@ -186,17 +205,23 @@ Manually archived logs for when `DDNS status` prints too many messages.
 
 ```
 DDNS archiveLog
+# or
+python ddns.py --archive
 ```
+
+
 
 <b>Windows</b>
 
-When DDNS service starts, if `DDNS.log` exceeds 2M, the old `DDNS.log` file will be renamed to `DDNS-xxx.log.back` and will not be compressed.
+When DDNS service starts, if `DDNS.log` exceeds 2M, the old `DDNS.log` file will be renamed to `DDNS-xxx.log.back`.
 
 Manually archived logs.
 
 ```
 python ddns.py archiveLog
 ```
+
+
 
 ## Start At Boot
 
@@ -216,13 +241,19 @@ systemctl daemon-reload
 systemctl enable DDNS
 ```
 
+
+
 <b>Windows</b>
 
 Add the vbs file to the Windows policy group.
 
+
+
 # Docker
 
 Now, NameSilo-DDNS supports docker on Linux, no need to have a python environment on your server, and no need to systemctl in terms of starting with Linux.
+
+
 
 ## Build or Pull Image
 
@@ -235,6 +266,8 @@ docker pull charles94jp/ddns
 This image is built based on the smallest Linux alpine image, Docker Hub shows 21.37M, `docker images` shows the image size is 57M.
 
 The images in Docker Hub are not necessarily the latest, you can also choose to build the images manually
+
+
 
 <b>Build docker image manually</b>
 
@@ -266,12 +299,16 @@ docker restart ddns
 
 Check the status of the ddns program with ``ddns-docker`` in `<local dir>`.
 
+
+
 ## Start with Linux
 
 ```shell
 systemctl enable docker
 docker update --restart=always ddns
 ```
+
+
 
 # Links
 

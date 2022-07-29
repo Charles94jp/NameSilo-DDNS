@@ -27,22 +27,22 @@ NameSilo DDNS是一个用于NameSilo的动态域名解析服务，适用于家�
 
 右上角点个 ⭐ Star 不迷路
 
+
+
 # Features
 
 - 配置简单但丰富
-
-- 具有邮件提醒功能，服务长时间运行过程中的掉线提醒
-
+- 具有邮件提醒功能，服务通知和异常提醒
 - 支持docker运行
-
 - 日志记录和滚动
+- 支持同时更新多个域名
+
 
 
 # Table of Contents
 
 - [Background](#background)
 - [Install](#install)
-    - [Dependencies](#dependencies)
 - [Usage](#usage)
     - [Configuration](#configuration)
     - [Note](#note)
@@ -53,8 +53,9 @@ NameSilo DDNS是一个用于NameSilo的动态域名解析服务，适用于家�
     - [Build or Pull Image](#build-or-pull-image)
     - [RUN](#run)
     - [Start with Linux](#start-with-linux)
-
 - [Links](#links)
+
+
 
 # Background
 
@@ -90,6 +91,12 @@ NameSilo DDNS是一个用于NameSilo的动态域名解析服务，适用于家�
 git -b python clone https://github.com/Charles94jp/NameSilo-DDNS.git
 ```
 
+需要使用python3来运行，python需要安装httpx模块：
+
+```
+pip install httpx
+```
+
 更新程序：
 
 ```
@@ -100,20 +107,16 @@ git pull origin python
 
 
 
-## Dependencies
-
-
-需要使用python3来运行，python需要安装httpx模块：
-
-```
-pip install httpx
-```
 
 # Usage
 
 ## Configuration
 
+
+
 启动前需要配置`conf/conf.json`文件，参考conf.json.example，**只有前两项配置是必要的**，其余的可以不进行配置。
+
+
 
 |字段|介绍|
 |--|--|
@@ -124,32 +127,39 @@ pip install httpx
 |mail_port|邮件服务器端口，必须是SMTP SSL端口|
 |mail_user|登录用户名，也是发件人|
 |mail_pass|登录密码或key|
-|receivers|数组，收件人地址，可以是多个|
+|receivers|数组，收件人地址，可以是多个。收件人 和 发件人 可以是同一个|
 |mail_lang|邮件的语言。默认zh-cn，可选en-us|
 |~~email_after_reboot~~|从v2.2.0版本起弃用。适用于家里意外断电的情况，当通电后，路由器重新拨号，一般会获得新IP，如果服务器支持来电自动开机，那么DDNS在开机自动启动后，会发送邮件告诉你：你的服务器已成功启动。|
-|auto_restart|Linux下生效，默认不启用。在程序持续异常一段时间后，自我重启。因为服务在长时间运行后，向NameSilo发起https请求时，会出现异常，目前不知道原因，但是重启DDNS能解决问题。|
+|auto_restart|Linux下生效，默认不启用。在程序持续异常一段时间后，自我重启。v2.1.0版本已找到异常原因并解决，此项不再重要。|
 |email_every_update|每次IP更新都发送邮件告知新IP，避免在DNS更新的十几二十分钟内无法访问。默认关闭，打开的前提是设置了邮件。|
 
-关于邮件提醒：简单地说就是程序意外停止后用mail_user给receivers发送一个提醒邮件，避免IP变动后未更新DNS，导致无法用域名访问。只要填写了邮件服务器、用户名密码和收件人等，就能收到基本的邮件通知，其余通知是可选的。
 
-Q：什么情况下程序会意外停止？
 
-A：我会避免程序本身的编码出bug，但是使用的api可能会出错，比如NameSilo的api或ip138的api无法连接，这是可能发生的。
+Q：邮件功能有什么用？
 
-所有邮件参数都是可选的，如少填一个，程序错误时都不会发送邮件提醒。 以qq邮箱为例，如果想用qq邮箱发送邮件，需要进邮箱开启SMTP服务，并获得一个用于登录的key，在帮助里找到服务对应的服务器即可。收件人地址不限于qq邮箱平台，收件人也可以是发件人
+A：会收到以下邮件：ip变动后，推送NameSilo成功；推送失败；程序因意外情况停止；程序自动重启
+
+Q：如何开启邮件功能？
+
+A：从mail_host到mail_pass，4个配置都填写正确，就会自动启用
+
+
 
 测试邮件设置是否正确，会发送一封邮件到你的邮箱：
 
 ```
 DDNS testEmail
 # or
-python ddns.py testEmail
+python ddns.py --test-email
 ```
+
+
 
 ## Note
 
-
 本程序只能更新域名的DNS记录，无法增加，请确保你的域名存在此DNS记录。
+
+
 
 ## Start
 
@@ -158,6 +168,8 @@ python ddns.py testEmail
 ```
 python ddns.py
 ```
+
+
 
 **Linux高级使用：**
 
@@ -179,11 +191,17 @@ chmod +x DDNS
 ln -s /root/NameSilo-DDNS/DDNS /usr/bin/DDNS
 ```
 
+
+
 **Windows使用：** 双击bat或vbs文件，程序运行状态请查看日志
+
+
 
 ## Log
 
 日志都在log文件夹下
+
+
 
 <b>Linux</b>
 
@@ -199,17 +217,23 @@ ls -lh log/DDNS*.log*
 
 ```
 DDNS archiveLog
+# or
+python ddns.py --archive
 ```
+
+
 
 <b>Windows</b>
 
-当DDNS服务启动时，若`DDNS.log`超过2M便会将旧的`DDNS.log`文件重命名为`DDNS-xxx.log.back`，不会压缩
+当DDNS服务启动时，若`DDNS.log`超过2M便会将旧的`DDNS.log`文件重命名为`DDNS-xxx.log.back`
 
 手动归档日志:
 
 ```
-python ddns.py archiveLog
+python ddns.py --archive
 ```
+
+
 
 ## Start At Boot
 
@@ -229,6 +253,8 @@ systemctl daemon-reload
 systemctl enable DDNS
 ```
 
+
+
 <b>Windows</b>
 
 将vbs文件[加入策略组](https://blog.csdn.net/yunmuq/article/details/110199091)
@@ -238,6 +264,8 @@ systemctl enable DDNS
 # Docker
 
 现在，NameSilo-DDNS支持docker启动了（Linux），不需要本机有python环境，在开机启动方面也不用systemctl了
+
+
 
 ## Build or Pull Image
 
@@ -251,13 +279,17 @@ docker pull charles94jp/ddns
 
 Docker Hub中的镜像不一定是最新的，你也可以选择手动构建镜像
 
+
+
 <b>手动构建镜像</b>
 
 ```shell
 docker build -t charles94jp/ddns .
 ```
 
-下载`python:3.x.x-alpine`镜像和`pip install httpx`需要一点时间
+构建过程中下载`python:3.x.x-alpine`镜像和`pip install httpx`需要一点时间
+
+
 
 ## RUN
 
@@ -277,6 +309,8 @@ docker restart ddns
 ```
 
 查看ddns程序状态用`<local dir>`中的`ddns-docker`
+
+
 
 ## Start with Linux
 
