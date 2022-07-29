@@ -41,7 +41,7 @@ class DDNS:
 
     _IS_LINUX = True if pl_system().find('Linux') > -1 else False
 
-    def __init__(self, conf: dict, restart_count: int = 0, debug: bool = False) -> None:
+    def __init__(self, conf: dict, debug: bool = False) -> None:
         """
 
         :param dict conf: 解析后的配置文件
@@ -93,7 +93,6 @@ class DDNS:
         # is_sys_reboot is deprecated
         # self._email_after_reboot = conf['email_after_reboot']
         # self._in_docker = in_docker
-        self._restart_count = restart_count
         self._auto_restart = conf['auto_restart']
 
     @staticmethod
@@ -150,6 +149,7 @@ class DDNS:
         开启循环
         """
         self._namesilo_client.fetch_domains_info()
+        error_count = 0
         while True:
             try:
                 current_ip = self._current_ip.fetch()
@@ -162,21 +162,23 @@ class DDNS:
                     if r != 0:
                         self._email_client.send_email('update_failed', self._namesilo_client.to_html_table(),
                                                       'new_ip', current_ip)
+                error_count = 0
             except Exception as e:
+                error_count = error_count + 1
                 self._logger.exception(e)
-                if self._auto_restart:
-                    if self._restart_count > 10:
+                if error_count > 10:
+                    if self._auto_restart:
+                        self._logger.info('The program has made 10 consecutive errors and will restart automatically')
+                        self._email_client.send_email('ddns_error_restart', self._namesilo_client.to_html_table())
+                        # 重启DDNS服务，确保python ddns.py的错误被记录，所以使用sh -c。subprocess.
+                        # Popen()本身无法单独追加到文件，需要传参stdout为open()文件，但主程序需要退出，让子进程单独运行，所以不可取
+                        # 这里还是会丢掉sh命令的报错，但是无所谓，影响很小
+                        Popen(['sh', '-c',
+                               f'nohup {sys.executable} ddns.py -c --is-auto-restart >> log/DDNS.log  2>&1 &'])
+                    else:
+                        self._logger.info('The program has made 10 consecutive errors and will exited automatically')
                         self._email_client.send_email('ddns_error_exit', self._namesilo_client.to_html_table())
-                        self._logger.info('The program has made 10 consecutive errors and exited automatically')
-                        sys.exit(-1)
-                    time.sleep(self._frequency)
-                    # 重启DDNS服务，确保python ddns.py的错误被记录，所以使用sh -c。subprocess.
-                    # Popen()本身无法单独追加到文件，需要传参stdout为open()文件，但主程序需要退出，让子进程单独运行，所以不可取
-                    # 这里还是会丢掉sh命令的报错，但是无所谓，影响很小
-                    Popen(['sh', '-c',
-                           f'nohup {sys.executable} ddns.py -c {self._restart_count + 1}>> log/DDNS.log  2>&1 &'])
                     sys.exit(-1)
-            self._restart_count = 0
             time.sleep(self._frequency)
 
 
@@ -188,7 +190,7 @@ def main():
                                                  'automatically update the IP address of the domain')
     parser.add_argument('--archive', action='store_true', help='Archive logs')
     parser.add_argument('--test-email', action='store_true', help='Send a test email and exit')
-    parser.add_argument('-c', help='A magic parameter', dest='count', type=int, default=0)
+    parser.add_argument('--is-auto-restart', action='store_true', help='A magic parameter')
     parser.add_argument('-v', '--version', action='version', version=DDNS.version)
     args = parser.parse_args()
 
@@ -196,11 +198,11 @@ def main():
         DDNS.archive_log()
         sys.exit(0)
     # for auto_restart, 避免log上的冲突
-    if args.count > 0:
+    if args.is_auto_restart:
         time.sleep(5)
 
     with open('conf/conf.json', 'r', encoding='utf-8') as fp:
-        ddns = DDNS(json.load(fp), restart_count=args.count, debug=True if sys.gettrace() else False)
+        ddns = DDNS(json.load(fp), debug=True if sys.gettrace() else False)
     if args.test_email:
         ddns.test_email()
     else:
