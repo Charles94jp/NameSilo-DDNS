@@ -101,11 +101,11 @@ fi
 ;;
 ########################################
 testEmail)
-$pythonBin ddns.py testEmail
+$pythonBin ddns.py --test-email
 ;;
 ########################################
 archiveLog)
-$pythonBin ddns.py archiveLog
+$pythonBin ddns.py --archive
 ;;
 ########################################
 *)
