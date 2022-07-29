@@ -12,6 +12,7 @@ class EmailClient:
 
     :author: Charles94jp
     :changelog: 20xx-xx-xx: xxx
+                2022-07-28 邮件支持英文，邮件标题和内容都从模板中读取
                 2022-07-26 代码重构，拆分出此类，由于邮件使用频率不高，取消在内存中缓存模板内容
     :since: 2022-07-26
     """
@@ -21,6 +22,7 @@ class EmailClient:
         """
 
         :param dict conf: 解析后的配置文件
+        :param bool debug: 调试则加载socks模块，并使用代理，为了连接gmail
         """
         self._logger = logging.getLogger('NameSilo_DDNS')
         self._debug = debug
@@ -36,14 +38,16 @@ class EmailClient:
             if lang == 'en' or lang == 'en-us':
                 self._zh_cn = False
 
-    def send_email(self, template_file_name, domain_table=None, var_name=None, value=None):
+    def send_email(self, template_file_name, domain_table=None, var_name=None, value=None) -> int:
         """
         从邮件模板中读取邮件标题和内容，替换变量，拼接domain table后发送
 
         :param str template_file_name: 模板的单纯文件名，不需要路径，不要.email-template.html后缀
-        :param str domain_table:
+        :param str domain_table: 拼接在邮件后的域名列表
         :param str var_name: 模板中的变量名，无需加上${}，只支持一个变量
         :param * value: 内存中的变量值
+        :rtype: int
+        :return: 0 on success
         """
         if not self.available:
             return -1
@@ -85,5 +89,6 @@ class EmailClient:
             # 退出
             r = smtp_client.quit()
             self._logger.info('send_email: \tsuccess')
+            return 0
         except smtplib.SMTPException as e:
             self._logger.exception(e)

@@ -76,11 +76,12 @@ class NameSiloClient:
                 self._logger.error('fetch_domains_info: \tError, process stopped. '
                                    'It could be due to the configuration file error, or the NameSilo server error.')
 
-    def update_domain_ip(self, new_ip: str):
+    def update_domain_ip(self, new_ip: str) -> int:
         """
         推送新ip到NameSilo
 
         :param new_ip: 新的ip
+        :rtype: int
         :return: 0 if successful, else the inverse of the number of failures
         """
         success1 = 10000
@@ -89,8 +90,8 @@ class NameSiloClient:
         for domain in self.domains:
             if domain['domain_ip'] == new_ip:
                 continue
+            full_domain = f"{domain['host']}{'.' if domain['host'] else ''}{domain['domain']}"
             try:
-                full_domain = f"{domain['host']}{'.' if domain['host'] else ''}{domain['domain']}"
                 _host = '' if domain["host"] == '@' else domain["host"]
                 url = f"/api/dnsUpdateRecord?version=1&type=xml&rrttl=7207&key={self._api_key}" \
                       f"&domain={domain['domain']}&rrid={domain['record_id']}&rrhost={_host}&rrvalue={new_ip}"
@@ -124,7 +125,7 @@ class NameSiloClient:
         if error3 > 30000:
             return -(error3 - 30000)
 
-    def ip_equal(self, ip: str):
+    def ip_equal(self, ip: str) -> bool:
         """
         比对ip和所有域名的解析值是否相同
 
