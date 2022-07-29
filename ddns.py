@@ -153,6 +153,8 @@ class DDNS:
         while True:
             try:
                 current_ip = self._current_ip.fetch()
+                if current_ip == '-1':
+                    raise Exception('current_ip.fetch error')
                 # 值得注意的是，当程序在运行一段时间后，而用户手动去NameSilo修改了域名的解析值，由于程序只对比内存中的值，所以不会触发更新
                 if not self._namesilo_client.ip_equal(current_ip):
                     r = self._namesilo_client.update_domain_ip(current_ip)

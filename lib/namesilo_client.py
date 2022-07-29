@@ -1,5 +1,6 @@
 import logging
 import copy
+import sys
 
 import httpx
 
@@ -49,28 +50,32 @@ class NameSiloClient:
         """
         拉取域名信息到对象中
         """
+        domains_msg = {}
         for domain in self.domains:
             try:
-                url = f"/api/dnsListRecords?version=1&type=xml&key={self._api_key}&domain={domain['domain']}"
-                r = self._http_client.get(url)
-                if r.status_code == 200:
-                    r = r.text.split('<resource_record>')
-                    _domain = domain['domain'] if domain['host'] == '@' or \
-                                                  domain['host'] == '' else f"{domain['host']}.{domain['domain']}"
-                    for record in r:
-                        if record.find(f'<host>{_domain}</host>') != -1:
-                            r = record
-                            break
-                    r = r.split('</record_id>')
-                    domain['record_id'] = r[0].split('<record_id>')[-1]
-                    domain['domain_ip'] = r[1].split('<value>')[1].split('</value>')[0]
-                    self._logger.info(
-                        f"fetch_domains_info: \t'{domain['host']}{'.' if domain['host'] else ''}{domain['domain']}' "
-                        f"resolution ip: {domain['domain_ip']}")
-                else:
-                    self._logger.error('fetch_domains_info: \tError, process stopped. '
-                                       'It could be due to the configuration file error, or the NameSilo server error.')
-                    exit(-1)
+                r = domains_msg.get(domain['domain'])
+                if r is None:
+                    url = f"/api/dnsListRecords?version=1&type=xml&key={self._api_key}&domain={domain['domain']}"
+                    r = self._http_client.get(url)
+                    domains_msg[domain['domain']] = r.text
+                    if r.status_code != 200:
+                        self._logger.error('fetch_domains_info: \tError, process stopped. '
+                                           'It could be due to the configuration file error, or the NameSilo server error.')
+                        sys.exit(-1)
+                    r = r.text
+                r = r.split('<resource_record>')
+                _domain = domain['domain'] if domain['host'] == '@' or \
+                                              domain['host'] == '' else f"{domain['host']}.{domain['domain']}"
+                for record in r:
+                    if record.find(f'<host>{_domain}</host>') != -1:
+                        r = record
+                        break
+                r = r.split('</record_id>')
+                domain['record_id'] = r[0].split('<record_id>')[-1]
+                domain['domain_ip'] = r[1].split('<value>')[1].split('</value>')[0]
+                self._logger.info(
+                    f"fetch_domains_info: \t'{domain['host']}{'.' if domain['host'] else ''}{domain['domain']}' "
+                    f"resolution ip: {domain['domain_ip']}")
             except httpx.ConnectError as e:
                 self._logger.exception(e)
                 self._logger.error('fetch_domains_info: \tError, process stopped. '
