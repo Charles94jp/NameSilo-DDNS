@@ -43,6 +43,7 @@ This program obtains the public IP address of home broadband by visiting http://
 
 - [Background](#background)
 - [Install](#install)
+- [Quick Start](#quick-start)
 - [Usage](#usage)
     - [Configuration](#configuration)
     - [Note](#note)
@@ -73,7 +74,7 @@ To achieve this, you need a computer that is always running to run this DDNS pro
 
 There are two optional modes of operation.
 
-1\. Local
+**1\. Local**
 
 Download and use:
 
@@ -93,7 +94,26 @@ Update:
 git pull origin python
 ```
 
-2\. [Docker](#docker)
+**2\. [Docker](#docker)**  (recommend)
+
+
+
+# Quick Start
+
+
+
+```shell
+mkdir -p /home/docker/ddns
+docker pull charles94jp/ddns
+docker run -d --name ddns -v /home/docker/ddns:/home/NameSilo-DDNS:rw charles94jp/ddns
+# --restart=always
+# -e TZ=Asia/Shanghai
+cp /home/ddns-docker/conf/conf.json.example /home/ddns-docker/conf/conf.json
+vi /home/docker/ddns/conf/conf.json
+# Fill in the domain name and key
+# Generate key here: https://www.namesilo.com/account/api-manager
+docker restart ddns
+```
 
 
 
@@ -311,6 +331,8 @@ docker update --restart=always ddns
 
 
 # Links
+
+- [Docker Hub](https://hub.docker.com/r/charles94jp/ddns/tags)
 
 - NameSilo API Document: [Domain API Reference - NameSilo](https://www.namesilo.com/api-reference#dns/dns-list-records)
 

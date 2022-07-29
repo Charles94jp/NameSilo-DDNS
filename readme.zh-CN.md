@@ -43,6 +43,7 @@ NameSilo DDNS是一个用于NameSilo的动态域名解析服务，适用于家�
 
 - [Background](#background)
 - [Install](#install)
+- [Quick Start](#quick-start)
 - [Usage](#usage)
     - [Configuration](#configuration)
     - [Note](#note)
@@ -83,7 +84,7 @@ NameSilo DDNS是一个用于NameSilo的动态域名解析服务，适用于家�
 
 两种可选方式
 
-1\. 本地运行
+**1\. 本地运行**
 
 下载即用
 
@@ -103,7 +104,26 @@ pip install httpx
 git pull origin python
 ```
 
-2\. [Docker运行](#docker)
+**2\. [Docker运行](#docker)** （推荐）
+
+
+
+# Quick Start
+
+快速上手
+
+```shell
+mkdir -p /home/docker/ddns
+docker pull charles94jp/ddns
+docker run -d --name ddns -v /home/docker/ddns:/home/NameSilo-DDNS:rw charles94jp/ddns
+# --restart=always
+# -e TZ=Asia/Shanghai
+cp /home/ddns-docker/conf/conf.json.example /home/ddns-docker/conf/conf.json
+vi /home/docker/ddns/conf/conf.json
+# 填写域名domain和api密钥key
+# api密钥在这里获取: https://www.namesilo.com/account/api-manager
+docker restart ddns
+```
 
 
 
@@ -324,6 +344,8 @@ docker update --restart=always ddns
 # Links
 
 相关链接：
+
+- [Docker Hub](https://hub.docker.com/r/charles94jp/ddns/tags)
 
 - NameSilo API Document: [Domain API Reference - NameSilo](https://www.namesilo.com/api-reference#dns/dns-list-records)
 
