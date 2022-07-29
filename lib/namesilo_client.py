@@ -59,8 +59,8 @@ class NameSiloClient:
                     r = self._http_client.get(url)
                     domains_msg[domain['domain']] = r.text
                     if r.status_code != 200:
-                        self._logger.error('fetch_domains_info: \tError, process stopped. '
-                                           'It could be due to the configuration file error, or the NameSilo server error.')
+                        self._logger.error('fetch_domains_info: \tError, process stopped. It could be due to the '
+                                           'configuration file error, or the NameSilo server error.')
                         sys.exit(-1)
                     r = r.text
                 r = r.split('<resource_record>')

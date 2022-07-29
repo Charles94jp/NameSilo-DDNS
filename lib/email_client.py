@@ -34,7 +34,7 @@ class EmailClient:
             self._mail_pwd = conf['mail_pass']
             self._receivers = conf['receivers']
             self._zh_cn = True
-            lang = conf['mail_lang'].lower()
+            lang = conf.get('mail_lang', 'zh-cn').lower()
             if lang == 'en' or lang == 'en-us':
                 self._zh_cn = False
 

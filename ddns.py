@@ -85,15 +85,13 @@ class DDNS:
         self._current_ip = CurrentIP(self._base_http_client)
         self._namesilo_client = NameSiloClient(self._base_http_client, conf)
         self._email_client = EmailClient(conf, debug=debug)
-        self._frequency = conf.get('frequency')
-        if self._frequency is None:
-            # 默认每次循环休眠10分钟
-            self._frequency = 600
-        self._email_every_update = conf['email_every_update']
+        # 默认每次循环休眠10分钟
+        self._frequency = conf.get('frequency', 600)
+        self._email_every_update = conf.get('email_every_update', False)
         # is_sys_reboot is deprecated
         # self._email_after_reboot = conf['email_after_reboot']
         # self._in_docker = in_docker
-        self._auto_restart = conf['auto_restart']
+        self._auto_restart = conf.get('auto_restart', False)
 
     @staticmethod
     def archive_log():
