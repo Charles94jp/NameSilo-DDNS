@@ -167,7 +167,7 @@ class DDNS:
                 error_count = error_count + 1
                 self._logger.exception(e)
                 if error_count > 10:
-                    if self._auto_restart:
+                    if self._auto_restart and self._IS_LINUX:
                         self._logger.info('The program has made 10 consecutive errors and will restart automatically')
                         self._email_client.send_email('ddns_error_restart', self._namesilo_client.to_html_table())
                         # 重启DDNS服务，确保python ddns.py的错误被记录，所以使用sh -c。subprocess.
