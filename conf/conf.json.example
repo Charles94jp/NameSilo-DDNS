@@ -2,6 +2,9 @@
     "domains": [
         "www.namesilo.com"
     ],
+    "domains_ipv6": [
+        "ipv6.namesilo.com"
+    ],
     "key": "1234",
     "frequency": 600,
     "mail_host": "smtp.qq.com",
