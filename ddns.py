@@ -92,10 +92,6 @@ class DDNS:
         # self._email_after_reboot = conf['email_after_reboot']
         # self._in_docker = in_docker
         self._auto_restart = conf.get('auto_restart', False)
-        self._enable_ipv6 = False
-        ipv6 = conf.get('domains_ipv6', [''])
-        if ipv6[0] != '':
-            self._enable_ipv6 = True
 
     @staticmethod
     def archive_log():
@@ -151,27 +147,33 @@ class DDNS:
         开启循环
         todo: 只开启ipv6，不用ipv4
         """
+        enable_ipv4 = self._namesilo_client.enable_ipv4
+        enable_ipv6 = self._namesilo_client.enable_ipv6
         self._namesilo_client.fetch_domains_info()
         error_count = 0
         current_ipv6 = None
         while True:
             try:
-                current_ip = self._current_ip.fetch()
-                if self._enable_ipv6:
+                if enable_ipv4:
+                    current_ip = self._current_ip.fetch()
+                    if current_ip == '-1':
+                        raise Exception('current_ip.fetch error')
+                if enable_ipv6:
                     current_ipv6 = self._current_ip.fetch_v6()
-                if current_ip == '-1':
-                    raise Exception('current_ip.fetch error')
-                if current_ipv6 == '-1':
-                    raise Exception('current_ip.fetch error')
+                    if current_ipv6 == '-1':
+                        raise Exception('current_ip.fetch error')
                 # 值得注意的是，当程序在运行一段时间后，而用户手动去NameSilo修改了域名的解析值，由于程序只对比内存中的值，所以不会触发更新
-                if not self._namesilo_client.ip_equal(current_ip) or \
-                        (self._enable_ipv6 and not self._namesilo_client.ip_equal_ipv6(current_ipv6)):
-                    r = self._namesilo_client.update_domain_ip(current_ip, current_ipv6 if self._enable_ipv6 else None)
-                    ip_msg = current_ip + f' and {current_ipv6}' if self._enable_ipv6 else ''
-                    if r == 0 and self._email_every_update:
+                if (enable_ipv4 and not self._namesilo_client.ip_equal(current_ip)) or \
+                        (enable_ipv6 and not self._namesilo_client.ip_equal_ipv6(current_ipv6)):
+                    r = self._namesilo_client.update_domain_ip(
+                        new_ip=current_ip if enable_ipv4 else None,
+                        new_ipv6=current_ipv6 if enable_ipv6 else None)
+                    ip_msg = f"{current_ip if enable_ipv4 else ''}" \
+                             f"{' and ' if enable_ipv4 and enable_ipv6 else ''}{current_ipv6 if enable_ipv6 else ''} "
+                    if r >= 0 and self._email_every_update:
                         self._email_client.send_email('update_successful', self._namesilo_client.to_html_table(),
                                                       'new_ip', ip_msg)
-                    if r != 0:
+                    else:
                         self._email_client.send_email('update_failed', self._namesilo_client.to_html_table(),
                                                       'new_ip', ip_msg)
                 error_count = 0

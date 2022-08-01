@@ -31,21 +31,30 @@ class NameSiloClient:
         self._list_dns_api_cache = {}
 
         self._api_key = conf['key']
-        # 适配两种配置文件的写法
-        original_domains = conf.get('domains')
-        if original_domains is None:
-            original_domains = conf['domain']
+        self.enable_ipv4 = False
+        self.enable_ipv6 = False
         self.domains = []
         self.domains_ipv6 = []
-        is_list = (type(original_domains) == list)
+        # 适配两种配置文件的写法，兼容旧版本的配置文件
+        domains_v4 = conf.get('domains')
+        if domains_v4 is None:
+            domains_v4 = conf.get('domain')
+        is_list = (type(domains_v4) == list)
+        if domains_v4 is not None and ((is_list and len(domains_v4) > 0 and domains_v4[0] != '')
+                                       or (not is_list and domains_v4 != '')):
+            self.enable_ipv4 = True
+        domains_v6 = conf.get('domains_ipv6', [])
+        if len(domains_v6) > 0 and domains_v6[0] != '':
+            self.enable_ipv6 = True
         # 分离域名和前面的前缀。支持处理列表，或者字符串。如果是字符串，则for循环每次取一个字符
-        for i in original_domains:
-            self.domains.append(NameSiloClient._separate(i if is_list else original_domains))
-            if not is_list:
-                break
-        for i in conf.get('domains_ipv6', []):
-            self.domains_ipv6.append(NameSiloClient._separate(i))
-        pass
+        if self.enable_ipv4:
+            for i in domains_v4:
+                self.domains.append(NameSiloClient._separate(i if is_list else domains_v4))
+                if not is_list:
+                    break
+        if self.enable_ipv6:
+            for i in domains_v6:
+                self.domains_ipv6.append(NameSiloClient._separate(i))
 
     @staticmethod
     def _separate(domain_name: str) -> dict:
@@ -71,7 +80,6 @@ class NameSiloClient:
             self._list_dns_api(domain)
         for domain in self.domains_ipv6:
             self._list_dns_api(domain, clear=True)
-        pass
 
     def _list_dns_api(self, domain: dict, clear=False) -> None:
         """
@@ -110,25 +118,25 @@ class NameSiloClient:
         if clear:
             self._list_dns_api_cache.clear()
 
-    def update_domain_ip(self, new_ip: str, new_ipv6=None) -> int:
+    def update_domain_ip(self, new_ip=None, new_ipv6=None) -> int:
         """
         推送新ip到NameSilo
 
-        :param new_ipv6:
         :param new_ip: 新的ip
+        :param new_ipv6:
         :rtype: int
-        :return: 0 if successful, else the inverse of the number of failures
+        :return: Number of successful updates, else the inverse of the number of failures
         """
         # 更新rrid，修复更新时api返回280：record_id missing or invalid
         self._logger.info('update_domain_ip: \tupdate record_id')
         self.fetch_domains_info()
-        r1 = self._update_dns_api(self.domains, new_ip)
-        if new_ipv6 is not None:
+        r1 = r2 = 0
+        if self.enable_ipv4 and new_ip is not None:
+            r1 = self._update_dns_api(self.domains, new_ip)
+        if self.enable_ipv6 and new_ipv6 is not None:
             r2 = self._update_dns_api(self.domains_ipv6, new_ipv6)
-            # todo: 如果一正一负
-            # todo: TypeError: unsupported operand type(s) for +: 'NoneType' and 'int'
-            return r1 + r2
-        return r1
+        # 避免结果一正一负
+        return r1 + r2 if r1 * r2 >= 0 else -1 * abs(r1 - r2)
 
     def _update_dns_api(self, domains: list, new_ip) -> int:
         """
@@ -137,7 +145,7 @@ class NameSiloClient:
         :param domains:
         :param new_ip:
         :rtype: int
-        :return: 0 if successful, else the inverse of the number of failures
+        :return: Number of successful updates, else the inverse of the number of failures
         """
         success = 0
         fail = 0
@@ -170,12 +178,11 @@ class NameSiloClient:
                 exception = exception + 1
                 self._logger.exception(e)
                 self._logger.error(f"update_dns_api: \tupdate '{full_domain}' error")
-        if success == len(domains):
-            return 0
         if fail > 0:
             return -1 * fail
         if exception > 0:
             return -1 * exception
+        return success
 
     def ip_equal(self, ip: str) -> bool:
         """
