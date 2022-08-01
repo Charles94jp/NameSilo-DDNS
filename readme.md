@@ -32,10 +32,16 @@ This program obtains the public IP address of home broadband by visiting http://
 # Features
 
 - Simple but rich configuration.
+
 - With email alert function, you will be alerted when there is an abnormality in the process of the service running for a long time.
+
 - Support Docker.
+
 - Log rotation.
+
 - Support multiple domain name updates at the same time.
+
+- Support IPv6.
 
 
 
@@ -60,6 +66,10 @@ This program obtains the public IP address of home broadband by visiting http://
 
 # Background
 
+How to access the server at home from outside? we call it intranet penetration. IPv4 and IPv6 both have their own solutions.
+
+### IPv4
+
 At present, telecom operators assign to home broadband IP are dynamic, although the IP address is not fixed, but the good thing is that the home router can get a real public IP, so we just need to use **set Modem to Bridge Mode + use router for Broadband Authentication + router setup NAT Mapping/DMZ Host** to access the home device in the public network. After the router mapping port 22 we can remotely connect to our home linux machine, and after mapping port 445+3389 we can use the remote desktop of Win10.
 
 ![网络拓扑图](./Network-topology-en.png)
@@ -67,6 +77,12 @@ At present, telecom operators assign to home broadband IP are dynamic, although 
 To solve the problem of changing public IP, you can purchase a domain name and use DDNS (Dynamic Domain Name Server) to resolve the domain name to your broadband's IP. This will allow you to access your home devices by accessing a **fixed domain name**.
 
 To achieve this, you need a computer that is always running to run this DDNS program.
+
+### IPv6
+
+Telecom operators are currently equipped with IPv6 addresses for broadband. Just enable the IPv6 function on the router, and make sure that the computer has an IPv6 address and a DNS server address to use IPv6 to connect to the Internet.
+
+As long as the router's firewall policy does not restrict external network traffic from accessing the internal network, you can access internal network machines through IPv6 addresses without NET mapping!
 
 
 
@@ -129,7 +145,9 @@ The `conf/conf.json` file needs to be configured before starting, refer to conf.
 
 |Fields|Introduction|
 |--|--|
-|domain or domains|String or list, such as `"aa.bb.cn"` or `["cc.bb.cn", "q.w.cc.cn"]`.The domain that you want to update. This program can only update an existing DNS record, not create a new one. So you must first create a resolution on the NameSilo web page before you can run the program.|
+|domains|A record type domain name for IPv4. Support to update multiple domain names at the same time, support second-level domain names, third-level domain names, etc., such as `["cc.bb.cn","q.w.cc.cn"]`. If you only use IPv6, leave this blank.<br>This program can only update an existing DNS record, not create a new one. So you must first create a resolution on the NameSilo web page before you can run the program.|
+|~~domain~~|An older version of the `domains` item, which is currently compatible. String type, only one domain name can be updated at a time.|
+|domains_ipv6|AAAA record type domain name for IPv6. If you only use IPv4, leave this blank.|
 |key|<a target="_blank" href="https://www.namesilo.com/account/api-manager">The key generated from NameSilo</a>, after generation you need to remember and keep this key.|
 |frequency|How often do you detect changes in your ip, and only update your DNS when a change in ip occurs, in seconds.|
 |mail_host| For example, you can use [Google Mail's POP/IMAP](https://support.google.com/mail/answer/7126229). |

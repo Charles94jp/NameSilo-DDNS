@@ -36,6 +36,7 @@ NameSilo DDNS是一个用于NameSilo的动态域名解析服务，适用于家�
 - 支持docker运行
 - 日志记录和滚动
 - 支持同时更新多个域名
+- 支持IPv6
 
 
 
@@ -60,6 +61,10 @@ NameSilo DDNS是一个用于NameSilo的动态域名解析服务，适用于家�
 
 # Background
 
+内网映射，内网穿透，在外访问家里的机器的方案
+
+### IPv4
+
 目前运营商给家庭宽带的IP都是动态的，庆幸的是虽然IP地址不固定，但分配到家庭路由器的却是一个实实在在的公网IP，所以我们只需**设置光猫桥接模式 + 路由器拨号上网 + 路由器NAT映射/DMZ主机**即可在公网访问家庭的设备。
 
 需要几个前提条件：
@@ -77,6 +82,14 @@ NameSilo DDNS是一个用于NameSilo的动态域名解析服务，适用于家�
 为解决公网IP的变动，可以购买一个域名，使用DDNS（Dynamic Domain Name Server，动态域名服务）将域名解析到宽带的IP。这样就可以在家搭建各种服务并通过访问**固定的域名**来访问，而无需租用昂贵的公网服务器
 
 想实现这个目的，你需要一台一直运行的电脑来运行此DDNS程序
+
+
+
+### IPv6
+
+IPv6就简单了，运营商目前都给宽带配备了IPv6地址，只需在路由器上开启IPv6功能，电脑上确保有IPv6地址和DNS服务器地址即可使用IPv6联网。如果开了全局代理记得测试时关掉。
+
+只要路由器的防火墙策略未限制外网流量访问内网，则无需NET映射，就能通过IPv6地址访问内网机器！
 
 
 
@@ -140,7 +153,9 @@ docker restart ddns
 
 |字段|介绍|
 |--|--|
-|domain或domains|字符串或列表，如`"aa.bb.cn"`或`["cc.bb.cn","q.w.cc.cn"]`。要更新的域名，程序只能更新已存在的DNS记录，而不能创建一个新的DNS记录。所以你**必须先在NameSilo网页上创建一个解析**后，才能运行程序。|
+|domains|A记录类型的域名，用于IPv4。支持同时更新多个域名，支持二级域名、三级域名等，如`["cc.bb.cn","q.w.cc.cn"]`。如果只使用IPv6，此项留白即可<br>程序只能更新已存在的DNS记录，而不能创建一个新的DNS记录。所以你**必须先在NameSilo网页上创建一个解析**后，才能运行程序。|
+|~~domain~~|`domains` 项的旧版本，目前还兼容。字符串类型，只能是一个域名|
+|domains_ipv6|AAAA记录类型的域名，用于IPv6。如果只使用IPv4，此项留白即可|
 |key|<a target="_blank" href="https://guozh.net/obtain-namesilo-api-key/">从NameSilo获取</a>的api key，有key才能获取和修改你的域名状态，保管好不要泄露此key|
 |frequency|多久检测一次你的ip变动，如有变动才更新你的域名解析状态，单位s|
 |mail_host|SMT邮件服务器，如qq、163等。QQ邮箱[打开POP3/SMTP](https://service.mail.qq.com/cgi-bin/help?subtype=1&&id=28&&no=331)即可|
