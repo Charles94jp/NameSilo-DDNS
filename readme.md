@@ -121,7 +121,7 @@ git pull origin python
 ```shell
 mkdir -p /home/docker/ddns
 docker pull charles94jp/ddns
-docker run -d --name ddns -v /home/docker/ddns:/home/NameSilo-DDNS:rw charles94jp/ddns
+docker run -d --name ddns -v /home/docker/ddns:/home/NameSilo-DDNS:rw --network host charles94jp/ddns
 # --restart=always
 # -e TZ=Asia/Shanghai
 cp /home/ddns-docker/conf/conf.json.example /home/ddns-docker/conf/conf.json
@@ -139,7 +139,7 @@ docker restart ddns
 
 
 
-The `conf/conf.json` file needs to be configured before starting, refer to conf.json.example. **Only the first two configurations are necessary**, the rest can be set without.
+The `conf/conf.json` file needs to be configured before starting, refer to conf.json.example. **Only two configurations, domains and key, are necessary**, the rest can be set without.
 
 
 
@@ -147,7 +147,7 @@ The `conf/conf.json` file needs to be configured before starting, refer to conf.
 |--|--|
 |domains|A record type domain name for IPv4. Support to update multiple domain names at the same time, support second-level domain names, third-level domain names, etc., such as `["cc.bb.cn","q.w.cc.cn"]`. If you only use IPv6, leave this blank.<br>This program can only update an existing DNS record, not create a new one. So you must first create a resolution on the NameSilo web page before you can run the program.|
 |~~domain~~|An older version of the `domains` item, which is currently compatible. String type, only one domain name can be updated at a time.|
-|domains_ipv6|AAAA record type domain name for IPv6. If you only use IPv4, leave this blank.|
+|domains_ipv6|AAAA record type domain name for IPv6. If you only use IPv4, leave this blank. To use IPv6 in docker, the `run` command requires the `--network host` option.|
 |key|<a target="_blank" href="https://www.namesilo.com/account/api-manager">The key generated from NameSilo</a>, after generation you need to remember and keep this key.|
 |frequency|How often do you detect changes in your ip, and only update your DNS when a change in ip occurs, in seconds.|
 |mail_host| For example, you can use [Google Mail's POP/IMAP](https://support.google.com/mail/answer/7126229). |
@@ -318,7 +318,7 @@ docker build -t charles94jp/ddns .
 ## RUN
 
 ```shell
-docker run -d --name ddns -v <local dir>:/home/NameSilo-DDNS:rw charles94jp/ddns
+docker run -d --name ddns -v <local dir>:/home/NameSilo-DDNS:rw --network host charles94jp/ddns
 # --restart=always
 # -e TZ=Asia/Shanghai
 ```
@@ -334,6 +334,8 @@ Finally remember to restart the container, because at the beginning of ``docker 
 ```shell
 docker restart ddns
 ```
+
+Use the `-network host` option for IPv6.
 
 Check the status of the ddns program with ``ddns-docker`` in `<local dir>`.
 

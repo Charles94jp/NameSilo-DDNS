@@ -128,7 +128,7 @@ git pull origin python
 ```shell
 mkdir -p /home/docker/ddns
 docker pull charles94jp/ddns
-docker run -d --name ddns -v /home/docker/ddns:/home/NameSilo-DDNS:rw charles94jp/ddns
+docker run -d --name ddns -v /home/docker/ddns:/home/NameSilo-DDNS:rw --network host charles94jp/ddns
 # --restart=always
 # -e TZ=Asia/Shanghai
 cp /home/ddns-docker/conf/conf.json.example /home/ddns-docker/conf/conf.json
@@ -147,7 +147,7 @@ docker restart ddns
 
 
 
-启动前需要配置`conf/conf.json`文件，参考conf.json.example，**只有前两项配置是必要的**，其余的可以不进行配置。
+启动前需要配置`conf/conf.json`文件，参考conf.json.example，**只有domains和key两项配置是必要的**，其余的可以不进行配置。
 
 
 
@@ -155,7 +155,7 @@ docker restart ddns
 |--|--|
 |domains|A记录类型的域名，用于IPv4。支持同时更新多个域名，支持二级域名、三级域名等，如`["cc.bb.cn","q.w.cc.cn"]`。如果只使用IPv6，此项留白即可<br>程序只能更新已存在的DNS记录，而不能创建一个新的DNS记录。所以你**必须先在NameSilo网页上创建一个解析**后，才能运行程序。|
 |~~domain~~|`domains` 项的旧版本，目前还兼容。字符串类型，只能是一个域名|
-|domains_ipv6|AAAA记录类型的域名，用于IPv6。如果只使用IPv4，此项留白即可|
+|domains_ipv6|AAAA记录类型的域名，用于IPv6。如果只使用IPv4，此项留白即可。docker中使用IPv6，run命令需要`--network host`选项|
 |key|<a target="_blank" href="https://guozh.net/obtain-namesilo-api-key/">从NameSilo获取</a>的api key，有key才能获取和修改你的域名状态，保管好不要泄露此key|
 |frequency|多久检测一次你的ip变动，如有变动才更新你的域名解析状态，单位s|
 |mail_host|SMT邮件服务器，如qq、163等。QQ邮箱[打开POP3/SMTP](https://service.mail.qq.com/cgi-bin/help?subtype=1&&id=28&&no=331)即可|
@@ -329,7 +329,7 @@ docker build -t charles94jp/ddns .
 ## RUN
 
 ```shell
-docker run -d --name ddns -v <local dir>:/home/NameSilo-DDNS:rw charles94jp/ddns
+docker run -d --name ddns -v <local dir>:/home/NameSilo-DDNS:rw --network host charles94jp/ddns
 # --restart=always
 ```
 
@@ -342,6 +342,8 @@ docker run -d --name ddns -v <local dir>:/home/NameSilo-DDNS:rw charles94jp/ddns
 ```shell
 docker restart ddns
 ```
+
+IPv6请使用`--network host`选项，IPv4可以不用
 
 查看ddns程序状态用`<local dir>`中的`ddns-docker`
 
