@@ -23,8 +23,6 @@ NameSilo DDNS是一个用于NameSilo的动态域名解析服务，适用于家�
 
 本程序仅适用于NameSilo上购买的域名
 
-本程序通过访问 http://202x.ip138.com 或https://api.myip.com 或 https://api.ipify.org?format=json 获取家庭宽带的公网IP地址，通过 https://www.namesilo.com/api/ 来查询和更新DNS状态。
-
 右上角点个 ⭐ Star 不迷路
 
 
@@ -363,7 +361,6 @@ docker update --restart=always ddns
 相关链接：
 
 - [Docker Hub](https://hub.docker.com/r/charles94jp/ddns/tags)
-
 - NameSilo API Document: [Domain API Reference - NameSilo](https://www.namesilo.com/api-reference#dns/dns-list-records)
-
 - 当前IP查询: [ip138.com](https://www.ip138.com/) ; [myip.com](https://www.myip.com/api-docs/) ; [ipify](https://www.ipify.org/)
+- 当前IPv6查询: [中科大测速网](http://test6.ustc.edu.cn/) ; [ipify](https://www.ipify.org/) ; [清华大学IPv6](https://ipv6.tsinghua.edu.cn/)

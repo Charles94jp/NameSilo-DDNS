@@ -19,11 +19,7 @@
 
 NameSilo DDNS is a Dynamic Domain Name System service for NameSilo for home broadband, it can automatically detect IP changes in home broadband and automatically update the resolution of the domain name.
 
-This project has been refactored via Python3, to view the Java version please switch branches.
-
 This program is only available for domain names purchased on NameSilo.
-
-This program obtains the public IP address of home broadband by visiting http://202x.ip138.com or https://api.myip.com or https://api.ipify.org?format=json, and queries and updates the DNS status by https://www.namesilo.com/api/.
 
 👉  ⭐  [Star](#)
 
@@ -353,8 +349,7 @@ docker update --restart=always ddns
 # Links
 
 - [Docker Hub](https://hub.docker.com/r/charles94jp/ddns/tags)
-
 - NameSilo API Document: [Domain API Reference - NameSilo](https://www.namesilo.com/api-reference#dns/dns-list-records)
-
 - Current IP query: [ip138.com](https://www.ip138.com/) ; [myip.com](https://www.myip.com/api-docs/) ; [ipify](https://www.ipify.org/)
+- Current IPv6 query: [USTC speed test](http://test6.ustc.edu.cn/) ; [ipify](https://www.ipify.org/) ; [Tsinghua University IPv6](https://ipv6.tsinghua.edu.cn/)
 
