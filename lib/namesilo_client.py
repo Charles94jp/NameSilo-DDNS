@@ -169,7 +169,7 @@ class NameSiloClient:
                     success = success + 1
                 elif r == '280' and r1.find('must be a valid ipv') > -1:
                     self._logger.error(f'update_dns_api: ip type and domain type do not match\n{r1}')
-                    fail = fail + 1
+                    sys.exit(-1)
                 else:
                     fail = fail + 1
                     self._logger.error(f"update_dns_api: \tupdate '{full_domain}' failed. "
