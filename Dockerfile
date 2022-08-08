@@ -1,4 +1,4 @@
-FROM python:3.8.12-alpine3.15
+FROM python:3.9.13-alpine3.16
 LABEL maintainer="https://github.com/Charles94jp/NameSilo-DDNS"
 LABEL description="NameSilo-DDNS"
 
