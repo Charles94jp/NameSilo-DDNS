@@ -85,7 +85,7 @@ As long as the router's firewall policy does not restrict external network traff
 
 # Quick Start
 
-
+Docker:
 
 ```shell
 mkdir -p /home/docker/ddns
@@ -99,6 +99,8 @@ vi /home/docker/ddns/conf/conf.json
 # Generate key here: https://www.namesilo.com/account/api-manager
 docker restart ddns
 ```
+
+Of course it can also be [run directly](#usage---direct) as a python program.
 
 
 

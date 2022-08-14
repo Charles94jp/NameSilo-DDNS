@@ -94,7 +94,7 @@ IPv6就简单了，运营商目前都给宽带配备了IPv6地址，只需在路
 
 # Quick Start
 
-快速上手
+快速上手，Dokcer：
 
 ```shell
 mkdir -p /home/docker/ddns
@@ -108,6 +108,8 @@ vi /home/docker/ddns/conf/conf.json
 # api密钥在这里获取: https://www.namesilo.com/account/api-manager
 docker restart ddns
 ```
+
+当然也可以作为python程序[直接运行](#usage---direct)。
 
 
 
