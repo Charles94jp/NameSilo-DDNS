@@ -41,18 +41,19 @@ NameSilo DDNS是一个用于NameSilo的动态域名解析服务，适用于家�
 # Table of Contents
 
 - [Background](#background)
-- [Install](#install)
 - [Quick Start](#quick-start)
-- [Usage](#usage)
-    - [Configuration](#configuration)
-    - [Note](#note)
-    - [Start](#start)
-    - [Log](#log)
-    - [Start At Boot](#start-at-boot)
-- [Docker](#Docker)
+- [Configuration](#configuration)
+- [Note](#note)
+- [Usage - Docker](#usage - docker)
     - [Build or Pull Image](#build-or-pull-image)
     - [RUN](#run)
     - [Start with Linux](#start-with-linux)
+    - [Log - Docker](#log - docker)
+- [Usage - Direct](#usage - direct)
+    - [Install](#install)
+    - [Start](#start)
+    - [Log](#log)
+    - [Start At Boot](#start-at-boot)
 - [Links](#links)
 
 
@@ -91,34 +92,6 @@ IPv6就简单了，运营商目前都给宽带配备了IPv6地址，只需在路
 
 
 
-# Install
-
-两种可选方式
-
-**1\. 本地运行**
-
-下载即用
-
-```
-git -b python clone https://github.com/Charles94jp/NameSilo-DDNS.git
-```
-
-需要使用python3来运行，python需要安装httpx模块：
-
-```
-pip install httpx
-```
-
-更新程序：
-
-```
-git pull origin python
-```
-
-**2\. [Docker运行](#docker)** （推荐）
-
-
-
 # Quick Start
 
 快速上手
@@ -138,33 +111,28 @@ docker restart ddns
 
 
 
-
-# Usage
-
-## Configuration
-
-
+# Configuration
 
 启动前需要配置`conf/conf.json`文件，参考conf.json.example，**只有domains和key两项配置是必要的**，其余的可以不进行配置。
 
 
 
-|字段|介绍|
-|--|--|
-|domains|A记录类型的域名，用于IPv4。支持同时更新多个域名，支持二级域名、三级域名等，如`["cc.bb.cn","q.w.cc.cn"]`。如果只使用IPv6，此项留白即可<br>程序只能更新已存在的DNS记录，而不能创建一个新的DNS记录。所以你**必须先在NameSilo网页上创建一个解析**后，才能运行程序。|
-|~~domain~~|`domains` 项的旧版本，目前还兼容。字符串类型，只能是一个域名|
-|domains_ipv6|AAAA记录类型的域名，用于IPv6。如果只使用IPv4，此项留白即可。docker中使用IPv6，run命令需要`--network host`选项|
-|key|<a target="_blank" href="https://guozh.net/obtain-namesilo-api-key/">从NameSilo获取</a>的api key，有key才能获取和修改你的域名状态，保管好不要泄露此key|
-|frequency|多久检测一次你的ip变动，如有变动才更新你的域名解析状态，单位s|
-|mail_host|SMT邮件服务器，如qq、163等。QQ邮箱[打开POP3/SMTP](https://service.mail.qq.com/cgi-bin/help?subtype=1&&id=28&&no=331)即可|
-|mail_port|邮件服务器端口，必须是SMTP SSL端口|
-|mail_user|登录用户名，也是发件人|
-|mail_pass|登录密码或key|
-|receivers|数组，收件人地址，可以是多个。收件人 和 发件人 可以是同一个|
-|mail_lang|邮件的语言。默认zh-cn，可选en-us|
-|~~email_after_reboot~~|从v2.2.0版本起弃用。适用于家里意外断电的情况，当通电后，路由器重新拨号，一般会获得新IP，如果服务器支持来电自动开机，那么DDNS在开机自动启动后，会发送邮件告诉你：你的服务器已成功启动。|
-|auto_restart|Linux下生效，默认不启用。在程序持续异常一段时间后，自我重启。v2.1.0版本已找到异常原因并解决，此项不再重要。|
-|email_every_update|每次IP更新都发送邮件告知新IP，避免在DNS更新的十几二十分钟内无法访问。默认关闭，打开的前提是设置了邮件。|
+| 字段                   | 介绍                                                         |
+| ---------------------- | ------------------------------------------------------------ |
+| domains                | A记录类型的域名，用于IPv4。支持同时更新多个域名，支持二级域名、三级域名等，如`["cc.bb.cn","q.w.cc.cn"]`。如果只使用IPv6，此项留白即可<br>程序只能更新已存在的DNS记录，而不能创建一个新的DNS记录。所以你**必须先在NameSilo网页上创建一个解析**后，才能运行程序。 |
+| ~~domain~~             | `domains` 项的旧版本，目前还兼容。字符串类型，只能是一个域名 |
+| domains_ipv6           | AAAA记录类型的域名，用于IPv6。如果只使用IPv4，此项留白即可。docker中使用IPv6，run命令需要`--network host`选项 |
+| key                    | <a target="_blank" href="https://guozh.net/obtain-namesilo-api-key/">从NameSilo获取</a>的api key，有key才能获取和修改你的域名状态，保管好不要泄露此key |
+| frequency              | 多久检测一次你的ip变动，如有变动才更新你的域名解析状态，单位s |
+| mail_host              | SMT邮件服务器，如qq、163等。QQ邮箱[打开POP3/SMTP](https://service.mail.qq.com/cgi-bin/help?subtype=1&&id=28&&no=331)即可 |
+| mail_port              | 邮件服务器端口，必须是SMTP SSL端口                           |
+| mail_user              | 登录用户名，也是发件人                                       |
+| mail_pass              | 登录密码或key                                                |
+| receivers              | 数组，收件人地址，可以是多个。收件人 和 发件人 可以是同一个  |
+| mail_lang              | 邮件的语言。默认zh-cn，可选en-us                             |
+| ~~email_after_reboot~~ | 从v2.2.0版本起弃用。适用于家里意外断电的情况，当通电后，路由器重新拨号，一般会获得新IP，如果服务器支持来电自动开机，那么DDNS在开机自动启动后，会发送邮件告诉你：你的服务器已成功启动。 |
+| auto_restart           | Linux下生效，默认不启用。在程序持续异常一段时间后，自我重启。v2.1.0版本已找到异常原因并解决，此项不再重要。 |
+| email_every_update     | 每次IP更新都发送邮件告知新IP，避免在DNS更新的十几二十分钟内无法访问。默认关闭，打开的前提是设置了邮件。 |
 
 
 
@@ -188,9 +156,120 @@ python ddns.py --test-email
 
 
 
-## Note
+# Note
 
 本程序只能更新域名的DNS记录，无法增加，请确保你的域名存在此DNS记录。
+
+
+
+# Usage - Docker
+
+Doker的优点是不需要安装python环境，在开机自动启动方面不需要将脚本加入systemctl
+
+## Build or Pull Image
+
+<b>从Docker Hub拉取</b>
+
+```shell
+docker pull charles94jp/ddns
+```
+
+本镜像基于最小的Linux alpine构建，Docker Hub显示21.37M，`docker images`显示镜像大小为57M
+
+Docker Hub中的镜像不一定是最新的，你也可以选择手动构建镜像
+
+
+
+<b>手动构建镜像</b>
+
+```shell
+docker build -t charles94jp/ddns .
+```
+
+构建过程中下载`python:3.x.x-alpine`镜像和`pip install httpx`需要一点时间
+
+
+
+## RUN
+
+```shell
+docker run -d --name ddns -v <local dir>:/home/NameSilo-DDNS:rw --network host charles94jp/ddns
+# --restart=always
+```
+
+一定要用 -v 参数将本机的目录`<local dir>`挂载到容器内的`/home/NameSilo-DDNS`，容器会将程序文件写出到`<local dir>`
+
+接着在`<local dir>`中配置`conf/conf.json`，参考[Configuration](#configuration)
+
+最后记得重启一下容器，因为最开始`docker run`时没有配置文件，所以ddns程序是没有成功运行的
+
+```shell
+docker restart ddns
+```
+
+IPv6请使用`--network host`选项，IPv4可以不用
+
+查看ddns程序状态用`<local dir>`中的`ddns-docker`
+
+
+
+## Start with Linux
+
+```shell
+systemctl enable docker
+docker update --restart=always ddns
+```
+
+
+
+## Log - Docker
+
+日志在`<local dir>/log`文件夹下
+
+查看程序运行状态，以及历史更新记录，运行：
+
+```shell
+<local dir>/ddns-docker
+```
+
+![](example.png)
+
+
+
+查看所有日志文件：
+
+```
+ls -lh log/DDNS*.log*
+```
+
+
+
+当DDNS服务启动时，若`DDNS.log`超过2M便会触发自动归档。可以存储使用DDNS以来所有的日志。
+
+
+
+
+# Usage - Direct
+
+## Install
+
+下载即用
+
+```
+git -b python clone https://github.com/Charles94jp/NameSilo-DDNS.git
+```
+
+需要使用python3来运行，python需要安装httpx模块：
+
+```
+pip install httpx
+```
+
+更新程序：
+
+```
+git pull origin python
+```
 
 
 
@@ -214,9 +293,9 @@ chmod +x DDNS
 ./DDNS {start|stop|status|restart|force-reload}
 ```
 
-例如
+功能类似[Log - Docker](#log - docker)，但更强大
 
-![](example.png)
+
 
 如果想在任何地方使用`DDNS`命令，可以在`/usr/bin`目录下建立软链接，注意`ln`命令要使用绝对路径，如
 
@@ -293,66 +372,6 @@ systemctl enable DDNS
 将vbs文件[加入策略组](https://blog.csdn.net/yunmuq/article/details/110199091)
 
 
-
-# Docker
-
-现在，NameSilo-DDNS支持docker启动了（Linux），不需要本机有python环境，在开机启动方面也不用systemctl了
-
-
-
-## Build or Pull Image
-
-<b>Pull from Docker Hub</b>
-
-```shell
-docker pull charles94jp/ddns
-```
-
-本镜像基于最小的Linux alpine构建，Docker Hub显示21.37M，`docker images`显示镜像大小为57M
-
-Docker Hub中的镜像不一定是最新的，你也可以选择手动构建镜像
-
-
-
-<b>手动构建镜像</b>
-
-```shell
-docker build -t charles94jp/ddns .
-```
-
-构建过程中下载`python:3.x.x-alpine`镜像和`pip install httpx`需要一点时间
-
-
-
-## RUN
-
-```shell
-docker run -d --name ddns -v <local dir>:/home/NameSilo-DDNS:rw --network host charles94jp/ddns
-# --restart=always
-```
-
-一定要用 -v 参数将本机的目录`<local dir>`挂载到容器内的`/home/NameSilo-DDNS`，容器会将程序文件写出到`<local dir>`
-
-接着在`<local dir>`中配置`conf/conf.json`，参考[Configuration](#configuration)
-
-最后记得重启一下容器，因为最开始`docker run`时没有配置文件，所以ddns程序是没有成功运行的
-
-```shell
-docker restart ddns
-```
-
-IPv6请使用`--network host`选项，IPv4可以不用
-
-查看ddns程序状态用`<local dir>`中的`ddns-docker`
-
-
-
-## Start with Linux
-
-```shell
-systemctl enable docker
-docker update --restart=always ddns
-```
 
 
 

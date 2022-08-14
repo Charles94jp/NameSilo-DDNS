@@ -21,7 +21,7 @@ NameSilo DDNS is a Dynamic Domain Name System service for NameSilo for home broa
 
 This program is only available for domain names purchased on NameSilo.
 
-👉  ⭐  [Star](#)
+-->  ⭐  [Star](#)
 
 
 
@@ -44,18 +44,19 @@ This program is only available for domain names purchased on NameSilo.
 # Table of Contents
 
 - [Background](#background)
-- [Install](#install)
 - [Quick Start](#quick-start)
-- [Usage](#usage)
-    - [Configuration](#configuration)
-    - [Note](#note)
-    - [Start](#start)
-    - [Log](#log)
-    - [Start At Boot](#start-at-boot)
-- [Docker](#Docker)
+- [Configuration](#configuration)
+- [Note](#note)
+- [Usage - Docker](#usage - docker)
     - [Build or Pull Image](#build-or-pull-image)
     - [RUN](#run)
     - [Start with Linux](#start-with-linux)
+    - [Log - Docker](#log - docker)
+- [Usage - Direct](#usage - direct)
+    - [Install](#install)
+    - [Start](#start)
+    - [Log](#log)
+    - [Start At Boot](#start-at-boot)
 - [Links](#links)
 
 
@@ -82,34 +83,6 @@ As long as the router's firewall policy does not restrict external network traff
 
 
 
-# Install
-
-There are two optional modes of operation.
-
-**1\. Local**
-
-Download and use:
-
-```
-git -b python clone https://github.com/Charles94jp/NameSilo-DDNS.git
-```
-
-The python 3 environment is required. The httpx module also needs to be installed.
-
-```
-pip install httpx
-```
-
-Update:
-
-```
-git pull origin python
-```
-
-**2\. [Docker](#docker)**  (recommend)
-
-
-
 # Quick Start
 
 
@@ -129,9 +102,7 @@ docker restart ddns
 
 
 
-# Usage
-
-## Configuration
+# Configuration
 
 
 
@@ -139,22 +110,22 @@ The `conf/conf.json` file needs to be configured before starting, refer to conf.
 
 
 
-|Fields|Introduction|
-|--|--|
-|domains|A record type domain name for IPv4. Support to update multiple domain names at the same time, support second-level domain names, third-level domain names, etc., such as `["cc.bb.cn","q.w.cc.cn"]`. If you only use IPv6, leave this blank.<br>This program can only update an existing DNS record, not create a new one. So you must first create a resolution on the NameSilo web page before you can run the program.|
-|~~domain~~|An older version of the `domains` item, which is currently compatible. String type, only one domain name can be updated at a time.|
-|domains_ipv6|AAAA record type domain name for IPv6. If you only use IPv4, leave this blank. To use IPv6 in docker, the `run` command requires the `--network host` option.|
-|key|<a target="_blank" href="https://www.namesilo.com/account/api-manager">The key generated from NameSilo</a>, after generation you need to remember and keep this key.|
-|frequency|How often do you detect changes in your ip, and only update your DNS when a change in ip occurs, in seconds.|
-|mail_host| For example, you can use [Google Mail's POP/IMAP](https://support.google.com/mail/answer/7126229). |
-|mail_port| Must be SMTP SSL port. |
-|mail_user|The login user name, which is also the email sender.|
-|mail_pass|Password or key, for gmail, refer [here](https://support.google.com/accounts/answer/185833).|
-|receivers|Array to store the addresses of recipients. Receiver and sender can be the same address.|
-|mail_lang|The language of the email. Default zh-cn, optional en-us.|
-|~~email_after_reboot~~|Deprecated since v2.2.0. When the power is lost unexpectedly, an email notification will be sent when the power is reapplied. If the server can start automatically after power on.|
-|auto_restart|Effective under Linux, disabled by default. When enabled, the program will automatically restart when it encounters exceptions. Since v2.1.0, the robustness of the program has been improved and this option is no longer important.|
-|email_every_update|Prerequisites: Linux; Set email configuration; Every time the IP is changed, an email will be sent to inform the new IP to avoid inaccessibility within ten or twenty minutes of DNS update.|
+| Fields                 | Introduction                                                 |
+| ---------------------- | ------------------------------------------------------------ |
+| domains                | A record type domain name for IPv4. Support to update multiple domain names at the same time, support second-level domain names, third-level domain names, etc., such as `["cc.bb.cn","q.w.cc.cn"]`. If you only use IPv6, leave this blank.<br>This program can only update an existing DNS record, not create a new one. So you must first create a resolution on the NameSilo web page before you can run the program. |
+| ~~domain~~             | An older version of the `domains` item, which is currently compatible. String type, only one domain name can be updated at a time. |
+| domains_ipv6           | AAAA record type domain name for IPv6. If you only use IPv4, leave this blank. To use IPv6 in docker, the `run` command requires the `--network host` option. |
+| key                    | <a target="_blank" href="https://www.namesilo.com/account/api-manager">The key generated from NameSilo</a>, after generation you need to remember and keep this key. |
+| frequency              | How often do you detect changes in your ip, and only update your DNS when a change in ip occurs, in seconds. |
+| mail_host              | For example, you can use [Google Mail's POP/IMAP](https://support.google.com/mail/answer/7126229). |
+| mail_port              | Must be SMTP SSL port.                                       |
+| mail_user              | The login user name, which is also the email sender.         |
+| mail_pass              | Password or key, for gmail, refer [here](https://support.google.com/accounts/answer/185833). |
+| receivers              | Array to store the addresses of recipients. Receiver and sender can be the same address. |
+| mail_lang              | The language of the email. Default zh-cn, optional en-us.    |
+| ~~email_after_reboot~~ | Deprecated since v2.2.0. When the power is lost unexpectedly, an email notification will be sent when the power is reapplied. If the server can start automatically after power on. |
+| auto_restart           | Effective under Linux, disabled by default. When enabled, the program will automatically restart when it encounters exceptions. Since v2.1.0, the robustness of the program has been improved and this option is no longer important. |
+| email_every_update     | Prerequisites: Linux; Set email configuration; Every time the IP is changed, an email will be sent to inform the new IP to avoid inaccessibility within ten or twenty minutes of DNS update. |
 
 
 
@@ -178,114 +149,15 @@ python ddns.py --test-email
 
 
 
-## Note
+# Note
 
 This program can only update the DNS record of a domain name, it cannot be added, please make sure this DNS record exists for your domain name.
 
 
 
-## Start
+# Usage - Docker
 
-
-**Quick start**
-
-```
-python ddns.py
-```
-
-
-
-**Advanced use of Linux:**
-
-First edit the DDNS file, change the 8th line to the path of NameSilo-DDNS project, change the 17th line to the path of python 3 executable file
-
-```
-chmod +x DDNS
-# usage
-./DDNS {start|stop|status|restart|force-reload}
-```
-
-Example
-
-![](example.png)
-
-If you want to use `DDNS` command anywhere, you can create a soft link in the `/usr/bin` directory, and note that the `ln` command should use the absolute path, such as :
-
-```
-ln -s /root/NameSilo-DDNS/DDNS /usr/bin/DDNS
-```
-
-
-
-**Windows usage:** Double-click the bat or vbs file, please check the log for the running status of the program.
-
-
-
-## Log
-
-The logs are in the log folder.
-
-<b>Linux</b>
-
-View log files
-
-```
-ls -lh log/DDNS*.log*
-```
-
-if `DDNS.log` exceeds 2M, it will trigger automatic archiving. It can store all the logs since DDNS was used.
-
-Manually archived logs for when `DDNS status` prints too many messages.
-
-```
-DDNS archiveLog
-# or
-python ddns.py --archive
-```
-
-
-
-<b>Windows</b>
-
-When DDNS service starts, if `DDNS.log` exceeds 2M, the old `DDNS.log` file will be renamed to `DDNS-xxx.log.back`.
-
-Manually archived logs.
-
-```
-python ddns.py archiveLog
-```
-
-
-
-## Start At Boot
-
-<b>Linux</b>
-
-To start at boot, only RedHat series such as CentOS 7 8 and Rocky Linux 8 are demonstrated, please write your own script for other Linux distributions.
-
-Register DDNS as a service managed by systemctl.
-
-First of all, follow the steps in [start](#start) to configure the DDNS file.
-
-Then configure the DDNS.service file, modify the path of DDNS file in it, and finally run:
-
-```
-cp  ./DDNS.service  /usr/lib/systemd/system/DDNS.service
-systemctl daemon-reload
-systemctl enable DDNS
-```
-
-
-
-<b>Windows</b>
-
-Add the vbs file to the Windows policy group.
-
-
-
-# Docker
-
-Now, NameSilo-DDNS supports docker on Linux, no need to have a python environment on your server, and no need to systemctl in terms of starting with Linux.
+The advantage of Doker is that there is no need to install python environment, and there is no need to add scripts to systemctl in terms of starting with Linux.
 
 
 
@@ -343,6 +215,157 @@ Check the status of the ddns program with ``ddns-docker`` in `<local dir>`.
 systemctl enable docker
 docker update --restart=always ddns
 ```
+
+
+
+## Log - Docker
+
+The logs are in the `<local dir>/log` folder
+
+To view the running status of the program, and the history of updates. Run:
+
+```shell
+<local dir>/ddns-docker
+```
+
+![](D:\GitHub\NameSilo-DDNS\readme.assets\example.png)
+
+
+
+View log files:
+
+```
+ls -lh log/DDNS*.log*
+```
+
+
+
+If `DDNS.log` exceeds 2M, it will trigger automatic archiving. It can store all the logs since DDNS was used.
+
+
+
+
+
+# Usage - Direct
+
+## Install
+
+Download and use:
+
+```
+git -b python clone https://github.com/Charles94jp/NameSilo-DDNS.git
+```
+
+The python 3 environment is required. The httpx module also needs to be installed.
+
+```
+pip install httpx
+```
+
+Update:
+
+```
+git pull origin python
+```
+
+
+
+## Start
+
+
+**Quick start**
+
+```
+python ddns.py
+```
+
+
+
+**Advanced use of Linux:**
+
+First edit the DDNS file, change the 8th line to the path of NameSilo-DDNS project, change the 17th line to the path of python 3 executable file
+
+```
+chmod +x DDNS
+# usage
+./DDNS {start|stop|status|restart|force-reload}
+```
+
+It functions like [Log - Docker](#log - docker), but more powerful.
+
+
+
+If you want to use `DDNS` command anywhere, you can create a soft link in the `/usr/bin` directory, and note that the `ln` command should use the absolute path, such as :
+
+```
+ln -s /root/NameSilo-DDNS/DDNS /usr/bin/DDNS
+```
+
+
+
+**Windows usage:** Double-click the bat or vbs file, please check the log for the running status of the program.
+
+
+
+## Log
+
+The logs are in the log folder.
+
+<b>Linux</b>
+
+View log files
+
+```
+ls -lh log/DDNS*.log*
+```
+
+If `DDNS.log` exceeds 2M, it will trigger automatic archiving. It can store all the logs since DDNS was used.
+
+Manually archived logs for when `DDNS status` prints too many messages.
+
+```
+DDNS archiveLog
+# or
+python ddns.py --archive
+```
+
+
+
+<b>Windows</b>
+
+When DDNS service starts, if `DDNS.log` exceeds 2M, the old `DDNS.log` file will be renamed to `DDNS-xxx.log.back`.
+
+Manually archived logs.
+
+```
+python ddns.py archiveLog
+```
+
+
+
+## Start At Boot
+
+<b>Linux</b>
+
+To start at boot, only RedHat series such as CentOS 7 8 and Rocky Linux 8 are demonstrated, please write your own script for other Linux distributions.
+
+Register DDNS as a service managed by systemctl.
+
+First of all, follow the steps in [start](#start) to configure the DDNS file.
+
+Then configure the DDNS.service file, modify the path of DDNS file in it, and finally run:
+
+```
+cp  ./DDNS.service  /usr/lib/systemd/system/DDNS.service
+systemctl daemon-reload
+systemctl enable DDNS
+```
+
+
+
+<b>Windows</b>
+
+Add the vbs file to the Windows policy group.
 
 
 
