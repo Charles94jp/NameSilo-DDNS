@@ -44,12 +44,12 @@ NameSilo DDNS是一个用于NameSilo的动态域名解析服务，适用于家�
 - [Quick Start](#quick-start)
 - [Configuration](#configuration)
 - [Note](#note)
-- [Usage - Docker](#usage - docker)
+- [Usage - Docker](#usage---docker)
     - [Build or Pull Image](#build-or-pull-image)
     - [RUN](#run)
     - [Start with Linux](#start-with-linux)
-    - [Log - Docker](#log - docker)
-- [Usage - Direct](#usage - direct)
+    - [Log - Docker](#log---docker)
+- [Usage - Direct](#usage---direct)
     - [Install](#install)
     - [Start](#start)
     - [Log](#log)
@@ -293,7 +293,7 @@ chmod +x DDNS
 ./DDNS {start|stop|status|restart|force-reload}
 ```
 
-功能类似[Log - Docker](#log - docker)，但更强大
+功能类似[Log - Docker](#log---docker)，但更强大
 
 
 

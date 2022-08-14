@@ -47,12 +47,12 @@ This program is only available for domain names purchased on NameSilo.
 - [Quick Start](#quick-start)
 - [Configuration](#configuration)
 - [Note](#note)
-- [Usage - Docker](#usage - docker)
+- [Usage - Docker](#usage---docker)
     - [Build or Pull Image](#build-or-pull-image)
     - [RUN](#run)
     - [Start with Linux](#start-with-linux)
-    - [Log - Docker](#log - docker)
-- [Usage - Direct](#usage - direct)
+    - [Log - Docker](#log---docker)
+- [Usage - Direct](#usage---direct)
     - [Install](#install)
     - [Start](#start)
     - [Log](#log)
@@ -228,7 +228,7 @@ To view the running status of the program, and the history of updates. Run:
 <local dir>/ddns-docker
 ```
 
-![](D:\GitHub\NameSilo-DDNS\readme.assets\example.png)
+![](example.png)
 
 
 
@@ -291,7 +291,7 @@ chmod +x DDNS
 ./DDNS {start|stop|status|restart|force-reload}
 ```
 
-It functions like [Log - Docker](#log - docker), but more powerful.
+It functions like [Log - Docker](#log---docker), but more powerful.
 
 
 
