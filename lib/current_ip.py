@@ -57,22 +57,27 @@ class CurrentIP:
                 r = r.split('您的IP地址是：')[1]
                 ip = r.split('</title>')[0]
 
-            # 国内api: https://ip.skk.moe/
+            # 国内api: https://www.speedtest.cn/
             if count == 2:
+                r = self._http_client.get('https://api-v3.speedtest.cn/ip')
+                ip = r.json().get('data').get('ip')
+
+            # 国内api: https://ip.skk.moe/ 但可能获取到的是ipv6
+            if count == 3:
                 r = self._http_client.get('https://api.ip.sb/geoip')
 
             # 两个美国的备用api
-            if count == 3:
-                r = self._http_client.get('https://api.myip.com')
             if count == 4:
+                r = self._http_client.get('https://api.myip.com')
+            if count == 5:
                 r = self._http_client.get('https://api.ipify.org?format=json')
-            if count > 1:
+            if count > 2:
                 ip = r.json().get('ip')
         except Exception as e:
             self._logger.exception(e)
         if type(ip) != str or ip.find('.') == -1:
             self._logger.error(f'fetch: \terror code: count={count}')
-            if count < 4:
+            if count < 5:
                 return self.fetch(count=count + 1)
             else:
                 return '-1'
