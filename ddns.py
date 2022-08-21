@@ -145,7 +145,6 @@ class DDNS:
     def start(self) -> None:
         """
         开启循环
-        todo: 只开启ipv6，不用ipv4
         """
         enable_ipv4 = self._namesilo_client.enable_ipv4
         enable_ipv6 = self._namesilo_client.enable_ipv6

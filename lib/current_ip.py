@@ -16,10 +16,6 @@ class CurrentIP:
     :since: 2022-07-26
     """
 
-    # 两个美国的备用api
-    _MYIP_API = 'https://api.myip.com'
-    _IPIFY_API = 'https://api.ipify.org?format=json'
-
     def __init__(self, http_client: httpx.Client) -> None:
         """
 
@@ -39,7 +35,7 @@ class CurrentIP:
                 self._logger.info('__init__: \tThe api for ip138 is not correctly obtained, '
                                   'the alternate api will be used')
 
-    def fetch(self):
+    def fetch(self, count=0):
         """
         获取当前公网IP
 
@@ -47,58 +43,41 @@ class CurrentIP:
         :rtype: str
         """
         ip = '-1'
+        r = None
         if not self._ip138_url:
-            try:
-                ip = self._fetch_current_ip_bk()
-            except Exception as e:
-                self._logger.exception(e)
-                self._logger.error('fetch: \tapi error')
-            return ip
-
+            return self.fetch(count=2)
         try:
-            r = self._http_client.get('http://' + self._ip138_url)
-        except Exception as e:
-            self._logger.exception(e)
-            try:
+            # 国内api: ip138
+            if count == 0:
+                r = self._http_client.get('http://' + self._ip138_url)
+            if count == 1:
                 r = self._http_client.get('https://' + self._ip138_url)
-            except Exception as e:
-                self._logger.exception(e)
-                return '-1'
+            if count < 2 and r.status_code == 200:
+                r = r.text
+                r = r.split('您的IP地址是：')[1]
+                ip = r.split('</title>')[0]
 
-        if r.status_code == 200:
-            r = r.text
-            r = r.split('您的IP地址是：')[1]
-            ip = r.split('</title>')[0]
-            self._logger.info(f'fetch: \tcurrent host ip(ip138): {ip}')
-        else:
-            try:
-                ip = self._fetch_current_ip_bk()
-            except Exception as e:
-                self._logger.exception(e)
-                self._logger.error('fetch: \tapi error')
-        return ip
+            # 国内api: ip.cn
+            if count == 2:
+                r = self._http_client.get('https://www.ip.cn/api/index?ip=&type=0')
 
-    def _fetch_current_ip_bk(self):
-        """
-        备用
-
-        :return: '-1' if failed
-        :rtype: str
-        """
-        ip = r = '-1'
-        try:
-            r = self._http_client.get(self._MYIP_API)
-            r = r.json()
-            ip = r['ip']
-            self._logger.info(f'_fetch_current_ip_bk: \tcurrent host ip(myip): {ip}')
-            return ip
+            # 两个美国的备用api
+            if count == 3:
+                r = self._http_client.get('https://api.myip.com')
+            if count == 4:
+                r = self._http_client.get('https://api.ipify.org?format=json')
+            if count > 1:
+                ip = r.json().get('ip')
         except Exception as e:
             self._logger.exception(e)
-            r = self._http_client.get(self._IPIFY_API)
-            r = r.json()
-            ip = r['ip']
-            self._logger.info(f'_fetch_current_ip_bk: \tcurrent host ip(ipify): {ip}')
-            return ip
+        if type(ip) != str or ip.find('.') == -1:
+            self._logger.error(f'fetch: \terror code: count={count}')
+            if count < 4:
+                return self.fetch(count=count + 1)
+            else:
+                return '-1'
+        self._logger.info(f'fetch: \tcurrent host ip: {ip}')
+        return ip
 
     def fetch_v6(self, count=0):
         """
