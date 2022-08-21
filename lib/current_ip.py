@@ -57,9 +57,9 @@ class CurrentIP:
                 r = r.split('您的IP地址是：')[1]
                 ip = r.split('</title>')[0]
 
-            # 国内api: ip.cn
+            # 国内api: https://ip.skk.moe/
             if count == 2:
-                r = self._http_client.get('https://www.ip.cn/api/index?ip=&type=0')
+                r = self._http_client.get('https://api.ip.sb/geoip')
 
             # 两个美国的备用api
             if count == 3:
