@@ -11,6 +11,7 @@ class CurrentIP:
 
     :author: Charles94jp
     :changelog: 20xx-xx-xx: xxx
+                2022-08-22 ip138的api已限流，即使10分钟请求一次，10次后仍被ban，寻找新的api
                 2022-07-30 添加获取IPv6功能
                 2022-07-26 代码重构，拆分出此类
     :since: 2022-07-26
@@ -23,17 +24,6 @@ class CurrentIP:
         """
         self._http_client = http_client
         self._logger = logging.getLogger('NameSilo_DDNS')
-        self._ip138_url = None
-        try:
-            r = self._http_client.get('https://www.ip138.com/')
-            api = r.text.split('<iframe src=\"//')[1]
-            api = api.split('/\"')[0]
-            self._ip138_url = api
-        except Exception as e:
-            self._logger.exception(e)
-            if self._ip138_url is not None:
-                self._logger.info('__init__: \tThe api for ip138 is not correctly obtained, '
-                                  'the alternate api will be used')
 
     def fetch(self, count=0):
         """
@@ -44,34 +34,36 @@ class CurrentIP:
         """
         ip = '-1'
         r = None
-        if not self._ip138_url:
-            return self.fetch(count=2)
         try:
-            # 国内api: ip138
+            # 国内api: www.speedtest.cn、plugin.speedtest.cn
             if count == 0:
-                r = self._http_client.get('http://' + self._ip138_url)
-            if count == 1:
-                r = self._http_client.get('https://' + self._ip138_url)
-            if count < 2 and r.status_code == 200:
-                r = r.text
-                r = r.split('您的IP地址是：')[1]
-                ip = r.split('</title>')[0]
-
-            # 国内api: https://www.speedtest.cn/
-            if count == 2:
                 r = self._http_client.get('https://api-v3.speedtest.cn/ip')
                 ip = r.json().get('data').get('ip')
+            if count == 1:
+                r = self._http_client.get('https://forge.speedtest.cn/api/location/info')
+                ip = r.json().get('ip')
+
+            # 南京大学测速网
+            if count == 2:
+                r = self._http_client.get('http://test.nju.edu.cn/backend/getIP.php')
+                ip = r.json().get('processedString')
+            # 中科大测速网
+            if count == 3:
+                r = self._http_client.get('http://test.ustc.edu.cn/backend/getIP.php')
+                ip = r.json().get('processedString')
 
             # 国内api: https://ip.skk.moe/ 但可能获取到的是ipv6
-            if count == 3:
-                r = self._http_client.get('https://api.ip.sb/geoip')
+            # 清华大学测速网: https://iptv.tsinghua.edu.cn/st/getIP.php 但可能获取到的是ipv6
+            # 两个未前后端分离，ip嵌在html中的网站
+            # https://ip.tool.chinaz.com/
+            # https://tool.lu/ip/
 
             # 两个美国的备用api
             if count == 4:
                 r = self._http_client.get('https://api.myip.com')
             if count == 5:
                 r = self._http_client.get('https://api.ipify.org?format=json')
-            if count > 2:
+            if count > 3:
                 ip = r.json().get('ip')
         except Exception as e:
             self._logger.exception(e)
