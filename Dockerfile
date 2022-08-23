@@ -10,7 +10,7 @@ COPY docker/ddns-docker /home/NameSilo-DDNS.back/ddns-docker
 COPY conf/ /home/NameSilo-DDNS.back/conf/
 COPY docker/start.sh /start.sh
 
-RUN pip install httpx \
+RUN python -m pip install -i https://mirrors.aliyun.com/pypi/simple/ httpx \
     && chmod 777 /start.sh
 
 CMD ["/start.sh"]
