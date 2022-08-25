@@ -29,7 +29,7 @@ This program is only available for domain names purchased on NameSilo.
 
 - Simple but rich configuration.
 
-- With email alert function, you will be alerted when there is an abnormality in the process of the service running for a long time.
+- With email notification function, you can receive notification when your ip is changed or the program is exception.
 
 - Support Docker.
 
@@ -375,6 +375,6 @@ Add the vbs file to the Windows policy group.
 
 - [Docker Hub](https://hub.docker.com/r/charles94jp/ddns/tags)
 - NameSilo API Document: [Domain API Reference - NameSilo](https://www.namesilo.com/api-reference#dns/dns-list-records)
-- Current IP query: [ip138.com](https://www.ip138.com/) ; [myip.com](https://www.myip.com/api-docs/) ; [ipify](https://www.ipify.org/)
+- Current IP query: [speedtest.cn](https://www.speedtest.cn/) ; [NJU speed test](http://test.nju.edu.cn/) ; [myip.com](https://www.myip.com/api-docs/) ; [ipify](https://www.ipify.org/)
 - Current IPv6 query: [USTC speed test](http://test6.ustc.edu.cn/) ; [ipify](https://www.ipify.org/) ; [Tsinghua University IPv6](https://ipv6.tsinghua.edu.cn/)
 

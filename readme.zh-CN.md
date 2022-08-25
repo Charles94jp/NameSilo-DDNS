@@ -383,5 +383,5 @@ systemctl enable DDNS
 
 - [Docker Hub](https://hub.docker.com/r/charles94jp/ddns/tags)
 - NameSilo API Document: [Domain API Reference - NameSilo](https://www.namesilo.com/api-reference#dns/dns-list-records)
-- 当前IP查询: [ip138.com](https://www.ip138.com/) ; [myip.com](https://www.myip.com/api-docs/) ; [ipify](https://www.ipify.org/)
+- 当前IP查询: [speedtest.cn](https://www.speedtest.cn/) ; [南京大学测速网](http://test.nju.edu.cn/) ; [myip.com](https://www.myip.com/api-docs/) ; [ipify](https://www.ipify.org/)
 - 当前IPv6查询: [中科大测速网](http://test6.ustc.edu.cn/) ; [ipify](https://www.ipify.org/) ; [清华大学IPv6](https://ipv6.tsinghua.edu.cn/)
