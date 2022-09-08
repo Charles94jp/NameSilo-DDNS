@@ -16,12 +16,25 @@ from lib.namesilo_client import NameSiloClient
 from lib.email_client import EmailClient
 
 
+def check_platform_is_unix() -> bool:
+    """
+
+    :return: True if Linux or macOS, else False
+    """
+    pl = pl_system().lower()
+    if pl.find('linux') > -1 or pl.find('darwin') > -1:
+        return True
+    else:
+        return False
+
+
 class DDNS:
     """
     `NameSilo DDNS <https://github.com/Charles94jp/NameSilo-DDNS>`_
 
     :author: Charles94jp
     :changelog: 20xx-xx-xx: xxx
+                2022-09-08 适配mac
                 2022-07-28 邮件内容添加域名信息表，邮件支持英文
                 2022-07-27 代码重构，引入argparse，移除email_after_reboot，新的重启及计数机制
                 2022-07-26 代码重构，拆分出三个子模块，优化代码风格，取消缓存邮件模板，取消日志回滚时压缩，添加ASCII启动图标
@@ -39,7 +52,7 @@ class DDNS:
     _HTTP_HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
                                    'Chrome/96.0.4664.93 Safari/537.36'}
 
-    _IS_LINUX = True if pl_system().find('Linux') > -1 else False
+    _IS_UNIX = check_platform_is_unix()
 
     def __init__(self, conf: dict, debug: bool = False) -> None:
         """
@@ -180,7 +193,7 @@ class DDNS:
                 error_count = error_count + 1
                 self._logger.exception(e)
                 if error_count > 10:
-                    if self._auto_restart and self._IS_LINUX:
+                    if self._auto_restart and self._IS_UNIX:
                         self._logger.info('The program has made 10 consecutive errors and will restart automatically')
                         self._email_client.send_email('ddns_error_restart', self._namesilo_client.to_html_table())
                         # 重启DDNS服务，确保python ddns.py的错误被记录，所以使用sh -c。subprocess.
