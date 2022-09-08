@@ -119,22 +119,22 @@ docker restart ddns
 
 
 
-| 字段                   | 介绍                                                         |
-| ---------------------- | ------------------------------------------------------------ |
+| 字段                   | 介绍                                                                                                                                                           |
+| ---------------------- |--------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | domains                | A记录类型的域名，用于IPv4。支持同时更新多个域名，支持二级域名、三级域名等，如`["cc.bb.cn","q.w.cc.cn"]`。如果只使用IPv6，此项留白即可<br>程序只能更新已存在的DNS记录，而不能创建一个新的DNS记录。所以你**必须先在NameSilo网页上创建一个解析**后，才能运行程序。 |
-| ~~domain~~             | `domains` 项的旧版本，目前还兼容。字符串类型，只能是一个域名 |
-| domains_ipv6           | AAAA记录类型的域名，用于IPv6。如果只使用IPv4，此项留白即可。docker中使用IPv6，run命令需要`--network host`选项 |
-| key                    | <a target="_blank" href="https://guozh.net/obtain-namesilo-api-key/">从NameSilo获取</a>的api key，有key才能获取和修改你的域名状态，保管好不要泄露此key |
-| frequency              | 多久检测一次你的ip变动，如有变动才更新你的域名解析状态，单位s |
-| mail_host              | SMT邮件服务器，如qq、163等。QQ邮箱[打开POP3/SMTP](https://service.mail.qq.com/cgi-bin/help?subtype=1&&id=28&&no=331)即可 |
-| mail_port              | 邮件服务器端口，必须是SMTP SSL端口                           |
-| mail_user              | 登录用户名，也是发件人                                       |
-| mail_pass              | 登录密码或key                                                |
-| receivers              | 数组，收件人地址，可以是多个。收件人 和 发件人 可以是同一个  |
-| mail_lang              | 邮件的语言。默认zh-cn，可选en-us                             |
-| ~~email_after_reboot~~ | 从v2.2.0版本起弃用。适用于家里意外断电的情况，当通电后，路由器重新拨号，一般会获得新IP，如果服务器支持来电自动开机，那么DDNS在开机自动启动后，会发送邮件告诉你：你的服务器已成功启动。 |
-| auto_restart           | Linux下生效，默认不启用。在程序持续异常一段时间后，自我重启。v2.1.0版本已找到异常原因并解决，此项不再重要。 |
-| email_every_update     | 每次IP更新都发送邮件告知新IP，避免在DNS更新的十几二十分钟内无法访问。默认关闭，打开的前提是设置了邮件。 |
+| ~~domain~~             | `domains` 项的旧版本，目前还兼容。字符串类型，只能是一个域名                                                                                                                          |
+| domains_ipv6           | AAAA记录类型的域名，用于IPv6。如果只使用IPv4，此项留白即可。docker中使用IPv6，run命令需要`--network host`选项                                                                                  |
+| key                    | <a target="_blank" href="https://guozh.net/obtain-namesilo-api-key/">从NameSilo获取</a>的api key，有key才能获取和修改你的域名状态，保管好不要泄露此key                                   |
+| frequency              | 多久检测一次你的ip变动，如有变动才更新你的域名解析状态，单位s                                                                                                                             |
+| mail_host              | SMT邮件服务器，如qq、163等。QQ邮箱[打开POP3/SMTP](https://service.mail.qq.com/cgi-bin/help?subtype=1&&id=28&&no=331)即可                                                     |
+| mail_port              | 邮件服务器端口，必须是SMTP SSL端口                                                                                                                                        |
+| mail_user              | 登录用户名，也是发件人                                                                                                                                                  |
+| mail_pass              | 登录密码或key                                                                                                                                                     |
+| receivers              | 数组，收件人地址，可以是多个。收件人 和 发件人 可以是同一个                                                                                                                              |
+| mail_lang              | 邮件的语言。默认zh-cn，可选en-us                                                                                                                                        |
+| ~~email_after_reboot~~ | 从v2.2.0版本起弃用。适用于家里意外断电的情况，当通电后，路由器重新拨号，一般会获得新IP，如果服务器支持来电自动开机，那么DDNS在开机自动启动后，会发送邮件告诉你：你的服务器已成功启动。                                                            |
+| auto_restart           | Linux、macOS下生效，默认不启用。在程序持续异常一段时间后，自我重启。v2.1.0版本已找到异常原因并解决，此项不再重要。                                                                                              |
+| email_every_update     | 每次IP更新都发送邮件告知新IP，避免在DNS更新的十几二十分钟内无法访问。默认关闭，打开的前提是设置了邮件。                                                                                                      |
 
 
 
