@@ -250,6 +250,8 @@ If `DDNS.log` exceeds 2M, it will trigger automatic archiving. It can store all 
 
 # Usage - Direct
 
+Run the program directly on your host.
+
 ## Install
 
 Download and use:
@@ -283,9 +285,13 @@ python ddns.py
 
 
 
-**Advanced use of Linux:**
+**Advanced use of Linux and Mac:**
 
-First edit the DDNS file, change the 8th line to the path of NameSilo-DDNS project, change the 17th line to the path of python 3 executable file
+The DDNS file is a powerful script that starts the ddns.py program in the background, detects if the program is running in the background, and kills the program.
+
+Edit the DDNS file before use, modify the 8th line to be the **absolute path** of the NameSilo-DDNS project, and modify the 17th line to be the path of the python 3 executable file. This is done so that the project path can be found when using softlinks or setup programs that start up with the system.
+
+Usage of `DDNS` script:
 
 ```
 chmod +x DDNS

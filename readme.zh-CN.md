@@ -250,8 +250,9 @@ ls -lh log/DDNS*.log*
 
 
 
-
 # Usage - Direct
+
+直接在机器上运行程序
 
 ## Install
 
@@ -285,9 +286,13 @@ python ddns.py
 
 
 
-**Linux高级使用：**
+**Linux | Mac进阶使用：**
 
-首先编辑DDNS文件，修改第8行为NameSilo-DDNS项目路径，修改第17行为python 3可执行文件路径即可使用
+`DDNS`文件是一个功能强大的脚本，可以后台启动ddns.py程序，检测程序是否在后台运行，以及杀死程序
+
+使用之前先编辑DDNS文件，修改第8行为NameSilo-DDNS项目的**绝对路径**，修改第17行为python 3可执行文件路径即。这样做是为了在使用软链或设置程序随系统启动时能找到项目路径
+
+`DDNS`脚本使用方法：
 
 ```
 chmod +x DDNS
