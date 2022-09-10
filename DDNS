@@ -40,7 +40,7 @@ function startps()
 
 function killps()
 {
-    ps -ef|grep $key_word|grep -vE '(grep|$0|service.*$key_word|systemctl)'| cut -c 9-16|xargs kill -9
+    ps -ef|grep $key_word|grep -vE '(grep|$0|service.*$key_word|systemctl)'| cut -c 7-16|xargs kill -9
 }
 
 case "$1" in
