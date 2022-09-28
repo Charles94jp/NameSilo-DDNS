@@ -79,9 +79,9 @@ class NameSiloClient:
         for domain in self.domains:
             self._list_dns_api(domain)
         for domain in self.domains_ipv6:
-            self._list_dns_api(domain, clear=True)
+            self._list_dns_api(domain, clear=True, type='AAAA')
 
-    def _list_dns_api(self, domain: dict, clear=False) -> None:
+    def _list_dns_api(self, domain: dict, clear=False, type='A') -> None:
         """
 
         :param domain: 直接对字典进行读取和修改操作，无返回值
@@ -89,6 +89,7 @@ class NameSiloClient:
         """
         try:
             r = self._list_dns_api_cache.get(domain['domain'])
+            print(r)
             if r is None:
                 url = f"/api/dnsListRecords?version=1&type=xml&key={self._api_key}&domain={domain['domain']}"
                 r = self._http_client.get(url)
@@ -102,9 +103,10 @@ class NameSiloClient:
             _domain = domain['domain'] if domain['host'] == '@' or \
                                           domain['host'] == '' else f"{domain['host']}.{domain['domain']}"
             for record in r:
-                if record.find(f'<host>{_domain}</host>') != -1:
+                if record.find(f'<host>{_domain}</host>') != -1 and record.find(f'<type>{type}</type>') != -1:
                     r = record
                     break
+            domain['type'] = type
             r = r.split('</record_id>')
             domain['record_id'] = r[0].split('<record_id>')[-1]
             domain['domain_ip'] = r[1].split('<value>')[1].split('</value>')[0]
