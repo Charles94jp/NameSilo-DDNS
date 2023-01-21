@@ -27,7 +27,7 @@ class NameSiloClient:
         """
         self._http_client = copy.copy(http_client)
         self._http_client.base_url = self._API_BASE_URL
-        self._logger = logging.getLogger('NameSilo_DDNS')
+        self._logger = logging.getLogger(self.__class__.__name__)
         self._list_dns_api_cache = {}
 
         self._api_key = conf['key']
@@ -94,7 +94,7 @@ class NameSiloClient:
                 r = self._http_client.get(url)
                 self._list_dns_api_cache[domain['domain']] = r.text
                 if r.status_code != 200:
-                    self._logger.error('_list_dns_api: \tError, process stopped. It could be due to the '
+                    self._logger.error('\tError, process stopped. It could be due to the '
                                        'configuration file error, or the NameSilo server error.')
                     sys.exit(-1)
                 r = r.text
@@ -109,11 +109,11 @@ class NameSiloClient:
             domain['record_id'] = r[0].split('<record_id>')[-1]
             domain['domain_ip'] = r[1].split('<value>')[1].split('</value>')[0]
             self._logger.info(
-                f"fetch_domains_info: \t'{domain['host']}{'.' if domain['host'] else ''}{domain['domain']}' "
+                f"\t'{domain['host']}{'.' if domain['host'] else ''}{domain['domain']}' "
                 f"resolution ip: {domain['domain_ip']}")
         except httpx.ConnectError as e:
             self._logger.exception(e)
-            self._logger.error('_list_dns_api: \tError, process stopped. '
+            self._logger.error('\tError, process stopped. '
                                'It could be due to the configuration file error, or the NameSilo server error.')
         if clear:
             self._list_dns_api_cache.clear()
@@ -128,7 +128,7 @@ class NameSiloClient:
         :return: Number of successful updates, else the inverse of the number of failures
         """
         # 更新rrid，修复更新时api返回280：record_id missing or invalid
-        self._logger.info('update_domain_ip: \tupdate record_id')
+        self._logger.info('\tupdate record_id')
         self.fetch_domains_info()
         r1 = r2 = 0
         if self.enable_ipv4 and new_ip is not None:
@@ -164,20 +164,20 @@ class NameSiloClient:
                 r = r.split('</code>')[0]
                 if r == '300':
                     domain['domain_ip'] = new_ip
-                    self._logger.info(f"update_dns_api: \tupdate '{full_domain}' "
+                    self._logger.info(f"\tupdate '{full_domain}' "
                                       f"completed: {domain['domain_ip']}")
                     success = success + 1
                 elif r == '280' and r1.find('must be a valid ipv') > -1:
-                    self._logger.error(f'update_dns_api: ip type and domain type do not match\n{r1}')
+                    self._logger.error(f'\tip type and domain type do not match\n{r1}')
                     sys.exit(-1)
                 else:
                     fail = fail + 1
-                    self._logger.error(f"update_dns_api: \tupdate '{full_domain}' failed. "
+                    self._logger.error(f"\tupdate '{full_domain}' failed. "
                                        f"Namesilo response:\n{r1}")
             except Exception as e:
                 exception = exception + 1
                 self._logger.exception(e)
-                self._logger.error(f"update_dns_api: \tupdate '{full_domain}' error")
+                self._logger.error(f"\tupdate '{full_domain}' error")
         if fail > 0:
             return -1 * fail
         if exception > 0:

@@ -24,7 +24,7 @@ class EmailClient:
         :param dict conf: 解析后的配置文件
         :param bool debug: 调试则加载socks模块，并使用代理，为了连接gmail
         """
-        self._logger = logging.getLogger('NameSilo_DDNS')
+        self._logger = logging.getLogger(self.__class__.__name__)
         self._debug = debug
         if conf['mail_host'] and conf['mail_port'] and conf['mail_user'] and conf['mail_pass'] and conf['receivers']:
             self.available = True
@@ -88,7 +88,7 @@ class EmailClient:
                 self._mail_user, self._receivers, message.as_string())
             # 退出
             r = smtp_client.quit()
-            self._logger.info('send_email: \tsuccess')
+            self._logger.info('\tsuccess')
             return 0
         except smtplib.SMTPException as e:
             self._logger.exception(e)

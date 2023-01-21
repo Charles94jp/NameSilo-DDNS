@@ -23,7 +23,7 @@ class CurrentIP:
         :param httpx.Client http_client: 完成基础配置的 http client
         """
         self._http_client = http_client
-        self._logger = logging.getLogger('NameSilo_DDNS')
+        self._logger = logging.getLogger(self.__class__.__name__)
 
     def fetch(self, count=0):
         """
@@ -68,12 +68,12 @@ class CurrentIP:
         except Exception as e:
             self._logger.exception(e)
         if type(ip) != str or ip.find('.') == -1:
-            self._logger.error(f'fetch: \terror code: count={count}')
+            self._logger.error(f'\terror code: count={count}')
             if count < 5:
                 return self.fetch(count=count + 1)
             else:
                 return '-1'
-        self._logger.info(f'fetch: \tcurrent host ip: {ip}')
+        self._logger.info(f'\tcurrent host ip: {ip}')
         return ip
 
     def fetch_v6(self, count=0):
@@ -106,10 +106,10 @@ class CurrentIP:
         except Exception as e:
             self._logger.exception(e)
         if type(r) != str or r.find(':') == -1:
-            self._logger.error(f'fetch_v6: \terror code: count={count}')
+            self._logger.error(f'\terror code: count={count}')
             if count < 2:
                 return self.fetch_v6(count=count + 1)
             else:
                 return '-1'
-        self._logger.info(f'fetch_v6: \tcurrent host IPv6: {r}')
+        self._logger.info(f'\tcurrent host IPv6: {r}')
         return r
