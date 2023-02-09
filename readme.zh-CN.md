@@ -259,7 +259,7 @@ ls -lh log/DDNS*.log*
 下载即用
 
 ```
-git -b python clone https://github.com/Charles94jp/NameSilo-DDNS.git
+git clone -b python https://github.com/Charles94jp/NameSilo-DDNS.git
 ```
 
 需要使用python3来运行，python需要安装httpx模块：
