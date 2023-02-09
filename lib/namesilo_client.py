@@ -88,17 +88,17 @@ class NameSiloClient:
         :param clear: 函数的最后清理缓存
         """
         try:
-            r = self._list_dns_api_cache.get(domain['domain'])
-            if r is None:
+            ro = self._list_dns_api_cache.get(domain['domain'])
+            if ro is None:
                 url = f"/api/dnsListRecords?version=1&type=xml&key={self._api_key}&domain={domain['domain']}"
-                r = self._http_client.get(url)
-                self._list_dns_api_cache[domain['domain']] = r.text
-                if r.status_code != 200:
+                ro = self._http_client.get(url)
+                self._list_dns_api_cache[domain['domain']] = ro.text
+                if ro.status_code != 200:
                     self._logger.error('\tError, process stopped. It could be due to the '
                                        'configuration file error, or the NameSilo server error.')
                     sys.exit(-1)
-                r = r.text
-            r = r.split('<resource_record>')
+                ro = ro.text
+            r = ro.split('<resource_record>')
             _domain = domain['domain'] if domain['host'] == '@' or \
                                           domain['host'] == '' else f"{domain['host']}.{domain['domain']}"
             for record in r:
@@ -111,6 +111,9 @@ class NameSiloClient:
             self._logger.info(
                 f"\t'{domain['host']}{'.' if domain['host'] else ''}{domain['domain']}' "
                 f"resolution ip: {domain['domain_ip']}")
+        except AttributeError as e:
+            self._logger.exception(e)
+            self._logger.error(f'\tResponse content error\n{ro}')
         except httpx.ConnectError as e:
             self._logger.exception(e)
             self._logger.error('\tError, process stopped. '
