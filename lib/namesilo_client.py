@@ -28,7 +28,6 @@ class NameSiloClient:
         self._http_client = copy.copy(http_client)
         self._http_client.base_url = self._API_BASE_URL
         self._logger = logging.getLogger(self.__class__.__name__)
-        self._list_dns_api_cache = {}
 
         self._api_key = conf['key']
         self.enable_ipv4 = False
@@ -76,23 +75,24 @@ class NameSiloClient:
         拉取域名信息到对象中
         不提取_list_dns_api()，直接循环（self.domains+self.domains_ipv6）应该也可以
         """
+        cache = {}
         for domain in self.domains:
-            self._list_dns_api(domain)
+            self._list_dns_api(domain, cache)
         for domain in self.domains_ipv6:
-            self._list_dns_api(domain, clear=True)
+            self._list_dns_api(domain, cache)
 
-    def _list_dns_api(self, domain: dict, clear=False) -> None:
+    def _list_dns_api(self, domain: dict, cache: dict = {}) -> None:
         """
 
         :param domain: 直接对字典进行读取和修改操作，无返回值
-        :param clear: 函数的最后清理缓存
+        :param cache: 缓存空间，可以由调用者负责提供和清空
         """
         try:
-            ro = self._list_dns_api_cache.get(domain['domain'])
+            ro = cache.get(domain['domain'])
             if ro is None:
                 url = f"/api/dnsListRecords?version=1&type=xml&key={self._api_key}&domain={domain['domain']}"
                 ro = self._http_client.get(url)
-                self._list_dns_api_cache[domain['domain']] = ro.text
+                cache[domain['domain']] = ro.text
                 if ro.status_code != 200:
                     self._logger.error('\tError, process stopped. It could be due to the '
                                        'configuration file error, or the NameSilo server error.')
@@ -118,8 +118,6 @@ class NameSiloClient:
             self._logger.exception(e)
             self._logger.error('\tError, process stopped. '
                                'It could be due to the configuration file error, or the NameSilo server error.')
-        if clear:
-            self._list_dns_api_cache.clear()
 
     def update_domain_ip(self, new_ip=None, new_ipv6=None) -> int:
         """
