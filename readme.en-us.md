@@ -14,7 +14,7 @@
 <a href="#features"><img src="https://img.shields.io/badge/log-rotation-orange"></a>
 </p>
 
-<h4 align="center"><a href="https://github.com/Charles94jp/NameSilo-DDNS#----">简体中文</a> | English</h3>
+<h4 align="center"><a href="https://github.com/Charles94jp/NameSilo-DDNS#简体中文--english">简体中文</a> | English</h3>
 
 
 NameSilo DDNS is a Dynamic Domain Name System service for NameSilo for home broadband, it can automatically detect IP changes in home broadband and automatically update the resolution of the domain name.
