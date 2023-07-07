@@ -14,30 +14,27 @@
 <a href="#features"><img src="https://img.shields.io/badge/log-rotation-orange"></a>
 </p>
 
-<h4 align="center"><a href="https://github.com/Charles94jp/NameSilo-DDNS/blob/python/readme.zh-CN.md">简体中文</a> | English</h3>
+<h4 align="center">简体中文 | <a href="https://github.com/Charles94jp/NameSilo-DDNS/blob/python/readme.en-us.md">English</a></h3>
 
 
-NameSilo DDNS is a Dynamic Domain Name System service for NameSilo for home broadband, it can automatically detect IP changes in home broadband and automatically update the resolution of the domain name.
+NameSilo DDNS是一个用于NameSilo的动态域名解析服务，适用于家庭宽带，它能自动检测家庭宽带的IP变动，并自动更新域名的解析。
 
-This program is only available for domain names purchased on NameSilo.
+本项目已通过python3重构，查看Java版本请切换分支。
 
--->  ⭐  [Star](#)
+本程序仅适用于NameSilo上购买的域名
+
+右上角点个 ⭐ Star 不迷路
 
 
 
 # Features
 
-- Simple but rich configuration.
-
-- With email notification function, you can receive notification when your ip is changed or the program is exception.
-
-- Support Docker.
-
-- Log rotation.
-
-- Support multiple domain name updates at the same time.
-
-- Support IPv6.
+- 配置简单但丰富
+- 具有邮件提醒功能，服务通知和异常提醒
+- 支持docker运行
+- 日志记录和滚动
+- 支持同时更新多个域名
+- 支持IPv6
 
 
 
@@ -63,29 +60,41 @@ This program is only available for domain names purchased on NameSilo.
 
 # Background
 
-How to access the server at home from outside? we call it intranet penetration. IPv4 and IPv6 both have their own solutions.
+内网映射，内网穿透，在外访问家里的机器的方案
 
 ### IPv4
 
-At present, telecom operators assign to home broadband IP are dynamic, although the IP address is not fixed, but the good thing is that the home router can get a real public IP, so we just need to use **set Modem to Bridge Mode + use router for Broadband Authentication + router setup NAT Mapping/DMZ Host** to access the home device in the public network. After the router mapping port 22 we can remotely connect to our home linux machine, and after mapping port 445+3389 we can use the remote desktop of Win10.
+目前运营商给家庭宽带的IP都是动态的，庆幸的是虽然IP地址不固定，但分配到家庭路由器的却是一个实实在在的公网IP，所以我们只需**设置光猫桥接模式 + 路由器拨号上网 + 路由器NAT映射/DMZ主机**即可在公网访问家庭的设备。
 
-![网络拓扑图](./Network-topology-en.png)
+需要几个前提条件：
 
-To solve the problem of changing public IP, you can purchase a domain name and use DDNS (Dynamic Domain Name Server) to resolve the domain name to your broadband's IP. This will allow you to access your home devices by accessing a **fixed domain name**.
+- 路由器支持NAT映射/DMZ主机功能，有的路由器甚至支持DDNS，不过是指定域名厂商的，一般是花生壳，也是需要备案的。所以本项目对比路由器自带DDNS仍有优势
 
-To achieve this, you need a computer that is always running to run this DDNS program.
+- 获取宽带的账号密码，拨号时使用
+
+- 获取光猫超级用户的账号密码，用于设置桥接模式，这个根据光猫型号去网上搜即可
+
+一切顺利的话，我们路由器映射22端口就能远程家里的linux，映射445+3389端口就能用win10自带远程桌面远程家里的windows。如下图
+
+![网络拓扑图](https://raw.githubusercontent.com/Charles94jp/NameSilo-DDNS/java/Network-topology.png)
+
+为解决公网IP的变动，可以购买一个域名，使用DDNS（Dynamic Domain Name Server，动态域名服务）将域名解析到宽带的IP。这样就可以在家搭建各种服务并通过访问**固定的域名**来访问，而无需租用昂贵的公网服务器
+
+想实现这个目的，你需要一台一直运行的电脑来运行此DDNS程序
+
+
 
 ### IPv6
 
-Telecom operators are currently equipped with IPv6 addresses for broadband. Just enable the IPv6 function on the router, and make sure that the computer has an IPv6 address and a DNS server address to use IPv6 to connect to the Internet.
+IPv6就简单了，运营商目前都给宽带配备了IPv6地址，只需在路由器上开启IPv6功能，电脑上确保有IPv6地址和DNS服务器地址即可使用IPv6联网。如果开了全局代理记得测试时关掉。
 
-As long as the router's firewall policy does not restrict external network traffic from accessing the internal network, you can access internal network machines through IPv6 addresses without NET mapping!
+只要路由器的防火墙策略未限制外网流量访问内网，则无需NET映射，就能通过IPv6地址访问内网机器！
 
 
 
 # Quick Start
 
-Docker:
+快速上手，Dokcer：
 
 ```shell
 mkdir -p /home/docker/ddns
@@ -95,53 +104,51 @@ docker run -d --name ddns -v /home/docker/ddns:/home/NameSilo-DDNS:rw --network 
 # -e TZ=Asia/Shanghai
 cp /home/ddns-docker/conf/conf.json.example /home/ddns-docker/conf/conf.json
 vi /home/docker/ddns/conf/conf.json
-# Fill in the domain name and key
-# Generate key here: https://www.namesilo.com/account/api-manager
+# 填写域名domain和api密钥key
+# api密钥在这里获取: https://www.namesilo.com/account/api-manager
 docker restart ddns
 ```
 
-Of course it can also be [run directly](#usage---direct) as a python program.
+当然也可以作为python程序[直接运行](#usage---direct)。
 
 
 
 # Configuration
 
-
-
-The `conf/conf.json` file needs to be configured before starting, refer to conf.json.example. **Only two configurations, domains and key, are necessary**, the rest can be set without.
-
-
-
-| Fields                 | Introduction                                                                                                                                                                                                                                                                                                                                                                                                              |
-| ---------------------- |---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| domains                | A record type domain name for IPv4. Support to update multiple domain names at the same time, support second-level domain names, third-level domain names, etc., such as `["cc.bb.cn","q.w.cc.cn"]`. If you only use IPv6, leave this blank.<br>This program can only update an existing DNS record, not create a new one. So you must first create a resolution on the NameSilo web page before you can run the program. |
-| ~~domain~~             | An older version of the `domains` item, which is currently compatible. String type, only one domain name can be updated at a time.                                                                                                                                                                                                                                                                                        |
-| domains_ipv6           | AAAA record type domain name for IPv6. If you only use IPv4, leave this blank. To use IPv6 in docker, the `run` command requires the `--network host` option.                                                                                                                                                                                                                                                             |
-| key                    | <a target="_blank" href="https://www.namesilo.com/account/api-manager">The key generated from NameSilo</a>, after generation you need to remember and keep this key.                                                                                                                                                                                                                                                      |
-| frequency              | How often do you detect changes in your ip, and only update your DNS when a change in ip occurs, in seconds.                                                                                                                                                                                                                                                                                                              |
-| mail_host              | For example, you can use [Google Mail's POP/IMAP](https://support.google.com/mail/answer/7126229).                                                                                                                                                                                                                                                                                                                        |
-| mail_port              | Must be SMTP SSL port.                                                                                                                                                                                                                                                                                                                                                                                                    |
-| mail_user              | The login user name, which is also the email sender.                                                                                                                                                                                                                                                                                                                                                                      |
-| mail_pass              | Password or key, for gmail, refer [here](https://support.google.com/accounts/answer/185833).                                                                                                                                                                                                                                                                                                                              |
-| receivers              | Array to store the addresses of recipients. Receiver and sender can be the same address.                                                                                                                                                                                                                                                                                                                                  |
-| mail_lang              | The language of the email. Default zh-cn, optional en-us.                                                                                                                                                                                                                                                                                                                                                                 |
-| ~~email_after_reboot~~ | Deprecated since v2.2.0. When the power is lost unexpectedly, an email notification will be sent when the power is reapplied. If the server can start automatically after power on.                                                                                                                                                                                                                                       |
-| auto_restart           | Effective under Linux and macOS, disabled by default. When enabled, the program will automatically restart when it encounters exceptions. Since v2.1.0, the robustness of the program has been improved and this option is no longer important.                                                                                                                                                                           |
-| email_every_update     | Prerequisites: Linux; Set email configuration; Every time the IP is changed, an email will be sent to inform the new IP to avoid inaccessibility within ten or twenty minutes of DNS update.                                                                                                                                                                                                                              |
+启动前需要配置`conf/conf.json`文件，参考conf.json.example，**只有domains和key两项配置是必要的**，其余的可以不进行配置。
 
 
 
-Q：What is the use of email function?
+| 字段                   | 介绍                                                                                                                                                           |
+| ---------------------- |--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| domains                | A记录类型的域名，用于IPv4。支持同时更新多个域名，支持二级域名、三级域名等，如`["cc.bb.cn","q.w.cc.cn"]`。如果只使用IPv6，此项留白即可<br>程序只能更新已存在的DNS记录，而不能创建一个新的DNS记录。所以你**必须先在NameSilo网页上创建一个解析**后，才能运行程序。 |
+| ~~domain~~             | `domains` 项的旧版本，目前还兼容。字符串类型，只能是一个域名                                                                                                                          |
+| domains_ipv6           | AAAA记录类型的域名，用于IPv6。如果只使用IPv4，此项留白即可。docker中使用IPv6，run命令需要`--network host`选项                                                                                  |
+| key                    | <a target="_blank" href="https://guozh.net/obtain-namesilo-api-key/">从NameSilo获取</a>的api key，有key才能获取和修改你的域名状态，保管好不要泄露此key                                   |
+| frequency              | 多久检测一次你的ip变动，如有变动才更新你的域名解析状态，单位s                                                                                                                             |
+| mail_host              | SMT邮件服务器，如qq、163等。QQ邮箱[打开POP3/SMTP](https://service.mail.qq.com/cgi-bin/help?subtype=1&&id=28&&no=331)即可                                                     |
+| mail_port              | 邮件服务器端口，必须是SMTP SSL端口                                                                                                                                        |
+| mail_user              | 登录用户名，也是发件人                                                                                                                                                  |
+| mail_pass              | 登录密码或key                                                                                                                                                     |
+| receivers              | 数组，收件人地址，可以是多个。收件人 和 发件人 可以是同一个                                                                                                                              |
+| mail_lang              | 邮件的语言。默认zh-cn，可选en-us                                                                                                                                        |
+| ~~email_after_reboot~~ | 从v2.2.0版本起弃用。适用于家里意外断电的情况，当通电后，路由器重新拨号，一般会获得新IP，如果服务器支持来电自动开机，那么DDNS在开机自动启动后，会发送邮件告诉你：你的服务器已成功启动。                                                            |
+| auto_restart           | Linux、macOS下生效，默认不启用。在程序持续异常一段时间后，自我重启。v2.1.0版本已找到异常原因并解决，此项不再重要。                                                                                              |
+| email_every_update     | 每次IP更新都发送邮件告知新IP，避免在DNS更新的十几二十分钟内无法访问。默认关闭，打开的前提是设置了邮件。                                                                                                      |
 
-A：The following emails will be received: successful push ip to NameSilo; failed to push ip; program stopped due to unexpected circumstances; program restarted automatically
-
-Q：How to enable the email function?
-
-A：From mail_host to mail_pass, all 4 configurations are filled in correctly, and it will be enabled automatically
 
 
+Q：邮件功能有什么用？
 
-Test if your email settings are correct, an email will be sent to your email address if your configuration works.
+A：会收到以下邮件：ip变动后，推送NameSilo成功；推送失败；程序因意外情况停止；程序自动重启
+
+Q：如何开启邮件功能？
+
+A：从mail_host到mail_pass，4个配置都填写正确，就会自动启用
+
+
+
+测试邮件设置是否正确，会发送一封邮件到你的邮箱：
 
 ```
 DDNS testEmail
@@ -153,35 +160,35 @@ python ddns.py --test-email
 
 # Note
 
-This program can only update the DNS record of a domain name, it cannot be added, please make sure this DNS record exists for your domain name.
+本程序只能更新域名的DNS记录，无法增加，请确保你的域名存在此DNS记录。
 
 
 
 # Usage - Docker
 
-The advantage of Doker is that there is no need to install python environment, and there is no need to add scripts to systemctl in terms of starting with Linux.
-
-
+Doker的优点是不需要安装python环境，在开机自动启动方面不需要将脚本加入systemctl
 
 ## Build or Pull Image
 
-<b>Pull from Docker Hub</b>
+<b>从Docker Hub拉取</b>
 
 ```shell
 docker pull charles94jp/ddns
 ```
 
-This image is built based on the smallest Linux alpine image, Docker Hub shows 21.37M, `docker images` shows the image size is 57M.
+本镜像基于最小的Linux alpine构建，Docker Hub显示21.37M，`docker images`显示镜像大小为57M
 
-The images in Docker Hub are not necessarily the latest, you can also choose to build the images manually
+Docker Hub中的镜像不一定是最新的，你也可以选择手动构建镜像
 
 
 
-<b>Build docker image manually</b>
+<b>手动构建镜像</b>
 
 ```shell
 docker build -t charles94jp/ddns .
 ```
+
+构建过程中下载`python:3.x.x-alpine`镜像和`pip install httpx`需要一点时间
 
 
 
@@ -190,24 +197,21 @@ docker build -t charles94jp/ddns .
 ```shell
 docker run -d --name ddns -v <local dir>:/home/NameSilo-DDNS:rw --network host charles94jp/ddns
 # --restart=always
-# -e TZ=Asia/Shanghai
 ```
 
-Be sure to mount the local directory `<local dir>` to `/home/NameSilo-DDNS` in the container with the -v parameter, the container will write out the program files to `<local dir>`.
+一定要用 -v 参数将本机的目录`<local dir>`挂载到容器内的`/home/NameSilo-DDNS`，容器会将程序文件写出到`<local dir>`
 
-The default time zone is Asia/Shanghai (CST, +0800). If you don't use this time zone, you can modify it with the -e option, for example `-e TZ=US/Mountain`.
+接着在`<local dir>`中配置`conf/conf.json`，参考[Configuration](#configuration)
 
-Then configure `conf/conf.json` in `<local dir>`, refer to [Configuration](#configuration)
-
-Finally remember to restart the container, because at the beginning of ``docker run`` there is no configuration file, so the ddns program is not successfully run.
+最后记得重启一下容器，因为最开始`docker run`时没有配置文件，所以ddns程序是没有成功运行的
 
 ```shell
 docker restart ddns
 ```
 
-Use the `-network host` option for IPv6.
+IPv6请使用`--network host`选项，IPv4可以不用
 
-Check the status of the ddns program with ``ddns-docker`` in `<local dir>`.
+查看ddns程序状态用`<local dir>`中的`ddns-docker`
 
 
 
@@ -222,9 +226,9 @@ docker update --restart=always ddns
 
 ## Log - Docker
 
-The logs are in the `<local dir>/log` folder
+日志在`<local dir>/log`文件夹下
 
-To view the running status of the program, and the history of updates. Run:
+查看程序运行状态，以及历史更新记录，运行：
 
 ```shell
 <local dir>/ddns-docker
@@ -234,7 +238,7 @@ To view the running status of the program, and the history of updates. Run:
 
 
 
-View log files:
+查看所有日志文件：
 
 ```
 ls -lh log/DDNS*.log*
@@ -242,31 +246,29 @@ ls -lh log/DDNS*.log*
 
 
 
-If `DDNS.log` exceeds 2M, it will trigger automatic archiving. It can store all the logs since DDNS was used.
-
-
+当DDNS服务启动时，若`DDNS.log`超过2M便会触发自动归档。可以存储使用DDNS以来所有的日志。
 
 
 
 # Usage - Direct
 
-Run the program directly on your host.
+直接在机器上运行程序
 
 ## Install
 
-Download and use:
+下载即用
 
 ```
 git clone -b python https://github.com/Charles94jp/NameSilo-DDNS.git
 ```
 
-The python 3 environment is required. The httpx module also needs to be installed.
+需要使用python3来运行，python需要安装httpx模块：
 
 ```
 pip install httpx
 ```
 
-Update:
+更新程序：
 
 ```
 git pull origin python
@@ -276,8 +278,7 @@ git pull origin python
 
 ## Start
 
-
-**Quick start**
+**快速启动：**
 
 ```
 python ddns.py
@@ -285,13 +286,13 @@ python ddns.py
 
 
 
-**Advanced use of Linux and Mac:**
+**Linux | Mac进阶使用：**
 
-The DDNS file is a powerful script that starts the ddns.py program in the background, detects if the program is running in the background, and kills the program.
+`DDNS`文件是一个功能强大的脚本，可以后台启动ddns.py程序，检测程序是否在后台运行，以及杀死程序
 
-Edit the DDNS file before use, modify the 8th line to be the **absolute path** of the NameSilo-DDNS project, and modify the 17th line to be the path of the python 3 executable file. This is done so that the project path can be found when using softlinks or setup programs that start up with the system.
+使用之前先编辑DDNS文件，修改第8行为NameSilo-DDNS项目的**绝对路径**，修改第17行为python 3可执行文件路径即。这样做是为了在使用软链或设置程序随系统启动时能找到项目路径
 
-Usage of `DDNS` script:
+`DDNS`脚本使用方法：
 
 ```
 chmod +x DDNS
@@ -299,11 +300,11 @@ chmod +x DDNS
 ./DDNS {start|stop|status|restart|force-reload}
 ```
 
-It functions like [Log - Docker](#log---docker), but more powerful.
+功能类似[Log - Docker](#log---docker)，但更强大
 
 
 
-If you want to use `DDNS` command anywhere, you can create a soft link in the `/usr/bin` directory, and note that the `ln` command should use the absolute path, such as :
+如果想在任何地方使用`DDNS`命令，可以在`/usr/bin`目录下建立软链接，注意`ln`命令要使用绝对路径，如
 
 ```
 ln -s /root/NameSilo-DDNS/DDNS /usr/bin/DDNS
@@ -311,25 +312,27 @@ ln -s /root/NameSilo-DDNS/DDNS /usr/bin/DDNS
 
 
 
-**Windows usage:** Double-click the bat or vbs file, please check the log for the running status of the program.
+**Windows使用：** 双击bat或vbs文件，程序运行状态请查看日志
 
 
 
 ## Log
 
-The logs are in the log folder.
+日志都在log文件夹下
+
+
 
 <b>Linux</b>
 
-View log files
+查看日志文件
 
 ```
 ls -lh log/DDNS*.log*
 ```
 
-If `DDNS.log` exceeds 2M, it will trigger automatic archiving. It can store all the logs since DDNS was used.
+当DDNS服务启动时，若`DDNS.log`超过2M便会触发自动归档。可以存储使用DDNS以来所有的日志。
 
-Manually archived logs for when `DDNS status` prints too many messages.
+手动归档日志，用于在`DDNS status`打印信息过多时
 
 ```
 DDNS archiveLog
@@ -341,12 +344,12 @@ python ddns.py --archive
 
 <b>Windows</b>
 
-When DDNS service starts, if `DDNS.log` exceeds 2M, the old `DDNS.log` file will be renamed to `DDNS-xxx.log.back`.
+当DDNS服务启动时，若`DDNS.log`超过2M便会将旧的`DDNS.log`文件重命名为`DDNS-xxx.log.back`
 
-Manually archived logs.
+手动归档日志:
 
 ```
-python ddns.py archiveLog
+python ddns.py --archive
 ```
 
 
@@ -355,13 +358,13 @@ python ddns.py archiveLog
 
 <b>Linux</b>
 
-To start at boot, only RedHat series such as CentOS 7 8 and Rocky Linux 8 are demonstrated, please write your own script for other Linux distributions.
+设置开机启动，仅示范RedHat系列，如CentOS 7 8和Rocky Linux 8，其他Linux发行版请自行编写脚本。
 
-Register DDNS as a service managed by systemctl.
+将DDNS注册为systemctl管理的服务
 
-First of all, follow the steps in [start](#start) to configure the DDNS file.
+首先要按照[start](#start)中的步骤配置DDNS文件
 
-Then configure the DDNS.service file, modify the path of DDNS file in it, and finally run:
+接着配置DDNS.service文件，修改其中DDNS文件的路径，最后
 
 ```
 cp  ./DDNS.service  /usr/lib/systemd/system/DDNS.service
@@ -373,14 +376,17 @@ systemctl enable DDNS
 
 <b>Windows</b>
 
-Add the vbs file to the Windows policy group.
+将vbs文件[加入策略组](https://blog.csdn.net/yunmuq/article/details/110199091)
+
+
 
 
 
 # Links
 
+相关链接：
+
 - [Docker Hub](https://hub.docker.com/r/charles94jp/ddns/tags)
 - NameSilo API Document: [Domain API Reference - NameSilo](https://www.namesilo.com/api-reference#dns/dns-list-records)
-- Current IP query: [speedtest.cn](https://www.speedtest.cn/) ; [NJU speed test](http://test.nju.edu.cn/) ; [myip.com](https://www.myip.com/api-docs/) ; [ipify](https://www.ipify.org/)
-- Current IPv6 query: [USTC speed test](http://test6.ustc.edu.cn/) ; [ipify](https://www.ipify.org/) ; [Tsinghua University IPv6](https://ipv6.tsinghua.edu.cn/)
-
+- 当前IP查询: [speedtest.cn](https://www.speedtest.cn/) ; [南京大学测速网](http://test.nju.edu.cn/) ; [myip.com](https://www.myip.com/api-docs/) ; [ipify](https://www.ipify.org/)
+- 当前IPv6查询: [中科大测速网](http://test6.ustc.edu.cn/) ; [ipify](https://www.ipify.org/) ; [清华大学IPv6](https://ipv6.tsinghua.edu.cn/)
