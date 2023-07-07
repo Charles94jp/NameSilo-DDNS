@@ -77,15 +77,16 @@ class NameSiloClient:
         """
         cache = {}
         for domain in self.domains:
-            self._list_dns_api(domain, cache)
+            self._list_dns_api(domain, cache, t='A')
         for domain in self.domains_ipv6:
-            self._list_dns_api(domain, cache)
+            self._list_dns_api(domain, cache, t='AAAA')
 
-    def _list_dns_api(self, domain: dict, cache: dict = {}) -> None:
+    def _list_dns_api(self, domain: dict, cache: dict = {}, t: str = 'A') -> None:
         """
 
         :param domain: 直接对字典进行读取和修改操作，无返回值
         :param cache: 缓存空间，可以由调用者负责提供和清空
+        :param t: type, 记录类型，支持A和AAAA
         """
         try:
             ro = cache.get(domain['domain'])
@@ -102,7 +103,7 @@ class NameSiloClient:
             _domain = domain['domain'] if domain['host'] == '@' or \
                                           domain['host'] == '' else f"{domain['host']}.{domain['domain']}"
             for record in r:
-                if record.find(f'<host>{_domain}</host>') != -1 and record.find(f'<type>{type}</type>') != -1:
+                if record.find(f'<host>{_domain}</host>') != -1 and record.find(f'<type>{t}</type>') != -1:
                     r = record
                     break
             if type(r) == list:
