@@ -105,6 +105,8 @@ class NameSiloClient:
                 if record.find(f'<host>{_domain}</host>') != -1:
                     r = record
                     break
+            if type(r) == list:
+                r = "".join(r)
             r = r.split('</record_id>')
             domain['record_id'] = r[0].split('<record_id>')[-1]
             domain['domain_ip'] = r[1].split('<value>')[1].split('</value>')[0]
