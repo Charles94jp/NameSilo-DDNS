@@ -106,7 +106,10 @@ class NameSiloClient:
                     r = record
                     break
             if type(r) == list:
-                r = "".join(r)
+                # 上方循环到最后也未匹配，未赋值
+                self._logger.error(f'\tResponse content error, '
+                                   f'or the domain name filled in the configuration file does not match\n{ro}')
+                return None
             r = r.split('</record_id>')
             domain['record_id'] = r[0].split('<record_id>')[-1]
             domain['domain_ip'] = r[1].split('<value>')[1].split('</value>')[0]
