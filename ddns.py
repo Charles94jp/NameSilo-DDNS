@@ -15,6 +15,8 @@ from lib.current_ip import CurrentIP
 from lib.namesilo_client import NameSiloClient
 from lib.email_client import EmailClient
 
+LOG_FILENAME = 'log/DDNS.log'
+
 
 def check_platform_is_unix() -> bool:
     """
@@ -26,6 +28,22 @@ def check_platform_is_unix() -> bool:
         return True
     else:
         return False
+
+
+def init_logger(stream_handler: bool = True) -> None:
+    handlers = []
+    level = logging.INFO
+    fh = logging.FileHandler(filename=LOG_FILENAME, encoding='utf-8', mode='a')
+    formatter = logging.Formatter('%(asctime)s - %(name)s.%(funcName)s[line:%(lineno)d] - %(levelname)s: %(message)s')
+    fh.setLevel(level)
+    fh.setFormatter(formatter)
+    handlers.append(fh)
+    if stream_handler:
+        sh = logging.StreamHandler()
+        sh.setLevel(level)
+        sh.setFormatter(formatter)
+        handlers.append(sh)
+    logging.basicConfig(level=level, handlers=handlers)
 
 
 class DDNS:
@@ -63,23 +81,13 @@ class DDNS:
 
         if not os.path.isdir('log'):
             os.mkdir('log')
-        if os.path.isfile('log/DDNS.log'):
+        if os.path.isfile(LOG_FILENAME):
             # size of DDNS.log > 2M
             # logging.handles.TimedRotatingFileHandler, RotatingFileHandler代替FileHandler，即自带的日志滚动，但是命名不可控
-            if os.path.getsize('log/DDNS.log') > 2 * 1024 * 1024:
+            if os.path.getsize(LOG_FILENAME) > 2 * 1024 * 1024:
                 DDNS.archive_log()
-        self._logger = logging.getLogger('NameSilo_DDNS')  # 传logger名称返回新logger，否则返回root，会重复输出到屏幕
-        self._logger.setLevel(logging.INFO)
-        fh = logging.FileHandler(filename='log/DDNS.log', encoding='utf-8', mode='a')
-        formatter = logging.Formatter('%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
-        fh.setLevel(logging.INFO)
-        fh.setFormatter(formatter)
-        self._logger.addHandler(fh)
-        if debug:
-            fh = logging.StreamHandler()
-            fh.setLevel(logging.INFO)
-            fh.setFormatter(formatter)
-            self._logger.addHandler(fh)
+        init_logger(stream_handler=debug)
+        self._logger = logging.getLogger(self.__class__.__name__)
         self._logger.info("""
 
  ███╗   ██╗  █████╗  ███╗   ███╗ ███████╗ ███████╗ ██╗ ██╗       ██████╗      ██████╗  ██████╗  ███╗   ██╗ ███████╗
@@ -109,7 +117,7 @@ class DDNS:
     @staticmethod
     def archive_log():
         date = time.strftime('%Y%m%d-%H%M%S', time.localtime())
-        os.rename('log/DDNS.log', 'log/DDNS-' + date + '.log.back')
+        os.rename(LOG_FILENAME, 'log/DDNS-' + date + '.log.back')
 
     def test_email(self):
         """

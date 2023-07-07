@@ -257,7 +257,7 @@ Run the program directly on your host.
 Download and use:
 
 ```
-git -b python clone https://github.com/Charles94jp/NameSilo-DDNS.git
+git clone -b python https://github.com/Charles94jp/NameSilo-DDNS.git
 ```
 
 The python 3 environment is required. The httpx module also needs to be installed.
