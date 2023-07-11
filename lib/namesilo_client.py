@@ -108,9 +108,9 @@ class NameSiloClient:
                     break
             if type(r) == list:
                 # 上方循环到最后也未匹配，未赋值
-                self._logger.error(f'\tResponse content error, '
-                                   f'or the domain name filled in the configuration file does not match\n{ro}')
-                return None
+                self._logger.error(f'\tResponse content error, or the domain name {_domain} in the configuration file '
+                                   f'does not match the data of the namesilo server\n{ro}')
+                raise Exception("Response error or configuration file error")
             r = r.split('</record_id>')
             domain['record_id'] = r[0].split('<record_id>')[-1]
             domain['domain_ip'] = r[1].split('<value>')[1].split('</value>')[0]
@@ -118,12 +118,12 @@ class NameSiloClient:
                 f"\t'{domain['host']}{'.' if domain['host'] else ''}{domain['domain']}' "
                 f"resolution ip: {domain['domain_ip']}")
         except AttributeError as e:
-            self._logger.exception(e)
             self._logger.error(f'\tResponse content error\n{ro}')
+            raise
         except httpx.ConnectError as e:
-            self._logger.exception(e)
             self._logger.error('\tError, process stopped. '
                                'It could be due to the configuration file error, or the NameSilo server error.')
+            raise
 
     def update_domain_ip(self, new_ip=None, new_ipv6=None) -> int:
         """
