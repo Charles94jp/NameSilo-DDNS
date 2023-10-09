@@ -54,6 +54,9 @@ class NameSiloClient:
         if self.enable_ipv6:
             for i in domains_v6:
                 self.domains_ipv6.append(NameSiloClient._separate(i))
+        self.ttl = conf.get('ttl')
+        if self.ttl is None:
+            self.ttl = 3600
 
     @staticmethod
     def _separate(domain_name: str) -> dict:
@@ -163,7 +166,7 @@ class NameSiloClient:
             full_domain = f"{domain['host']}{'.' if domain['host'] else ''}{domain['domain']}"
             try:
                 _host = '' if domain["host"] == '@' else domain["host"]
-                url = f"/api/dnsUpdateRecord?version=1&type=xml&rrttl=7207&key={self._api_key}" \
+                url = f"/api/dnsUpdateRecord?version=1&type=xml&rrttl={self.ttl}&key={self._api_key}" \
                       f"&domain={domain['domain']}&rrid={domain['record_id']}&rrhost={_host}&rrvalue={new_ip}"
                 r = self._http_client.get(url)
                 r = r1 = r.text

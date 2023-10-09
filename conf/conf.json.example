@@ -5,6 +5,7 @@
     "domains_ipv6": [
         "ipv6.namesilo.com"
     ],
+    "ttl": 3600,
     "key": "1234",
     "frequency": 600,
     "mail_host": "smtp.qq.com",
