@@ -100,9 +100,9 @@ IPv6就简单了，运营商目前都给宽带配备了IPv6地址，只需在路
 mkdir -p /home/docker/ddns
 docker pull charles94jp/ddns
 docker run -d --name ddns -v /home/docker/ddns:/home/NameSilo-DDNS:rw --network host charles94jp/ddns
-# --restart=always
-# -e TZ=Asia/Shanghai
-cp /home/ddns-docker/conf/conf.json.example /home/ddns-docker/conf/conf.json
+# run命令可选项-启动docker时启动容器: --restart=always
+# run命令可选项-时区: -e TZ=Asia/Shanghai
+cp /home/docker/ddns/conf/conf.json.example /home/docker/ddns/conf/conf.json
 vi /home/docker/ddns/conf/conf.json
 # 填写域名domain和api密钥key
 # api密钥在这里获取: https://www.namesilo.com/account/api-manager
