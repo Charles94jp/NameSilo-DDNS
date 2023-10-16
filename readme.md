@@ -127,7 +127,7 @@ docker restart ddns
 | ttl                    | Time To Live, DNS解析记录在DNS服务器上缓存时间，默认3600秒                                                                                                                    |
 | key                    | <a target="_blank" href="https://guozh.net/obtain-namesilo-api-key/">从NameSilo获取</a>的api key，有key才能获取和修改你的域名状态，保管好不要泄露此key                                   |
 | frequency              | 多久检测一次你的ip变动，如有变动才更新你的域名解析状态，单位s                                                                                                                             |
-| mail_host              | SMT邮件服务器，如qq、163等。QQ邮箱[打开POP3/SMTP](https://service.mail.qq.com/cgi-bin/help?subtype=1&&id=28&&no=331)即可                                                     |
+| mail_host              | SMT邮件服务器，如qq、163等。QQ邮箱[打开POP3/SMTP](https://service.mail.qq.com/detail/0/75)即可                                                     |
 | mail_port              | 邮件服务器端口，必须是SMTP SSL端口                                                                                                                                        |
 | mail_user              | 登录用户名，也是发件人                                                                                                                                                  |
 | mail_pass              | 登录密码或key                                                                                                                                                     |
