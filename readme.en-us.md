@@ -43,25 +43,25 @@ This program is only available for domain names purchased on NameSilo.
 
 # Table of Contents
 
-- [Background](#background)
-- [Quick Start](#quick-start)
-- [Configuration](#configuration)
-- [Note](#note)
-- [Usage - Docker](#usage---docker)
-    - [Build or Pull Image](#build-or-pull-image)
-    - [RUN](#run)
-    - [Start with Linux](#start-with-linux)
-    - [Log - Docker](#log---docker)
-- [Usage - Direct](#usage---direct)
-    - [Install](#install)
-    - [Start](#start)
-    - [Log](#log)
-    - [Start At Boot](#start-at-boot)
-- [Links](#links)
+- [1. Background](#1-background)
+- [2. Quick Start](#2-quick-start)
+- [3. Configuration](#3-configuration)
+- [4. Note](#4-note)
+- [5. Usage - Docker](#5-usage---docker)
+    - [5.1 Build or Pull Image](#51-build-or-pull-image)
+    - [5.2 RUN](#52-run)
+    - [5.3 Start with Linux](#53-start-with-linux)
+    - [5.4 Log - Docker](#54-log---docker)
+- [6. Usage - Direct](#6-usage---direct)
+    - [6.1 Install](#61-install)
+    - [6.2 Start](#62-start)
+    - [6.3 Log](#63-log)
+    - [6.4 Start At Boot](#64-start-at-boot)
+- [7. Links](#7-links)
 
 
 
-# Background
+# 1. Background
 
 How to access the server at home from outside? we call it intranet penetration. IPv4 and IPv6 both have their own solutions.
 
@@ -83,7 +83,7 @@ As long as the router's firewall policy does not restrict external network traff
 
 
 
-# Quick Start
+# 2. Quick Start
 
 Docker:
 
@@ -104,7 +104,7 @@ Of course it can also be [run directly](#usage---direct) as a python program.
 
 
 
-# Configuration
+# 3. Configuration
 
 
 
@@ -152,19 +152,19 @@ python ddns.py --test-email
 
 
 
-# Note
+# 4. Note
 
 This program can only update the DNS record of a domain name, it cannot be added, please make sure this DNS record exists for your domain name.
 
 
 
-# Usage - Docker
+# 5. Usage - Docker
 
 The advantage of Doker is that there is no need to install python environment, and there is no need to add scripts to systemctl in terms of starting with Linux.
 
 
 
-## Build or Pull Image
+## 5.1 Build or Pull Image
 
 <b>Pull from Docker Hub</b>
 
@@ -186,7 +186,7 @@ docker build -t charles94jp/ddns .
 
 
 
-## RUN
+## 5.2 RUN
 
 ```shell
 docker run -d --name ddns -v <local dir>:/home/NameSilo-DDNS:rw --network host charles94jp/ddns
@@ -212,7 +212,7 @@ Check the status of the ddns program with ``ddns-docker`` in `<local dir>`.
 
 
 
-## Start with Linux
+## 5.3 Start with Linux
 
 ```shell
 systemctl enable docker
@@ -221,7 +221,7 @@ docker update --restart=always ddns
 
 
 
-## Log - Docker
+## 5.4 Log - Docker
 
 The logs are in the `<local dir>/log` folder
 
@@ -249,11 +249,11 @@ If `DDNS.log` exceeds 2M, it will trigger automatic archiving. It can store all 
 
 
 
-# Usage - Direct
+# 6. Usage - Direct
 
 Run the program directly on your host.
 
-## Install
+## 6.1 Install
 
 Download and use:
 
@@ -275,7 +275,7 @@ git pull origin python
 
 
 
-## Start
+## 6.2 Start
 
 
 **Quick start**
@@ -316,7 +316,7 @@ ln -s /root/NameSilo-DDNS/DDNS /usr/bin/DDNS
 
 
 
-## Log
+## 6.3 Log
 
 The logs are in the log folder.
 
@@ -352,7 +352,7 @@ python ddns.py archiveLog
 
 
 
-## Start At Boot
+## 6.4 Start At Boot
 
 <b>Linux</b>
 
@@ -378,7 +378,7 @@ Add the vbs file to the Windows policy group.
 
 
 
-# Links
+# 7. Links
 
 - [Docker Hub](https://hub.docker.com/r/charles94jp/ddns/tags)
 - NameSilo API Document: [Domain API Reference - NameSilo](https://www.namesilo.com/api-reference#dns/dns-list-records)

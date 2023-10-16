@@ -40,25 +40,25 @@ NameSilo DDNS是一个用于NameSilo的动态域名解析服务，适用于家�
 
 # Table of Contents
 
-- [Background](#background)
-- [Quick Start](#quick-start)
-- [Configuration](#configuration)
-- [Note](#note)
-- [Usage - Docker](#usage---docker)
-    - [Build or Pull Image](#build-or-pull-image)
-    - [RUN](#run)
-    - [Start with Linux](#start-with-linux)
-    - [Log - Docker](#log---docker)
-- [Usage - Direct](#usage---direct)
-    - [Install](#install)
-    - [Start](#start)
-    - [Log](#log)
-    - [Start At Boot](#start-at-boot)
-- [Links](#links)
+- [1. Background](#1-background)
+- [2. Quick Start](#2-quick-start)
+- [3. Configuration](#3-configuration)
+- [4. Note](#4-note)
+- [5. Usage - Docker](#5-usage---docker)
+    - [5.1 Build or Pull Image](#51-build-or-pull-image)
+    - [5.2 RUN](#52-run)
+    - [5.3 Start with Linux](#53-start-with-linux)
+    - [5.4 Log - Docker](#54-log---docker)
+- [6. Usage - Direct](#6-usage---direct)
+    - [6.1 Install](#61-install)
+    - [6.2 Start](#62-start)
+    - [6.3 Log](#63-log)
+    - [6.4 Start At Boot](#64-start-at-boot)
+- [7. Links](#7-links)
 
 
 
-# Background
+# 1. Background
 
 内网映射，内网穿透，在外访问家里的机器的方案
 
@@ -78,7 +78,9 @@ NameSilo DDNS是一个用于NameSilo的动态域名解析服务，适用于家�
 
 ![网络拓扑图](https://raw.githubusercontent.com/Charles94jp/NameSilo-DDNS/java/Network-topology.png)
 
-为解决公网IP的变动，可以购买一个域名，使用DDNS（Dynamic Domain Name Server，动态域名服务）将域名解析到宽带的IP。这样就可以在家搭建各种服务并通过访问**固定的域名**来访问，而无需租用昂贵的公网服务器
+当然运营商会屏蔽80 443等端口
+
+且分配的公网IP会变动（每次间隔几天到十几天不等），为解决这一问题，可以购买一个域名，使用DDNS（Dynamic Domain Name Server，动态域名服务）将域名实时解析到宽带的IP。这样就可以在家搭建各种服务并通过访问**固定的域名**来访问，而无需租用昂贵的公网服务器
 
 想实现这个目的，你需要一台一直运行的电脑来运行此DDNS程序
 
@@ -92,7 +94,7 @@ IPv6就简单了，运营商目前都给宽带配备了IPv6地址，只需在路
 
 
 
-# Quick Start
+# 2. Quick Start
 
 快速上手，Dokcer：
 
@@ -113,7 +115,7 @@ docker restart ddns
 
 
 
-# Configuration
+# 3. Configuration
 
 启动前需要配置`conf/conf.json`文件，参考conf.json.example，**只有domains和key两项配置是必要的**，其余的可以不进行配置。
 
@@ -159,17 +161,17 @@ python ddns.py --test-email
 
 
 
-# Note
+# 4. Note
 
 本程序只能更新域名的DNS记录，无法增加，请确保你的域名存在此DNS记录。
 
 
 
-# Usage - Docker
+# 5. Usage - Docker
 
 Doker的优点是不需要安装python环境，在开机自动启动方面不需要将脚本加入systemctl
 
-## Build or Pull Image
+## 5.1 Build or Pull Image
 
 <b>从Docker Hub拉取</b>
 
@@ -193,7 +195,7 @@ docker build -t charles94jp/ddns .
 
 
 
-## RUN
+## 5.2 RUN
 
 ```shell
 docker run -d --name ddns -v <local dir>:/home/NameSilo-DDNS:rw --network host charles94jp/ddns
@@ -216,7 +218,7 @@ IPv6请使用`--network host`选项，IPv4可以不用
 
 
 
-## Start with Linux
+## 5.3 Start with Linux
 
 ```shell
 systemctl enable docker
@@ -225,7 +227,7 @@ docker update --restart=always ddns
 
 
 
-## Log - Docker
+## 5.4 Log - Docker
 
 日志在`<local dir>/log`文件夹下
 
@@ -251,11 +253,11 @@ ls -lh log/DDNS*.log*
 
 
 
-# Usage - Direct
+# 6. Usage - Direct
 
 直接在机器上运行程序
 
-## Install
+## 6.1 Install
 
 下载即用
 
@@ -277,7 +279,7 @@ git pull origin python
 
 
 
-## Start
+## 6.2 Start
 
 **快速启动：**
 
@@ -317,7 +319,7 @@ ln -s /root/NameSilo-DDNS/DDNS /usr/bin/DDNS
 
 
 
-## Log
+## 6.3 Log
 
 日志都在log文件夹下
 
@@ -355,7 +357,7 @@ python ddns.py --archive
 
 
 
-## Start At Boot
+## 6.4 Start At Boot
 
 <b>Linux</b>
 
@@ -383,7 +385,7 @@ systemctl enable DDNS
 
 
 
-# Links
+# 7. Links
 
 相关链接：
 
