@@ -1,4 +1,5 @@
 import logging
+import re
 
 import httpx
 
@@ -11,6 +12,7 @@ class CurrentIP:
 
     :author: Charles94jp
     :changelog: 20xx-xx-xx: xxx
+                2023-10-17 speedtest的api变动，遂强校验ip格式，并使用备用api
                 2022-08-22 ip138的api已限流，即使10分钟请求一次，10次后仍被ban，寻找新的api
                 2022-07-30 添加获取IPv6功能
                 2022-07-26 代码重构，拆分出此类
@@ -37,11 +39,12 @@ class CurrentIP:
         try:
             # 国内api: www.speedtest.cn、plugin.speedtest.cn
             if count == 0:
-                r = self._http_client.get('https://api-v3.speedtest.cn/ip')
-                ip = r.json().get('data').get('ip')
-            if count == 1:
                 r = self._http_client.get('https://forge.speedtest.cn/api/location/info')
                 ip = r.json().get('ip')
+            if count == 1:
+                r = self._http_client.get('https://tisu-api-v3.speedtest.cn/speedUp/query')
+                ip = r.json().get('data').get('ip')
+            # https://nodes.speedtest.cn 亦可
 
             # 南京大学测速网
             if count == 2:
@@ -67,7 +70,7 @@ class CurrentIP:
                 ip = r.json().get('ip')
         except Exception as e:
             self._logger.exception(e)
-        if type(ip) != str or ip.find('.') == -1:
+        if type(ip) != str or not self.valid_v4(ip):
             self._logger.error(f'\terror code: count={count}')
             if count < 5:
                 return self.fetch(count=count + 1)
@@ -105,7 +108,7 @@ class CurrentIP:
 
         except Exception as e:
             self._logger.exception(e)
-        if type(r) != str or r.find(':') == -1:
+        if type(r) != str or not self.valid_v6(r):
             self._logger.error(f'\terror code: count={count}')
             if count < 2:
                 return self.fetch_v6(count=count + 1)
@@ -113,3 +116,17 @@ class CurrentIP:
                 return '-1'
         self._logger.info(f'\tcurrent host IPv6: {r}')
         return r
+
+    @staticmethod
+    def valid_v4(ip: str) -> bool:
+        # '0'开头也会被匹配，如：02.2.2.026
+        # re.compile会被缓存
+        exp = re.compile(
+            r'^((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}$')
+        return exp.match(ip) is not None
+
+    @staticmethod
+    def valid_v6(ip: str) -> bool:
+        # ::只能作为最后一个分隔符，不能作为第一个分隔符
+        exp = re.compile(r'^(([0-9A-Fa-f]{1,4}:){1,6})(:|[0-9A-Fa-f]{1,4}:)([0-9A-Fa-f]{1,4})$')
+        return exp.match(ip) is not None
