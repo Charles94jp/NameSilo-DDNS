@@ -27,7 +27,6 @@ class NameSiloClient:
         """
         self._http_client = copy.copy(http_client)
         self._http_client.base_url = self._API_BASE_URL
-        self._logger = logging.getLogger(self.__class__.__name__)
 
         self._api_key = conf['key']
         self.enable_ipv4 = False
@@ -57,6 +56,9 @@ class NameSiloClient:
         self.ttl = conf.get('ttl')
         if self.ttl is None:
             self.ttl = 3600
+
+        self._logger = logging.getLogger(self.__class__.__name__)
+        logging.getLogger('httpx').addFilter(DesensitizeKeyFilter(self._api_key))
 
     @staticmethod
     def _separate(domain_name: str) -> dict:
@@ -271,3 +273,19 @@ class NameSiloClient:
             count = count + 1
         table = table_template.replace('${trs}', trs)
         return table
+
+
+class DesensitizeKeyFilter(logging.Filter):
+    """
+    mask key
+    """
+
+    def __init__(self, key: str) -> None:
+        super().__init__()
+        self.key = key
+
+    def filter(self, record):
+        tmp = (arg.__str__().replace(f'key={self.key}', 'key=****') if isinstance(arg, httpx.URL) else arg for
+               arg in record.args)
+        record.args = tuple(tmp)
+        return True
