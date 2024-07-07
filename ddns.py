@@ -113,6 +113,7 @@ class DDNS:
         # self._email_after_reboot = conf['email_after_reboot']
         # self._in_docker = in_docker
         self._auto_restart = conf.get('auto_restart', False)
+        self._get_ipv6_local = conf.get('get_ipv6_local', True)
 
     @staticmethod
     def archive_log():
@@ -179,7 +180,7 @@ class DDNS:
                     if current_ip == '-1':
                         raise Exception('current_ip.fetch error')
                 if enable_ipv6:
-                    current_ipv6 = self._current_ip.fetch_v6()
+                    current_ipv6 = self._current_ip.get_local_ipv6() if self._get_ipv6_local else self._current_ip.fetch_v6()
                     if current_ipv6 == '-1':
                         raise Exception('current_ip.fetch error')
                 # 值得注意的是，当程序在运行一段时间后，而用户手动去NameSilo修改了域名的解析值，由于程序只对比内存中的值，所以不会触发更新

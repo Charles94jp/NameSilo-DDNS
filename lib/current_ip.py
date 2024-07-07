@@ -1,5 +1,6 @@
 import logging
 import re
+from socket import socket, AF_INET6, SOCK_DGRAM
 
 import httpx
 
@@ -19,6 +20,13 @@ class CurrentIP:
     :since: 2022-07-26
     """
 
+    # re.compile会缓存编译后的正则
+    # '0'开头也会被匹配，如：02.2.2.026
+    _VALID_V4_EXP = re.compile(r'^((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}$')
+    _FIND_V4_EXP = re.compile(r'((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}')
+    # ::只能作为最后一个分隔符，不能作为第一个分隔符
+    _VALID_V6_EXP = re.compile(r'^(([0-9A-Fa-f]{1,4}:){1,6})(:|[0-9A-Fa-f]{1,4}:)([0-9A-Fa-f]{1,4})$')
+
     def __init__(self, http_client: httpx.Client) -> None:
         """
 
@@ -37,22 +45,29 @@ class CurrentIP:
         ip = '-1'
         r = None
         try:
-            # 国内api: www.speedtest.cn、plugin.speedtest.cn
             if count == 0:
-                r = self._http_client.get('https://forge.speedtest.cn/api/location/info')
-                ip = r.json().get('ip')
+                r = self._http_client.get('https://www.ipplus360.com/getIP')
+                ip = r.json().get('data')
             if count == 1:
+                # api迭代更新较快
                 r = self._http_client.get('https://tisu-api-v3.speedtest.cn/speedUp/query')
-                ip = r.json().get('data').get('ip')
-            # https://nodes.speedtest.cn 亦可
-
-            # 南京大学测速网
+                ip = r.json().get('data').get('addr')
+                ip = ip.split(':')[0]
             if count == 2:
-                r = self._http_client.get('http://test.nju.edu.cn/backend/getIP.php')
-                ip = r.json().get('processedString')
-            # 中科大测速网
+                r = self._http_client.get('http://cip.cc')
+                ip = r.text
+                ip = self._FIND_V4_EXP.search(ip).group()
             if count == 3:
+                r = self._http_client.get('https://api-ipv4.ip.sb/ip')
+                ip = r.text.strip()
+
+            # 中科大测速网
+            if count == 4:
                 r = self._http_client.get('http://test.ustc.edu.cn/backend/getIP.php')
+                ip = r.json().get('processedString')
+            # 南京大学测速网
+            if count == 5:
+                r = self._http_client.get('http://test.nju.edu.cn/backend/getIP.php')
                 ip = r.json().get('processedString')
 
             # 国内api: https://ip.skk.moe/ 但可能获取到的是ipv6
@@ -62,17 +77,17 @@ class CurrentIP:
             # https://tool.lu/ip/
 
             # 两个美国的备用api
-            if count == 4:
+            if count == 6:
                 r = self._http_client.get('https://api.myip.com')
-            if count == 5:
+                ip = r.json().get('ip')
+            if count == 7:
                 r = self._http_client.get('https://api.ipify.org?format=json')
-            if count > 3:
                 ip = r.json().get('ip')
         except Exception as e:
             self._logger.exception(e)
         if type(ip) != str or not self.valid_v4(ip):
             self._logger.error(f'\terror code: count={count}')
-            if count < 5:
+            if count < 7:  # 等于最后一个count
                 return self.fetch(count=count + 1)
             else:
                 return '-1'
@@ -117,16 +132,25 @@ class CurrentIP:
         self._logger.info(f'\tcurrent host IPv6: {r}')
         return r
 
+    def get_local_ipv6(self) -> str:
+        """
+        因为IPv6没有局域网NAT转换，地址公网可用，可以通过ifconfig等本地操作获取地址
+        """
+        ip = '-1'
+        s = socket(AF_INET6, SOCK_DGRAM)
+        try:
+            # 未发送数据，也不用管是否ping通
+            s.connect(("2400:3200::1", 53))
+            ip = s.getsockname()[0]
+        except Exception as e:
+            self._logger.exception(e)
+        s.close()
+        return ip
+
     @staticmethod
     def valid_v4(ip: str) -> bool:
-        # '0'开头也会被匹配，如：02.2.2.026
-        # re.compile会被缓存
-        exp = re.compile(
-            r'^((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}$')
-        return exp.match(ip) is not None
+        return CurrentIP._VALID_V4_EXP.match(ip) is not None
 
     @staticmethod
     def valid_v6(ip: str) -> bool:
-        # ::只能作为最后一个分隔符，不能作为第一个分隔符
-        exp = re.compile(r'^(([0-9A-Fa-f]{1,4}:){1,6})(:|[0-9A-Fa-f]{1,4}:)([0-9A-Fa-f]{1,4})$')
-        return exp.match(ip) is not None
+        return CurrentIP._VALID_V6_EXP.match(ip) is not None

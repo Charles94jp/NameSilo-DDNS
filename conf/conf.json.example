@@ -8,6 +8,7 @@
     "ttl": 3600,
     "key": "1234",
     "frequency": 600,
+    "get_ipv6_local": true,
     "mail_host": "smtp.qq.com",
     "mail_port": "465",
     "mail_user": "",
