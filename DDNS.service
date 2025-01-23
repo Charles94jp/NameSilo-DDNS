@@ -4,6 +4,8 @@ After=network-online.target
 
 [Service]
 Type=forking
+Restart=always
+RestartSec=5s
 ExecStart=/usr/bin/bash /root/NameSilo-DDNS/DDNS start
 ExecStop=/usr/bin/bash /root/NameSilo-DDNS/DDNS stop
 ExecReload=/usr/bin/bash /root/NameSilo-DDNS/DDNS restart
