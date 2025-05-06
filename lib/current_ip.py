@@ -35,64 +35,32 @@ class CurrentIP:
         self._http_client = http_client
         self._logger = logging.getLogger(self.__class__.__name__)
 
-    def fetch(self, count=0):
-        """
-        获取当前公网IP
+    def fetch(self):
+        sources = [
+            lambda: self._http_client.get('https://www.ipplus360.com/getIP').json().get('data'),
+            lambda: self._http_client.get('https://tisu-api-v3.speedtest.cn/speedUp/query').json().get('data').get('addr').split(':')[0],
+            lambda: self._FIND_V4_EXP.search(self._http_client.get('http://cip.cc').text).group(),
+            lambda: self._http_client.get('https://api-ipv4.ip.sb/ip').text.strip(),
+            lambda: self._http_client.get('http://test.ustc.edu.cn/backend/getIP.php').json().get('processedString'),
+            lambda: self._http_client.get('http://test.nju.edu.cn/backend/getIP.php').json().get('processedString'),
+            lambda: self._http_client.get('https://api.myip.com').json().get('ip'),
+            lambda: self._http_client.get('https://api.ipify.org?format=json').json().get('ip')
+        ]
+        counts = {}
+        for src in sources:
+            try:
+                ip = src()
+                if isinstance(ip, str) and self.valid_v4(ip):
+                    counts[ip] = counts.get(ip, 0) + 1
+            except Exception as e:
+                self._logger.exception(e)
 
-        :return: '-1' if failed
-        :rtype: str
-        """
-        ip = '-1'
-        r = None
-        try:
-            if count == 0:
-                r = self._http_client.get('https://www.ipplus360.com/getIP')
-                ip = r.json().get('data')
-            if count == 1:
-                # api迭代更新较快
-                r = self._http_client.get('https://tisu-api-v3.speedtest.cn/speedUp/query')
-                ip = r.json().get('data').get('addr')
-                ip = ip.split(':')[0]
-            if count == 2:
-                r = self._http_client.get('http://cip.cc')
-                ip = r.text
-                ip = self._FIND_V4_EXP.search(ip).group()
-            if count == 3:
-                r = self._http_client.get('https://api-ipv4.ip.sb/ip')
-                ip = r.text.strip()
-
-            # 中科大测速网
-            if count == 4:
-                r = self._http_client.get('http://test.ustc.edu.cn/backend/getIP.php')
-                ip = r.json().get('processedString')
-            # 南京大学测速网
-            if count == 5:
-                r = self._http_client.get('http://test.nju.edu.cn/backend/getIP.php')
-                ip = r.json().get('processedString')
-
-            # 国内api: https://ip.skk.moe/ 但可能获取到的是ipv6
-            # 清华大学测速网: https://iptv.tsinghua.edu.cn/st/getIP.php 但可能获取到的是ipv6
-            # 两个未前后端分离，ip嵌在html中的网站
-            # https://ip.tool.chinaz.com/
-            # https://tool.lu/ip/
-
-            # 两个美国的备用api
-            if count == 6:
-                r = self._http_client.get('https://api.myip.com')
-                ip = r.json().get('ip')
-            if count == 7:
-                r = self._http_client.get('https://api.ipify.org?format=json')
-                ip = r.json().get('ip')
-        except Exception as e:
-            self._logger.exception(e)
-        if type(ip) != str or not self.valid_v4(ip):
-            self._logger.error(f'\terror code: count={count}')
-            if count < 7:  # 等于最后一个count
-                return self.fetch(count=count + 1)
-            else:
-                return '-1'
-        self._logger.info(f'\tcurrent host ip: {ip}')
-        return ip
+        if not counts:
+            return '-1'
+        result_ip, max_count = max(counts.items(), key=lambda x: x[1])
+        if max_count < 2:
+            return '-1'
+        return result_ip
 
     def fetch_v6(self, count=0):
         """
