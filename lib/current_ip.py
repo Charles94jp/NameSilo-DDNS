@@ -1,5 +1,6 @@
 import logging
 import re
+import time
 from socket import socket, AF_INET6, SOCK_DGRAM
 
 import httpx
@@ -17,6 +18,9 @@ class CurrentIP:
                 2022-08-22 ip138的api已限流，即使10分钟请求一次，10次后仍被ban，寻找新的api
                 2022-07-30 添加获取IPv6功能
                 2022-07-26 代码重构，拆分出此类
+    :author: Resurrection2981
+                2025-05-07 共用公网 ip 出现查询结果来回变动时，多数api是错的导致计数方法失效，增加每个接口的权重，以及每个接口隔3秒取5次，大于等于3次一致次才纳入统计
+                2025-05-06 fetch 增加全部接口取一次，返回出现最多的IP，避免部分地区共用公网 ip 出现查询结果来回变动
     :since: 2022-07-26
     """
 
@@ -36,22 +40,52 @@ class CurrentIP:
         self._logger = logging.getLogger(self.__class__.__name__)
 
     def fetch(self):
+        """
+        获取当前公网IP
+
+        :return: '-1' if failed
+        :rtype: str
+        """
         sources = [
-            lambda: self._http_client.get('https://www.ipplus360.com/getIP').json().get('data'),
-            lambda: self._http_client.get('https://tisu-api-v3.speedtest.cn/speedUp/query').json().get('data').get('addr').split(':')[0],
-            lambda: self._FIND_V4_EXP.search(self._http_client.get('http://cip.cc').text).group(),
-            lambda: self._http_client.get('https://api-ipv4.ip.sb/ip').text.strip(),
-            lambda: self._http_client.get('http://test.ustc.edu.cn/backend/getIP.php').json().get('processedString'),
-            lambda: self._http_client.get('http://test.nju.edu.cn/backend/getIP.php').json().get('processedString'),
-            lambda: self._http_client.get('https://api.myip.com').json().get('ip'),
-            lambda: self._http_client.get('https://api.ipify.org?format=json').json().get('ip')
+            # cip.cc (权重1) 似乎很久才刷新一次
+            ("http://cip.cc", 1, lambda: self._FIND_V4_EXP.search(self._http_client.get('http://cip.cc').text).group()),
+            # ipplus360 (权重1) 似乎很久才刷新一次
+            ("https://www.ipplus360.com/getIP", 1, lambda: self._http_client.get('https://www.ipplus360.com/getIP').json().get('data')),
+            # ip.sb (权重2)
+            ("https://api-ipv4.ip.sb/ip", 2, lambda: self._http_client.get('https://api-ipv4.ip.sb/ip').text.strip()),
+            # api迭代更新较快 (权重1)
+            ("https://tisu-api-v3.speedtest.cn/speedUp/query", 1, lambda: self._http_client.get('https://tisu-api-v3.speedtest.cn/speedUp/query').json().get('data').get('addr').split(':')[0]),
+            # 中科大测速网
+            ("http://test.ustc.edu.cn/backend/getIP.php", 1, lambda: self._http_client.get('http://test.ustc.edu.cn/backend/getIP.php').json().get('processedString')),
+            # 南京大学测速网#
+            ("http://test.nju.edu.cn/backend/getIP.php", 1, lambda: self._http_client.get('http://test.nju.edu.cn/backend/getIP.php').json().get('processedString')) #,
+
+            # 国内api: https://ip.skk.moe/ 但可能获取到的是ipv6
+            # 清华大学测速网: https://iptv.tsinghua.edu.cn/st/getIP.php 但可能获取到的是ipv6
+            # 两个未前后端分离，ip嵌在html中的网站
+            # https://ip.tool.chinaz.com/
+            # https://tool.lu/ip/
+
+            # 美国备用 myip.com),
+            # ("https://api.myip.com", 1, lambda: self._http_client.get('https://api.myip.com').json().get('ip')),
+            # 美国备用 ipify.org))
+            # ("https://api.ipify.org?format=json", 1, lambda: self._http_client.get('https://api.ipify.org?format=json').json().get('ip'))
         ]
         counts = {}
-        for src in sources:
+        for url, weight, src in sources:
             try:
-                ip = src()
-                if isinstance(ip, str) and self.valid_v4(ip):
-                    counts[ip] = counts.get(ip, 0) + 1
+                ip_counter = {}
+                for i in range(5):
+                    ip_try = src()
+                    self._logger.info(f"Fetched IP from {url} (attempt {i+1}): {ip_try}")
+                    time.sleep(3)
+                    ip_counter[ip_try] = ip_counter.get(ip_try, 0) + 1
+
+                # 选出现次数最多的 ip
+                best_ip, best_count = max(ip_counter.items(), key=lambda x: x[1])
+                # 出现次数 >= 3，且合法才计入
+                if best_count >= 3 and isinstance(best_ip, str) and self.valid_v4(best_ip):
+                    counts[best_ip] = counts.get(best_ip, 0) + weight
             except Exception as e:
                 self._logger.exception(e)
 
