@@ -115,12 +115,23 @@ class DDNS:
         self._auto_restart = conf.get('auto_restart', False)
         self._get_ipv6_local = conf.get('get_ipv6_local', True)
         
-        # 路由器 IPv6 SNMP 配置
-        self._get_router_ipv6_snmp = conf.get('get_router_ipv6_snmp', False)
+        # 路由器 SNMP 配置
         self._router_snmp = conf.get('router_snmp', {})
-        if self._get_router_ipv6_snmp and not self._router_snmp.get('enabled', False):
-            self._logger.warning('get_router_ipv6_snmp is true but router_snmp.enabled is false, router IPv6 will not be updated')
-            self._get_router_ipv6_snmp = False
+        self._router_snmp_enabled = self._router_snmp.get('enabled', False)
+        if self._router_snmp_enabled:
+            self._logger.info('Router SNMP is enabled')
+        
+        # 路由器 SSH 配置
+        self._router_ssh = conf.get('router_ssh', {})
+        self._router_ssh_enabled = self._router_ssh.get('enabled', False)
+        if self._router_ssh_enabled:
+            self._logger.info('Router SSH is enabled')
+            # 验证必需的 SSH 配置项
+            required_keys = ['ip', 'username', 'password', 'port']
+            missing_keys = [key for key in required_keys if not self._router_ssh.get(key)]
+            if missing_keys:
+                self._logger.error(f'Router SSH configuration missing required keys: {missing_keys}')
+                self._router_ssh_enabled = False
 
     @staticmethod
     def archive_log():
@@ -178,6 +189,14 @@ class DDNS:
         enable_ipv4 = self._namesilo_client.enable_ipv4
         enable_ipv6 = self._namesilo_client.enable_ipv6
         enable_router_ipv6 = self._namesilo_client.enable_router_ipv6
+
+        # # 打印配置信息
+        # self._logger.info(f'Configuration: enable_ipv4={enable_ipv4}, enable_ipv6={enable_ipv6}, enable_router_ipv6={enable_router_ipv6}')
+        # self._logger.info(f'SSH enabled: {self._router_ssh_enabled}, SNMP enabled: {self._router_snmp_enabled}')
+        # if self._router_ssh_enabled:
+        #     self._logger.info(f'SSH IPv4 command: {self._router_ssh.get("ipv4_command")}')
+        #     self._logger.info(f'SSH IPv6 command: {self._router_ssh.get("ipv6_command")}')
+
         self._namesilo_client.fetch_domains_info()
         error_count = 0
         current_ipv6 = None
@@ -186,43 +205,86 @@ class DDNS:
             try:
                 # 获取 IPv4
                 if enable_ipv4:
-                    current_ip = self._current_ip.fetch()
-                    if current_ip == '-1':
-                        raise Exception('current_ip.fetch error')
+                    # 通过 SSH 从路由器获取
+                    if self._router_ssh_enabled and self._router_ssh.get('ipv4_command'):
+                        current_ip = self._current_ip.get_router_ip_ssh(
+                            router_ip=self._router_ssh.get('ip'),
+                            username=self._router_ssh.get('username'),
+                            password=self._router_ssh.get('password'),
+                            port=self._router_ssh.get('port', 22),
+                            command=self._router_ssh.get('ipv4_command'),
+                            ip_type='ipv4'
+                        )
+                        if current_ip == '-1':
+                            raise Exception('Failed to get IPv4 via SSH')
+                    else:
+                        current_ip = self._current_ip.fetch()
+                        if current_ip == '-1':
+                            raise Exception('Failed to get IPv4 via public API')
                 
                 # 获取本机 IPv6
                 if enable_ipv6:
-                    current_ipv6 = self._current_ip.get_local_ipv6() if self._get_ipv6_local else self._current_ip.fetch_v6()
-                    if current_ipv6 == '-1':
-                        raise Exception('current_ip.fetch error')
-                    self._logger.info(f'Local IPv6: {current_ipv6}')
-                
-                # 获取路由器 IPv6 (通过 SNMP)
-                if enable_router_ipv6 and self._get_router_ipv6_snmp:
-                    router_ip = self._router_snmp.get('router_ip', '192.168.1.1')
-                    community = self._router_snmp.get('community', 'public')
-                    port = self._router_snmp.get('port', 161)
-                    interface_index = self._router_snmp.get('interface_index')
-                    snmp_version = self._router_snmp.get('version', 2)
-                    username = self._router_snmp.get('username')
-                    auth_key = self._router_snmp.get('auth_key')
-                    priv_key = self._router_snmp.get('priv_key')
-                    
-                    if snmp_version == 3:
-                        self._logger.info(f'Fetching router IPv6 via SNMPv3: {router_ip}:{port}, user={username}, interface={interface_index}')
+                    # self._logger.info('Starting to fetch local IPv6...')
+                    if self._get_ipv6_local:
+                        # self._logger.info('Fetching local IPv6 via socket...')
+                        current_ipv6 = self._current_ip.get_local_ipv6()
+                        if current_ipv6 == '-1':
+                            raise Exception('Failed to get local IPv6')
                     else:
-                        self._logger.info(f'Fetching router IPv6 via SNMPv2c: {router_ip}:{port}, community={community}, interface={interface_index}')
+                        # self._logger.info('Fetching local IPv6 via public API...')
+                        current_ipv6 = self._current_ip.fetch_v6()
+                        if current_ipv6 == '-1':
+                            raise Exception('Failed to get IPv6 via public API')
                     
-                    current_router_ipv6 = self._current_ip.get_router_ipv6_snmp(
-                        router_ip, community, port, interface_index,
-                        snmp_version, username, auth_key, priv_key
-                    )
-                    
-                    if current_router_ipv6 == '-1':
-                        self._logger.warning('Failed to get router IPv6 via SNMP, skipping router IPv6 update')
-                        current_router_ipv6 = None
-                    else:
+                    # self._logger.info(f'Current local IPv6: {current_ipv6}')
+                # else:
+                    # self._logger.info('Local IPv6 is disabled (no domains_ipv6 configured)')
+
+                # 获取路由器 IPv6 (通过 SSH 或 SNMP)
+                if enable_router_ipv6:
+                    # self._logger.info('Starting to fetch router IPv6...')
+                    # 优先通过 SSH 从路由器获取
+                    if self._router_ssh_enabled and self._router_ssh.get('ipv6_command'):
+                        # self._logger.info(f'Fetching router IPv6 via SSH with command: {self._router_ssh.get("ipv6_command")}')
+                        current_router_ipv6 = self._current_ip.get_router_ip_ssh(
+                            router_ip=self._router_ssh.get('ip'),
+                            username=self._router_ssh.get('username'),
+                            password=self._router_ssh.get('password'),
+                            port=self._router_ssh.get('port', 22),
+                            command=self._router_ssh.get('ipv6_command'),
+                            ip_type='ipv6'
+                        )
+                        if current_router_ipv6 == '-1':
+                            raise Exception('Failed to get router IPv6 via SSH')
+                        # self._logger.info(f'Router IPv6 via SSH: {current_router_ipv6}')
+                    # 通过 SNMP 从路由器获取
+                    elif self._router_snmp_enabled:
+                        router_ip = self._router_snmp.get('router_ip', '192.168.1.1')
+                        community = self._router_snmp.get('community', 'public')
+                        port = self._router_snmp.get('port', 161)
+                        interface_index = self._router_snmp.get('interface_index')
+                        snmp_version = self._router_snmp.get('version', 2)
+                        username = self._router_snmp.get('username')
+                        auth_key = self._router_snmp.get('auth_key')
+                        priv_key = self._router_snmp.get('priv_key')
+                        
+                        # if snmp_version == 3:
+                        #     self._logger.info(f'Fetching router IPv6 via SNMPv3: {router_ip}:{port}, user={username}, interface={interface_index}')
+                        # else:
+                        #     self._logger.info(f'Fetching router IPv6 via SNMPv2c: {router_ip}:{port}, community={community}, interface={interface_index}')
+                        
+                        current_router_ipv6 = self._current_ip.get_router_ipv6_snmp(
+                            router_ip, community, port, interface_index,
+                            snmp_version, username, auth_key, priv_key
+                        )
+                        
+                        if current_router_ipv6 == '-1':
+                            raise Exception('Failed to get router IPv6 via SNMP')
                         self._logger.info(f'Router IPv6 via SNMP: {current_router_ipv6}')
+                    else:
+                        raise Exception('Router IPv6 is enabled but no SSH or SNMP method is configured')
+                else:
+                    self._logger.info('Router IPv6 is disabled (no domains_router_ipv6 configured)')
                 
                 # 值得注意的是，当程序在运行一段时间后，而用户手动去NameSilo修改了域名的解析值，由于程序只对比内存中的值，所以不会触发更新
                 needs_update = False

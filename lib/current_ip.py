@@ -188,6 +188,38 @@ class CurrentIP:
             self._logger.exception(e)
             return '-1'
 
+    def get_router_ip_ssh(self, router_ip: str, username: str, password: str,
+                         port: int, command: str, ip_type: str = 'ipv4') -> str:
+        """
+        通过 SSH 从路由器获取 WAN 口 IP 地址
+        
+        :param router_ip: 路由器 IP 地址
+        :param username: SSH 用户名
+        :param password: SSH 密码
+        :param port: SSH 端口
+        :param command: 获取 IP 的命令
+        :param ip_type: IP 类型, 'ipv4' 或 'ipv6'
+        :return: IP 地址或 '-1'
+        :since: 2025-10-03
+        """
+        try:
+            from lib.get_wanip_ssh import SSHRouter
+            
+            ssh_router = SSHRouter(router_ip, username, password, port)
+            ip = ssh_router.get_wan_ip(command, ip_type)
+            
+            if ip != '-1':
+                self._logger.info(f'\tRouter {ip_type} via SSH: {ip}')
+            
+            return ip
+            
+        except ImportError:
+            self._logger.error('SSH library (paramiko) not installed. Please install: pip install paramiko')
+            return '-1'
+        except Exception as e:
+            self._logger.exception(e)
+            return '-1'
+
     @staticmethod
     def valid_v4(ip: str) -> bool:
         return CurrentIP._VALID_V4_EXP.match(ip) is not None

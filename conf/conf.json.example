@@ -12,17 +12,25 @@
     "key": "1234",
     "frequency": 600,
     "get_ipv6_local": true,
-    "get_router_ipv6_snmp": false,
     "router_snmp": {
         "enabled": false,
         "router_ip": "192.168.1.1",
-        "version": 2,
+        "version": 3,
         "community": "public",
         "username": null,
         "auth_key": null,
         "priv_key": null,
         "port": 161,
         "interface_index": null
+    },
+    "router_ssh": {
+        "enabled": false,
+        "ip": "192.168.1.1",
+        "username": "root",
+        "password": "password",
+        "port": 22,
+        "ipv4_command": "dev_sta get -m ipinfo | jq .wan.ip",
+        "ipv6_command": "dev_sta get -m ipinfo6 | jq -r '.wan.ip6 | split(\"/\")[0]'"
     },
     "mail_host": "smtp.qq.com",
     "mail_port": "465",
