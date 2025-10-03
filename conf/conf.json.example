@@ -5,10 +5,21 @@
     "domains_ipv6": [
         "ipv6.namesilo.com"
     ],
+    "domains_router_ipv6": [
+        "router6.namesilo.com"
+    ],
     "ttl": 3600,
     "key": "1234",
     "frequency": 600,
     "get_ipv6_local": true,
+    "get_router_ipv6_snmp": false,
+    "router_snmp": {
+        "enabled": false,
+        "router_ip": "192.168.1.1",
+        "community": "public",
+        "port": 161,
+        "interface_index": null
+    },
     "mail_host": "smtp.qq.com",
     "mail_port": "465",
     "mail_user": "",

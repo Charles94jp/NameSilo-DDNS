@@ -2,6 +2,7 @@ import logging
 import re
 import time
 from socket import socket, AF_INET6, SOCK_DGRAM
+from typing import Optional
 
 import httpx
 
@@ -148,6 +149,36 @@ class CurrentIP:
             self._logger.exception(e)
         s.close()
         return ip
+
+    def get_router_ipv6_snmp(self, router_ip: str, community: str = 'public', 
+                             port: int = 161, interface_index: Optional[int] = None) -> str:
+        """
+        通过 SNMP 从路由器获取 WAN 口 IPv6 地址
+        
+        :param router_ip: 路由器 IP 地址
+        :param community: SNMP community string (默认 'public')
+        :param port: SNMP 端口 (默认 161)
+        :param interface_index: 网络接口索引 (可选)
+        :return: IPv6 地址或 '-1'
+        :since: 2025-10-03
+        """
+        try:
+            from lib.snmp_client import SNMPClient
+            
+            snmp = SNMPClient(router_ip, community, port)
+            ipv6 = snmp.get_wan_ipv6(interface_index)
+            
+            if ipv6 != '-1':
+                self._logger.info(f'\tRouter IPv6 via SNMP: {ipv6}')
+            
+            return ipv6
+            
+        except ImportError:
+            self._logger.error('SNMP library not installed. Please install: pip install pysnmp')
+            return '-1'
+        except Exception as e:
+            self._logger.exception(e)
+            return '-1'
 
     @staticmethod
     def valid_v4(ip: str) -> bool:
