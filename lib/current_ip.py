@@ -151,21 +151,29 @@ class CurrentIP:
         return ip
 
     def get_router_ipv6_snmp(self, router_ip: str, community: str = 'public', 
-                             port: int = 161, interface_index: Optional[int] = None) -> str:
+                             port: int = 161, interface_index: Optional[int] = None,
+                             snmp_version: int = 2, username: str = None,
+                             auth_key: str = None, priv_key: str = None) -> str:
         """
         通过 SNMP 从路由器获取 WAN 口 IPv6 地址
         
         :param router_ip: 路由器 IP 地址
-        :param community: SNMP community string (默认 'public')
+        :param community: SNMPv2c community string (默认 'public')
         :param port: SNMP 端口 (默认 161)
         :param interface_index: 网络接口索引 (可选)
+        :param snmp_version: SNMP 版本 (2=v2c, 3=v3，默认 2)
+        :param username: SNMPv3 用户名 (仅 v3)
+        :param auth_key: SNMPv3 认证密钥 (可选)
+        :param priv_key: SNMPv3 加密密钥 (可选)
         :return: IPv6 地址或 '-1'
         :since: 2025-10-03
         """
         try:
             from lib.snmp_client import SNMPClient
             
-            snmp = SNMPClient(router_ip, community, port)
+            snmp = SNMPClient(router_ip, community, port, 
+                            snmp_version=snmp_version, username=username,
+                            auth_key=auth_key, priv_key=priv_key)
             ipv6 = snmp.get_wan_ipv6(interface_index)
             
             if ipv6 != '-1':

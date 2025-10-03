@@ -5,12 +5,15 @@ from typing import Optional
 from pysnmp.hlapi import (
     SnmpEngine,
     CommunityData,
+    UsmUserData,
     UdpTransportTarget,
     ContextData,
     ObjectType,
     ObjectIdentity,
     getCmd,
-    nextCmd
+    nextCmd,
+    usmNoAuthProtocol,
+    usmNoPrivProtocol
 )
 
 
@@ -33,20 +36,39 @@ class SNMPClient:
     # IP-MIB::ipAddressPrefix
     OID_IP_ADDRESS_PREFIX = '1.3.6.1.2.1.4.32.1.5'
     
-    def __init__(self, router_ip: str, community: str = 'public', port: int = 161, timeout: int = 5):
+    def __init__(self, router_ip: str, community: str = 'public', port: int = 161, timeout: int = 5, 
+                 snmp_version: int = 2, username: str = None, auth_key: str = None, priv_key: str = None):
         """
         初始化 SNMP 客户端
         
         :param router_ip: 路由器 IP 地址
-        :param community: SNMP community string (默认 'public')
+        :param community: SNMPv1/v2c community string (默认 'public')
         :param port: SNMP 端口 (默认 161)
         :param timeout: 超时时间（秒）
+        :param snmp_version: SNMP 版本 (2=v2c, 3=v3，默认 2)
+        :param username: SNMPv3 用户名
+        :param auth_key: SNMPv3 认证密钥（可选）
+        :param priv_key: SNMPv3 加密密钥（可选）
         """
         self._router_ip = router_ip
         self._community = community
         self._port = port
         self._timeout = timeout
+        self._snmp_version = snmp_version
+        self._username = username
+        self._auth_key = auth_key
+        self._priv_key = priv_key
         self._logger = logging.getLogger(self.__class__.__name__)
+        
+        # 创建认证数据
+        if snmp_version == 3:
+            # SNMPv3 with noAuthNoPriv
+            self._auth_data = UsmUserData(username or 'public', authKey=auth_key, privKey=priv_key)
+            self._logger.info(f'Using SNMPv3 with username: {username}')
+        else:
+            # SNMPv2c
+            self._auth_data = CommunityData(community)
+            self._logger.info(f'Using SNMPv2c with community: {community}')
     
     def get_wan_ipv6(self, interface_index: Optional[int] = None) -> str:
         """
@@ -99,7 +121,7 @@ class SNMPClient:
             # 使用 nextCmd 遍历 IP-MIB::ipAddressIfIndex 表
             iterator = nextCmd(
                 SnmpEngine(),
-                CommunityData(self._community),
+                self._auth_data,
                 UdpTransportTarget((self._router_ip, self._port), timeout=self._timeout, retries=1),
                 ContextData(),
                 ObjectType(ObjectIdentity(self.OID_IP_ADDRESS_IF_INDEX)),
@@ -237,7 +259,7 @@ class SNMPClient:
         try:
             iterator = getCmd(
                 SnmpEngine(),
-                CommunityData(self._community),
+                self._auth_data,
                 UdpTransportTarget((self._router_ip, self._port), timeout=self._timeout, retries=1),
                 ContextData(),
                 ObjectType(ObjectIdentity('SNMPv2-MIB', 'sysDescr', 0))

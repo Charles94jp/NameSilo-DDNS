@@ -16,7 +16,11 @@
     "router_snmp": {
         "enabled": false,
         "router_ip": "192.168.1.1",
+        "version": 2,
         "community": "public",
+        "username": null,
+        "auth_key": null,
+        "priv_key": null,
         "port": 161,
         "interface_index": null
     },

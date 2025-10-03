@@ -114,6 +114,13 @@ class DDNS:
         # self._in_docker = in_docker
         self._auto_restart = conf.get('auto_restart', False)
         self._get_ipv6_local = conf.get('get_ipv6_local', True)
+        
+        # 路由器 IPv6 SNMP 配置
+        self._get_router_ipv6_snmp = conf.get('get_router_ipv6_snmp', False)
+        self._router_snmp = conf.get('router_snmp', {})
+        if self._get_router_ipv6_snmp and not self._router_snmp.get('enabled', False):
+            self._logger.warning('get_router_ipv6_snmp is true but router_snmp.enabled is false, router IPv6 will not be updated')
+            self._get_router_ipv6_snmp = False
 
     @staticmethod
     def archive_log():
@@ -170,27 +177,78 @@ class DDNS:
         """
         enable_ipv4 = self._namesilo_client.enable_ipv4
         enable_ipv6 = self._namesilo_client.enable_ipv6
+        enable_router_ipv6 = self._namesilo_client.enable_router_ipv6
         self._namesilo_client.fetch_domains_info()
         error_count = 0
         current_ipv6 = None
+        current_router_ipv6 = None
         while True:
             try:
+                # 获取 IPv4
                 if enable_ipv4:
                     current_ip = self._current_ip.fetch()
                     if current_ip == '-1':
                         raise Exception('current_ip.fetch error')
+                
+                # 获取本机 IPv6
                 if enable_ipv6:
                     current_ipv6 = self._current_ip.get_local_ipv6() if self._get_ipv6_local else self._current_ip.fetch_v6()
                     if current_ipv6 == '-1':
                         raise Exception('current_ip.fetch error')
+                    self._logger.info(f'Local IPv6: {current_ipv6}')
+                
+                # 获取路由器 IPv6 (通过 SNMP)
+                if enable_router_ipv6 and self._get_router_ipv6_snmp:
+                    router_ip = self._router_snmp.get('router_ip', '192.168.1.1')
+                    community = self._router_snmp.get('community', 'public')
+                    port = self._router_snmp.get('port', 161)
+                    interface_index = self._router_snmp.get('interface_index')
+                    snmp_version = self._router_snmp.get('version', 2)
+                    username = self._router_snmp.get('username')
+                    auth_key = self._router_snmp.get('auth_key')
+                    priv_key = self._router_snmp.get('priv_key')
+                    
+                    if snmp_version == 3:
+                        self._logger.info(f'Fetching router IPv6 via SNMPv3: {router_ip}:{port}, user={username}, interface={interface_index}')
+                    else:
+                        self._logger.info(f'Fetching router IPv6 via SNMPv2c: {router_ip}:{port}, community={community}, interface={interface_index}')
+                    
+                    current_router_ipv6 = self._current_ip.get_router_ipv6_snmp(
+                        router_ip, community, port, interface_index,
+                        snmp_version, username, auth_key, priv_key
+                    )
+                    
+                    if current_router_ipv6 == '-1':
+                        self._logger.warning('Failed to get router IPv6 via SNMP, skipping router IPv6 update')
+                        current_router_ipv6 = None
+                    else:
+                        self._logger.info(f'Router IPv6 via SNMP: {current_router_ipv6}')
+                
                 # 值得注意的是，当程序在运行一段时间后，而用户手动去NameSilo修改了域名的解析值，由于程序只对比内存中的值，所以不会触发更新
-                if (enable_ipv4 and not self._namesilo_client.ip_equal(current_ip)) or \
-                        (enable_ipv6 and not self._namesilo_client.ip_equal_ipv6(current_ipv6)):
+                needs_update = False
+                if enable_ipv4 and not self._namesilo_client.ip_equal(current_ip):
+                    needs_update = True
+                if enable_ipv6 and not self._namesilo_client.ip_equal_ipv6(current_ipv6):
+                    needs_update = True
+                if enable_router_ipv6 and current_router_ipv6 and not self._namesilo_client.ip_equal_router_ipv6(current_router_ipv6):
+                    needs_update = True
+                
+                if needs_update:
                     r = self._namesilo_client.update_domain_ip(
                         new_ip=current_ip if enable_ipv4 else None,
-                        new_ipv6=current_ipv6 if enable_ipv6 else None)
-                    ip_msg = f"{current_ip if enable_ipv4 else ''}" \
-                             f"{' and ' if enable_ipv4 and enable_ipv6 else ''}{current_ipv6 if enable_ipv6 else ''} "
+                        new_ipv6=current_ipv6 if enable_ipv6 else None,
+                        new_router_ipv6=current_router_ipv6 if enable_router_ipv6 else None)
+                    
+                    # 构建 IP 消息
+                    ip_parts = []
+                    if enable_ipv4:
+                        ip_parts.append(f"IPv4: {current_ip}")
+                    if enable_ipv6:
+                        ip_parts.append(f"IPv6: {current_ipv6}")
+                    if enable_router_ipv6 and current_router_ipv6:
+                        ip_parts.append(f"Router IPv6: {current_router_ipv6}")
+                    ip_msg = ", ".join(ip_parts) + " "
+                    
                     if r >= 0 and self._email_every_update:
                         self._email_client.send_email('update_successful', self._namesilo_client.to_html_table(),
                                                       'new_ip', ip_msg)

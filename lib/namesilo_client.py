@@ -31,8 +31,10 @@ class NameSiloClient:
         self._api_key = conf['key']
         self.enable_ipv4 = False
         self.enable_ipv6 = False
+        self.enable_router_ipv6 = False
         self.domains = []
         self.domains_ipv6 = []
+        self.domains_router_ipv6 = []
         # 适配两种配置文件的写法，兼容旧版本的配置文件
         domains_v4 = conf.get('domains')
         if domains_v4 is None:
@@ -44,6 +46,9 @@ class NameSiloClient:
         domains_v6 = conf.get('domains_ipv6', [])
         if len(domains_v6) > 0 and domains_v6[0] != '':
             self.enable_ipv6 = True
+        domains_router_v6 = conf.get('domains_router_ipv6', [])
+        if len(domains_router_v6) > 0 and domains_router_v6[0] != '':
+            self.enable_router_ipv6 = True
         # 分离域名和前面的前缀。支持处理列表，或者字符串。如果是字符串，则for循环每次取一个字符
         if self.enable_ipv4:
             for i in domains_v4:
@@ -53,6 +58,9 @@ class NameSiloClient:
         if self.enable_ipv6:
             for i in domains_v6:
                 self.domains_ipv6.append(NameSiloClient._separate(i))
+        if self.enable_router_ipv6:
+            for i in domains_router_v6:
+                self.domains_router_ipv6.append(NameSiloClient._separate(i))
         self.ttl = conf.get('ttl')
         if self.ttl is None:
             self.ttl = 3600
@@ -84,6 +92,8 @@ class NameSiloClient:
         for domain in self.domains:
             self._list_dns_api(domain, cache, t='A')
         for domain in self.domains_ipv6:
+            self._list_dns_api(domain, cache, t='AAAA')
+        for domain in self.domains_router_ipv6:
             self._list_dns_api(domain, cache, t='AAAA')
 
     def _list_dns_api(self, domain: dict, cache: dict = {}, t: str = 'A') -> None:
@@ -130,25 +140,32 @@ class NameSiloClient:
                                'It could be due to the configuration file error, or the NameSilo server error.')
             raise
 
-    def update_domain_ip(self, new_ip=None, new_ipv6=None) -> int:
+    def update_domain_ip(self, new_ip=None, new_ipv6=None, new_router_ipv6=None) -> int:
         """
         推送新ip到NameSilo
 
-        :param new_ip: 新的ip
-        :param new_ipv6:
+        :param new_ip: 新的 IPv4
+        :param new_ipv6: 新的 IPv6（本机/NAS）
+        :param new_router_ipv6: 新的 IPv6（路由器）
         :rtype: int
         :return: Number of successful updates, else the inverse of the number of failures
         """
         # 更新rrid，修复更新时api返回280：record_id missing or invalid
         self._logger.info('\tupdate record_id')
         self.fetch_domains_info()
-        r1 = r2 = 0
+        r1 = r2 = r3 = 0
         if self.enable_ipv4 and new_ip is not None:
             r1 = self._update_dns_api(self.domains, new_ip)
         if self.enable_ipv6 and new_ipv6 is not None:
             r2 = self._update_dns_api(self.domains_ipv6, new_ipv6)
+        if self.enable_router_ipv6 and new_router_ipv6 is not None:
+            r3 = self._update_dns_api(self.domains_router_ipv6, new_router_ipv6)
         # 避免结果一正一负
-        return r1 + r2 if r1 * r2 >= 0 else -1 * abs(r1 - r2)
+        total = r1 + r2 + r3
+        if r1 >= 0 and r2 >= 0 and r3 >= 0:
+            return total
+        else:
+            return -1 * (abs(r1) + abs(r2) + abs(r3))
 
     def _update_dns_api(self, domains: list, new_ip) -> int:
         """
@@ -222,6 +239,19 @@ class NameSiloClient:
             result = result & (ip == domain['domain_ip'])
         return result
 
+    def ip_equal_router_ipv6(self, ip: str) -> bool:
+        """
+        比对路由器IPv6和所有域名的解析值是否相同
+
+        :param str ip: 要比较的ip
+        :rtype: bool
+        :return: True or False
+        """
+        result = True
+        for domain in self.domains_router_ipv6:
+            result = result & (ip == domain['domain_ip'])
+        return result
+
     def to_html_table(self) -> str:
         """
         将域名信息导出为html表格，方便邮件发送
@@ -263,7 +293,7 @@ class NameSiloClient:
 
         count = 1
         trs = ''
-        for domain in (self.domains + self.domains_ipv6):
+        for domain in (self.domains + self.domains_ipv6 + self.domains_router_ipv6):
             tr = tr_template.replace('${background}', ';background-color:rgb(248,248,248)' if count % 2 == 0 else '')
             td1 = td_template.replace('${content}', domain['host'])
             td2 = td_template.replace('${content}', domain['domain'])
