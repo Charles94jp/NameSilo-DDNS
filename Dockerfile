@@ -1,5 +1,5 @@
 FROM python:3.10.11-alpine3.16
-LABEL maintainer="https://github.com/Charles94jp/NameSilo-DDNS"
+LABEL maintainer="https://github.com/Resurrection2981/NameSilo-DDNS"
 LABEL description="NameSilo-DDNS"
 
 ENV TZ Asia/Shanghai
