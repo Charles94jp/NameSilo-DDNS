@@ -111,7 +111,7 @@ vi /home/docker/ddns/conf/conf.json
 docker restart ddns
 ```
 
-当然也可以作为python程序[直接运行](#usage---direct)。
+当然也可以作为python程序[直接运行](#6-usage---direct)。
 
 
 
@@ -205,7 +205,7 @@ docker run -d --name ddns -v <local dir>:/home/NameSilo-DDNS:rw --network host c
 
 一定要用 -v 参数将本机的目录`<local dir>`挂载到容器内的`/home/NameSilo-DDNS`，容器会将程序文件写出到`<local dir>`
 
-接着在`<local dir>`中配置`conf/conf.json`，参考[Configuration](#configuration)
+接着在`<local dir>`中配置`conf/conf.json`，参考[Configuration](#3-configuration)
 
 最后记得重启一下容器，因为最开始`docker run`时没有配置文件，所以ddns程序是没有成功运行的
 
@@ -269,7 +269,7 @@ git clone -b python https://github.com/Charles94jp/NameSilo-DDNS.git
 需要使用python3来运行，python需要安装httpx模块：
 
 ```
-pip install httpx
+pip install httpx==0.28.1
 ```
 
 更新程序：
@@ -304,7 +304,7 @@ chmod +x DDNS
 ./DDNS {start|stop|status|restart|force-reload}
 ```
 
-功能类似[Log - Docker](#log---docker)，但更强大
+功能类似[Log - Docker](#54-log---docker)，但更强大
 
 
 
@@ -366,7 +366,7 @@ python ddns.py --archive
 
 将DDNS注册为systemctl管理的服务
 
-首先要按照[start](#start)中的步骤配置DDNS文件
+首先要按照[start](#62-start)中的步骤配置DDNS文件
 
 接着配置DDNS.service文件，修改其中DDNS文件的路径，最后
 

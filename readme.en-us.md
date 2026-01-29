@@ -100,7 +100,7 @@ vi /home/docker/ddns/conf/conf.json
 docker restart ddns
 ```
 
-Of course it can also be [run directly](#usage---direct) as a python program.
+Of course it can also be [run directly](#6-usage---direct) as a python program.
 
 
 
@@ -199,7 +199,7 @@ Be sure to mount the local directory `<local dir>` to `/home/NameSilo-DDNS` in t
 
 The default time zone is Asia/Shanghai (CST, +0800). If you don't use this time zone, you can modify it with the -e option, for example `-e TZ=US/Mountain`.
 
-Then configure `conf/conf.json` in `<local dir>`, refer to [Configuration](#configuration)
+Then configure `conf/conf.json` in `<local dir>`, refer to [Configuration](#3-configuration)
 
 Finally remember to restart the container, because at the beginning of ``docker run`` there is no configuration file, so the ddns program is not successfully run.
 
@@ -265,7 +265,7 @@ git clone -b python https://github.com/Charles94jp/NameSilo-DDNS.git
 The python 3 environment is required. The httpx module also needs to be installed.
 
 ```
-pip install httpx
+pip install httpx==0.28.1
 ```
 
 Update:
@@ -301,7 +301,7 @@ chmod +x DDNS
 ./DDNS {start|stop|status|restart|force-reload}
 ```
 
-It functions like [Log - Docker](#log---docker), but more powerful.
+It functions like [Log - Docker](#54-log---docker), but more powerful.
 
 
 
@@ -361,7 +361,7 @@ To start at boot, only RedHat series such as CentOS 7 8 and Rocky Linux 8 are de
 
 Register DDNS as a service managed by systemctl.
 
-First of all, follow the steps in [start](#start) to configure the DDNS file.
+First of all, follow the steps in [start](#62-start) to configure the DDNS file.
 
 Then configure the DDNS.service file, modify the path of DDNS file in it, and finally run:
 

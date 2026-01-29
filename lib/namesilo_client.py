@@ -105,16 +105,16 @@ class NameSiloClient:
                     sys.exit(-1)
                 ro = ro.text
             r = ro.split('<resource_record>')
-            _domain = domain['domain'] if domain['host'] == '@' or \
-                                          domain['host'] == '' else f"{domain['host']}.{domain['domain']}"
+            _host = domain['host']
             for record in r:
-                if record.find(f'<host>{_domain}</host>') != -1 and record.find(f'<type>{t}</type>') != -1:
+                if record.find(f'<host>{_host}</host>') != -1 and record.find(f'<type>{t}</type>') != -1:
                     r = record
                     break
             if type(r) == list:
                 # 上方循环到最后也未匹配，未赋值
-                self._logger.error(f'\tResponse content error, or the domain name {_domain} in the configuration file '
-                                   f'does not match the data of the namesilo server\n{ro}')
+                self._logger.error(
+                    f'\tResponse content error, or the domain name {_host + "." + domain["domain"]} in the '
+                    f'configuration file does not match the data of the namesilo server\n{ro}')
                 raise Exception("Response error or configuration file error")
             r = r.split('</record_id>')
             domain['record_id'] = r[0].split('<record_id>')[-1]

@@ -5,7 +5,6 @@ import os
 import ssl
 import sys
 import time
-from datetime import datetime
 from platform import system as pl_system
 from subprocess import Popen
 
@@ -101,7 +100,7 @@ class DDNS:
         # 基础配置，分到各模块可以配置base url
         self._base_http_client = httpx.Client(headers=self._HTTP_HEADERS, timeout=30,
                                               verify=False if debug else self._SSL_CONTEXT,
-                                              proxies=self._DEBUG_PROXY if debug else None)
+                                              proxy=self._DEBUG_PROXY if debug else None)
 
         self._current_ip = CurrentIP(self._base_http_client)
         self._namesilo_client = NameSiloClient(self._base_http_client, conf)
@@ -109,9 +108,6 @@ class DDNS:
         # 默认每次循环休眠10分钟
         self._frequency = conf.get('frequency', 600)
         self._email_every_update = conf.get('email_every_update', False)
-        # is_sys_reboot is deprecated
-        # self._email_after_reboot = conf['email_after_reboot']
-        # self._in_docker = in_docker
         self._auto_restart = conf.get('auto_restart', False)
         self._get_ipv6_local = conf.get('get_ipv6_local', True)
 
@@ -131,50 +127,20 @@ class DDNS:
         self._email_client.send_email('email_test', self._namesilo_client.to_html_table())
         print('The test email has been sent')
 
-    def is_sys_reboot(self):
-        """
-        适用于家里意外断电后，来电后，路由器重新拨号，导致IP变化的情况
-        如果服务器支持来电自启，那么可以邮件提醒这次的IP变化
-        deprecated:
-            1.该功能实际用处不大，监控家里停电、来电可以通过其它渠道，不需要本程序
-            2.如果来电，路由器程序拨号，IP变化，本程序有邮件提醒
-            3.docker中判断是否是长时间关机后启动，需要读取/var/log/wtmp文件，alpine没有last命令可以读取。而python utmp则不方便
-        """
-        import warnings
-        warnings.warn("this is deprecated", DeprecationWarning, 2)
-        if self._email_client.available and self._email_after_reboot and pl_system().find('Linux') > -1:
-            uptime = os.popen('uptime -s').read().strip()
-            uptime = datetime.strptime(uptime, '%Y-%m-%d %H:%M:%S')
-            # 判断DDNS是随系统启动，还是被手动启动。系统开机到现在的时间差
-            if (datetime.now() - uptime).total_seconds() < 4 * 60:
-
-                # 判断系统这次启动是重启，还是关机许久后开机
-                # 容器通过 -v /var/log/wtmp:/home/wtmp:rw 挂载宿主机文件进行
-                cmd = f"last --system reboot --time-format iso {'-f /home/wtmp' if self._in_docker else ''}"
-                last_reboot = os.popen(cmd).read().strip()
-                last_reboot = last_reboot.split('+')[0].split(' ')[-1]
-                last_reboot = datetime.strptime(last_reboot, '%Y-%m-%dT%H:%M:%S')
-
-                cmd = f"last --system shutdown --time-format iso {'-f /home/wtmp' if self._in_docker else ''}"
-                last_shutdown = os.popen(cmd).read().strip()
-                last_shutdown = last_shutdown.split('+')[0].split(' ')[-1]
-                last_shutdown = datetime.strptime(last_shutdown, '%Y-%m-%dT%H:%M:%S')
-
-                power_outage_duration = last_reboot - last_shutdown
-                if power_outage_duration.total_seconds() > 4 * 60:
-                    pass
-
     def start(self) -> None:
         """
         开启循环
         """
         enable_ipv4 = self._namesilo_client.enable_ipv4
         enable_ipv6 = self._namesilo_client.enable_ipv6
-        self._namesilo_client.fetch_domains_info()
+        first_run = True
         error_count = 0
         current_ipv6 = None
         while True:
             try:
+                if first_run:
+                    self._namesilo_client.fetch_domains_info()
+                    first_run = False
                 if enable_ipv4:
                     current_ip = self._current_ip.fetch()
                     if current_ip == '-1':
