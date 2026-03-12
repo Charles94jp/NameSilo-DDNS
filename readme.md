@@ -113,7 +113,9 @@ docker restart ddns
 
 当然也可以作为python程序[直接运行](#6-usage---direct)。
 
+如果需要自动申请更新https证书，建议使用：[acme.sh](https://github.com/acmesh-official/acme.sh/wiki/说明)
 
+推荐命令参数：`acme.sh --issue -d github.com --dns dns_namesilo --dnssleep 1080`
 
 # 3. Configuration
 

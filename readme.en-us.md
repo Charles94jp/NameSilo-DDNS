@@ -102,7 +102,9 @@ docker restart ddns
 
 Of course it can also be [run directly](#6-usage---direct) as a python program.
 
+If you need to automatically apply for and update HTTPS certificates, the recommended repo is: [acme.sh](https://github.com/acmesh-official/acme.sh/wiki).
 
+Recommended command parameters: `acme.sh --issue -d github.com --dns dns_namesilo --dnssleep 1080`
 
 # 3. Configuration
 
